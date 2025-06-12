@@ -1,12 +1,13 @@
 {
   "profile_data": {
-    "name": "Peluquería Estilo Único",
-    "address": "Calle Falsa 123",
-    "phone": "555-1234",
+    "name": "Menú Revel",
+    "address": "Falucho 2406, B7600 Mar del Plata, Provincia de Buenos Aires",
+    "instagram": "revel_mdpubar",
     "favicon": "/assets/icons/default.ico",
-    "banner": "/assets/banners/default.jpg"
+    "logo": "/assets/images/logo.png"
   },
   "default_skin": "default",
+  "default_module": "Revel - Café",
   "timed_events": [
     {
       "name": "Navidad",
@@ -18,22 +19,8 @@
         "set_skin": "christmas",
         "set_title_suffix": " - ¡Feliz Navidad!",
         "set_favicon": "/assets/icons/christmas.ico",
-        "set_banner": "/assets/banners/christmas.jpg"
-      }
-    },
-    {
-      "name": "Happy Hour Semanal",
-      "priority": 50,
-      "when": {
-        "days_of_week": [4, 5], 
-        "time_range": { "start": "18:00", "end": "20:00" }
-      },
-      "then": {
-        "set_skin": "happy_hour",
-        "set_title_suffix": " - ¡Happy Hour!",
-        "modify_module_data": {
-          "catalog": { "action": "apply_discount", "value": 15 }
-        }
+        "set_banner": "/assets/banners/christmas.jpg",
+        "logo": "/assets/images/logo-navidad.png"
       }
     },
     {
@@ -43,13 +30,13 @@
         "time_range": { "start": "20:00", "end": "07:00" }
       },
       "then": {
-        "set_skin": "dark"
+        "set_skin": "dark",
+        "default_module": "Revel - Bar",
       }
     }
   ],
   "modules": [
-    { "type": "banner" },
-    { "type": "profile", "data_key": "profile_data" },
-    { "type": "catalog", "title": "Nuestros Productos", "data_file": "catalog_items.json" }
+    { "type": "menues", "title": "Revel - Bar", "data_file": "menues_1_items.json" }
+    { "type": "menues", "title": "Revel - Café", "data_file": "menues_2_items.json" }
   ]
 }
