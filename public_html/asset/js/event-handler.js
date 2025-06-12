@@ -1,68 +1,166 @@
-(function() {
-    const config = window.EVENT_CONFIG;
-    if (!config || !config.rules) return;
+document.addEventListener('DOMContentLoaded', () => {
 
-    function getActiveContext() {
-        const context = { ...config.defaults };
-        const now = new Date();
-        const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        const currentDay = now.getDay() === 0 ? 7 : now.getDay(); // Sun=0 -> Sun=7
+    class EventScheduler {
+        constructor() {
+            // --- Elementos del DOM y datos iniciales ---
+            this.body = document.body;
+            this.clientId = this.body.dataset.clientId;
+            this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
 
-        const activeEvents = config.rules.filter(event => {
-            if (!event.when) return false;
-            const cond = event.when;
-            if (cond.date_range) {
-                if (now < new Date(cond.date_range.start) || now > new Date(cond.date_range.end + "T23:59:59")) return false;
+            this.skinStylesheet = document.getElementById('skin-stylesheet');
+            this.favicon = document.getElementById('favicon');
+            
+            // --- Estado de la aplicación ---
+            this.activeEvents = {}; // Un objeto para guardar los eventos actualmente activos
+            this.timers = [];       // Guardaremos las referencias a nuestros timers
+            
+            // --- Información del Manifiesto (se cargará después) ---
+            this.profileTitle = '';
+            this.defaultSkin = 'default';
+            this.defaultFavicon = 'asset/favicon/default.png';
+        }
+
+        /**
+         * Inicia el proceso: pide la agenda al servidor y la procesa.
+         */
+        async init() {
+            if (!this.clientId) {
+                console.error('Scheduler Error: Client ID no encontrado.');
+                return;
             }
-            if (cond.days_of_week) {
-                if (!cond.days_of_week.includes(currentDay)) return false;
+
+            try {
+                const response = await fetch(`/api/agenda.php?client=${this.clientId}`);
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                
+                const agendaData = await response.json();
+                this.scheduleEvents(agendaData);
+
+            } catch (error) {
+                console.error('No se pudo obtener la agenda de eventos:', error);
             }
-            if (cond.time_range) {
-                if (cond.time_range.start > cond.time_range.end) {
-                    if (currentTime < cond.time_range.start && currentTime >= cond.time_range.end) return false;
-                } else {
-                    if (currentTime < cond.time_range.start || currentTime >= cond.time_range.end) return false;
+        }
+
+        /**
+         * Procesa la agenda recibida y programa los temporizadores.
+         * @param {object} agendaData - La respuesta de nuestra API /api/agenda.php
+         */
+        scheduleEvents(agendaData) {
+            const { server_time_iso, events_agenda } = agendaData;
+            const serverNow = new Date(server_time_iso).getTime();
+            
+            console.log(`Agenda recibida. Hora del servidor: ${server_time_iso}`);
+            console.log(`Se encontraron ${events_agenda.length} eventos futuros.`);
+
+            // Primero, determinamos el estado inicial correcto
+            this.determineInitialState(serverNow, events_agenda);
+
+            events_agenda.forEach(event => {
+                const startTime = new Date(event.start_iso).getTime();
+                const endTime = new Date(event.end_iso).getTime();
+
+                // Calculamos el tiempo restante (delay) desde AHORA hasta que el evento empiece/termine
+                const delayUntilStart = startTime - serverNow;
+                const delayUntilEnd = endTime - serverNow;
+                
+                // Programamos el inicio del evento solo si es en el futuro
+                if (delayUntilStart > 0) {
+                    const timer = setTimeout(() => {
+                        console.log(`%cINICIO EVENTO: ${event.id}`, 'color: green; font-weight: bold;');
+                        this.updateCurrentState(event.id, event.event_details, 'start');
+                    }, delayUntilStart);
+                    this.timers.push(timer);
                 }
-            }
-            return true;
-        });
 
-        activeEvents.sort((a, b) => (b.priority || 0) - (a.priority || 0));
-
-        activeEvents.forEach(event => {
-            const actions = event.then;
-            if (actions.set_skin) context.skin = actions.set_skin;
-            if (actions.set_title_suffix) context.title += actions.set_title_suffix;
-            if (actions.set_favicon) context.favicon = actions.set_favicon;
-            // Otras acciones visuales se pueden añadir aquí (ej. banner)
-        });
-        
-        return context;
-    }
-
-    function applyContext(context) {
-        // Actualizar Título
-        document.getElementById('page-title').innerText = context.title;
-
-        // Actualizar Favicon
-        document.getElementById('page-favicon').href = context.favicon;
-
-        // Actualizar Estilos
-        const currentSkin = document.querySelector('.stylesheet').href.match(/\/skins\/(.*?)\//)[1];
-        if (currentSkin !== context.skin) {
-            console.log(`Cambiando skin a: ${context.skin}`);
-            document.querySelectorAll('.stylesheet').forEach(sheet => {
-                const newHref = sheet.href.replace(/\/skins\/[a-zA-Z0-9_-]+\//, `/skins/${context.skin}/`);
-                sheet.href = newHref;
+                // Programamos el fin del evento solo si es en el futuro
+                if (delayUntilEnd > 0) {
+                    const timer = setTimeout(() => {
+                        console.log(`%cFIN EVENTO: ${event.id}`, 'color: red; font-weight: bold;');
+                        this.updateCurrentState(event.id, event.event_details, 'end');
+                    }, delayUntilEnd);
+                    this.timers.push(timer);
+                }
             });
         }
-        // Nota: aplicar cambios de datos como descuentos en vivo requeriría una llamada a una API
-        // para re-renderizar el módulo, lo cual es más complejo. Por ahora, nos centramos en cambios visuales.
+        
+        /**
+         * Comprueba si algún evento ya debería estar activo al momento de cargar la página.
+         */
+        determineInitialState(serverNow, events_agenda) {
+            events_agenda.forEach(event => {
+                const startTime = new Date(event.start_iso).getTime();
+                const endTime = new Date(event.end_iso).getTime();
+                if (serverNow >= startTime && serverNow < endTime) {
+                    console.log(`El evento '${event.id}' ya estaba activo al cargar la página.`);
+                    this.activeEvents[event.id] = event.event_details;
+                }
+            });
+            this.updateView(); // Actualizamos la vista con el estado inicial correcto.
+        }
+
+        /**
+         * Modifica el estado actual añadiendo o quitando un evento.
+         * @param {string} eventId - El ID del evento.
+         * @param {object} eventDetails - Los detalles completos del evento.
+         * @param {'start'|'end'} type - Si el evento está empezando o terminando.
+         */
+        updateCurrentState(eventId, eventDetails, type) {
+            if (type === 'start') {
+                this.activeEvents[eventId] = eventDetails;
+            } else if (type === 'end') {
+                delete this.activeEvents[eventId];
+            }
+            this.updateView();
+        }
+
+        /**
+         * Actualiza la interfaz (DOM) basándose en el estado actual de los eventos activos.
+         * Se encarga de la lógica de prioridad.
+         */
+        updateView() {
+            const events = Object.values(this.activeEvents);
+            let winningEvent = null;
+
+            if (events.length > 0) {
+                // Ordenamos por prioridad para encontrar el evento "ganador"
+                events.sort((a, b) => (b.priority || 0) - (a.priority || 0));
+                winningEvent = events[0];
+            }
+            
+            console.log("Actualizando vista. Evento ganador:", winningEvent ? winningEvent.id : 'Ninguno');
+
+            // --- Actualizar Apariencia (título, skin, favicon) ---
+            const skin = winningEvent?.skin || this.initialContext.default_skin || 'default';
+            const title = winningEvent?.title_modifier || this.initialContext.profile_title || document.title;
+            const faviconFile = winningEvent?.favicon_modifier || this.initialContext.default_favicon || 'default.png';
+
+            document.title = title;
+            this.favicon.href = `/asset/favicon/${faviconFile}`;
+            this.skinStylesheet.href = `/asset/css/skin/${skin}.css`;
+            
+            // --- Actualizar Vista de Módulos (ej: menú del catálogo) ---
+            this.updateMenuView(winningEvent);
+        }
+
+        /**
+         * Muestra u oculta los ítems del menú según el evento activo.
+         * @param {object|null} winningEvent - El evento de mayor prioridad activo.
+         */
+        updateMenuView(winningEvent) {
+            const productos = document.querySelectorAll('.producto[data-menu]');
+            let menuActivo = 'default'; // Menú por defecto
+
+            if (winningEvent?.data_modifiers?.catalog?.show_menu) {
+                menuActivo = winningEvent.data_modifiers.catalog.show_menu;
+            }
+
+            productos.forEach(producto => {
+                producto.style.display = (producto.dataset.menu === menuActivo) ? 'block' : 'none';
+            });
+        }
     }
 
-    setInterval(() => {
-        const newContext = getActiveContext();
-        applyContext(newContext);
-    }, 30000); // Comprobar cada 30 segundos
-
-})();
+    // --- Iniciar la aplicación ---
+    const app = new EventScheduler();
+    app.init();
+});
