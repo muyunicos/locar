@@ -1,0 +1,38 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title"><?php echo htmlspecialchars($page_title); ?></title>
+    <link id="page-favicon" rel="icon" type="image/x-icon" href="<?php echo htmlspecialchars($favicon); ?>">
+    
+    <?php foreach ($stylesheets as $stylesheet): ?>
+        <link class="stylesheet" rel="stylesheet" href="<?php echo htmlspecialchars($stylesheet); ?>">
+    <?php endforeach; ?>
+</head>
+<body>
+    <header>
+        <!-- ... -->
+    </header>
+    <main>
+        <?php echo $content; ?>
+    </main>
+    <footer>
+        <!-- ... -->
+    </footer>
+    <script>
+        window.EVENT_CONFIG = {
+            rules: <?php echo json_encode($event_rules); ?>,
+            defaults: {
+                skin: "<?php echo htmlspecialchars($manifest['default_skin']); ?>",
+                title: "<?php echo htmlspecialchars($manifest['profile_data']['name']); ?>",
+                favicon: "<?php echo htmlspecialchars($manifest['profile_data']['favicon']); ?>",
+                banner: "<?php echo htmlspecialchars($manifest['profile_data']['banner']); ?>"
+            }
+        };
+    </script>
+    <script src="https://loc.ar/asset/js/event-handler.js"></script>
+
+</body>
+</html>

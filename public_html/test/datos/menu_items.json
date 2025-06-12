@@ -1,0 +1,8 @@
+{
+  "restaurant_name": "Test de Menú Rápido",
+  "items": [
+    { "name": "Producto A", "price": "100" },
+    { "name": "Producto B", "price": "250" },
+    { "name": "Producto C", "price": "300" }
+  ]
+}
