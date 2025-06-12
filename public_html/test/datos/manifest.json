@@ -36,7 +36,7 @@
     }
   ],
   "modules": [
-    { "type": "menues", "title": "Revel - Bar", "data_file": "menues_1_items.json" }
-    { "type": "menues", "title": "Revel - Café", "data_file": "menues_2_items.json" }
+    { "type": "menues", "title": "Revel - Bar", "data_id": 2 }
+    { "type": "menues", "title": "Revel - Café", "data_id": 1 }
   ]
 }

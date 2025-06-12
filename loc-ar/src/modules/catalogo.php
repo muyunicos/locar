@@ -1,7 +1,8 @@
 <?php
-function get_module_data(array $moduleConfig, array $manifest, array $context): array
+function get_module_data(array $moduleConfig, array $manifest, array $context, string $clientId): array
 {
-    $itemsPath = __DIR__ . '/../../../public_html/' . basename(dirname(dirname($moduleConfig['data_file']))) . '/datos/' . basename($moduleConfig['data_file']);
+    $itemsPath = __DIR__ . '/../../../public_html/' . $clientId . '/datos/' . $moduleConfig['data_file'];
+    
     $items = json_decode(file_get_contents($itemsPath), true);
 
     // Comprobar si hay una modificación para este módulo

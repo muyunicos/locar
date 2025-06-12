@@ -22,7 +22,7 @@ function launchApp(string $clientId)
         if (file_exists($logicPath)) {
             require_once $logicPath;
             // Pasamos el contexto completo a la lógica del módulo
-            $moduleData = get_module_data($moduleConfig, $manifest, $context);
+            $moduleData = get_module_data($moduleConfig, $manifest, $context, $clientId);
             $modulesContent .= View::render('modules/' . $moduleType, $moduleData);
 
             $moduleCssPath = "/skins/{$context['skin']}/{$moduleType}.css";
