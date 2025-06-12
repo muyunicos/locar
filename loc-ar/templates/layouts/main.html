@@ -6,11 +6,12 @@
     
     <title><?= htmlspecialchars($page_title) ?></title>
     
-    <link id="favicon" rel="icon" href="<?= htmlspecialchars($favicon_path) ?>">
+    <link id="favicon" rel="icon" href="<?= htmlspecialchars($favicon) ?>">
     
-    <link id="skin-stylesheet" rel="stylesheet" href="<?= htmlspecialchars($skin_path) ?>">
-
-    </head>
+    <?php foreach ($stylesheets as $stylesheet): ?>
+        <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet) ?>">
+    <?php endforeach; ?>
+</head>
 
 <body 
     data-client-id="<?= htmlspecialchars($client_id) ?>"
@@ -18,7 +19,7 @@
 >
 
     <div id="app-container">
-        <?= $content ?>
+        <?= $content /* El contenido de los módulos se inyecta aquí */ ?>
     </div>
 
     <script src="/asset/js/event-handler.js"></script>

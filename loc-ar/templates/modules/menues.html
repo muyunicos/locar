@@ -1,0 +1,28 @@
+<?php
+// loc-ar/templates/modules/menues.phtml
+?>
+<div class="module-container module-menues">
+    <h2 class="menues-title"><?= htmlspecialchars($catalog_title) ?></h2>
+    <div class="item-list">
+        <?php foreach ($item_list as $item): ?>
+            <?php if ($item['tipo'] === 'producto'): ?>
+                <div class="producto">
+                    <div class="producto-info">
+                        <h3 class="producto-titulo"><?= htmlspecialchars($item['titulo']) ?></h3>
+                        <?php if (!empty($item['descripcion'])): ?>
+                            <p class="producto-descripcion"><?= htmlspecialchars($item['descripcion']) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="producto-precio">
+                        <?php if (isset($item['original_price'])): ?>
+                            <span class="precio-original">$<?= htmlspecialchars($item['original_price']) ?></span>
+                        <?php endif; ?>
+                        <span class="precio-final">$<?= htmlspecialchars($item['precio']) ?></span>
+                    </div>
+                </div>
+            <?php elseif ($item['tipo'] === 'categoria'): ?>
+                <h4 class="categoria-titulo"><?= htmlspecialchars($item['titulo']) ?></h4>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+</div>

@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/View.php';
-require_once __DIR__ . '/EventManager.php'; // Incluimos el nuevo motor
+require_once __DIR__ . '/EventManager.php';
 
 function launchApp(string $clientId)
 {
@@ -8,15 +8,23 @@ function launchApp(string $clientId)
         die('Invalid client ID.');
     }
     $manifestPath = __DIR__ . '/../../public_html/' . $clientId . '/datos/manifest.json';
+    if (!file_exists($manifestPath)) {
+        die('Manifest file not found.');
+    }
     $manifest = json_decode(file_get_contents($manifestPath), true);
     
-    // 1. Crear el motor de eventos y obtener el contexto final
-    $eventManager = new EventManager($manifest);
-    $context = $eventManager->getContext();
+    $eventManager = new EventManager($manifest['timed_events'] ?? []);
+    $activeEventContext = $eventManager->getContext();
 
-    // 2. Preparar el contenido de los módulos
+    $finalContext = [
+        'title' => $activeEventContext['active_event']['then']['set_title_suffix'] ?? $manifest['profile_data']['name'],
+        'skin' => $activeEventContext['active_event']['then']['set_skin'] ?? $manifest['default_skin'],
+        'favicon' => $activeEventContext['active_event']['then']['set_favicon'] ?? $manifest['profile_data']['favicon'],
+    ];
+
     $modulesContent = '';
-    $stylesheets = ["/skins/{$context['skin']}/main.css"];
+    // <-- CAMBIO AQUÍ: La nueva ruta para los CSS
+    $stylesheets = ["/asset/css/{$finalContext['skin']}/main.css"];
 
     foreach ($manifest['modules'] as $moduleConfig) {
         $moduleType = $moduleConfig['type'];
@@ -24,23 +32,31 @@ function launchApp(string $clientId)
 
         if (file_exists($logicPath)) {
             require_once $logicPath;
-            // Pasamos el contexto completo a la lógica del módulo
-            $moduleData = get_module_data($moduleConfig, $manifest, $context, $clientId);
+            $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext, $clientId);
             $modulesContent .= View::render('modules/' . $moduleType, $moduleData);
 
-            $moduleCssPath = "/skins/{$context['skin']}/{$moduleType}.css";
-            if (file_exists(__DIR__ . '/../public_html' . $moduleCssPath)) {
+            // <-- CAMBIO AQUÍ: La nueva ruta para los CSS de módulos
+            $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
+            $publicPath = __DIR__ . '/../../public_html' . $moduleCssPath;
+            
+            if (file_exists($publicPath)) {
                 $stylesheets[] = $moduleCssPath;
             }
         }
     }
     
-    // 3. Renderizamos la vista principal con el contexto final
+    $initialContextForJs = [
+        'profile_title' => $manifest['profile_data']['name'],
+        'default_skin' => $manifest['default_skin'],
+        'default_favicon' => $manifest['profile_data']['favicon'],
+    ];
+
     echo View::render('layouts/main', [
-        'page_title' => $context['title'],
-        'favicon' => $context['favicon'],
+        'page_title' => $finalContext['title'],
+        'favicon' => $finalContext['favicon'],
         'stylesheets' => $stylesheets,
         'content' => $modulesContent,
-        'event_rules' => $manifest['timed_events'] ?? [] // Pasamos las reglas a JS
+        'client_id' => $clientId,
+        'initial_context_json' => json_encode($initialContextForJs)
     ]);
 }
