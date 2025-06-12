@@ -1,0 +1,24 @@
+<?php
+// loc-ar/templates/modules/catalogo.html
+?>
+<div class="module-container module-catalogo">
+    <h2 class="catalogo-title"><?= htmlspecialchars($catalog_title) ?></h2>
+    <div class="item-list">
+        <?php foreach ($item_list as $item): ?>
+            <div class="producto">
+                <div class="producto-info">
+                    <h3 class="producto-titulo"><?= htmlspecialchars($item['name']) ?></h3>
+                    <?php if (!empty($item['description'])): ?>
+                        <p class="producto-descripcion"><?= htmlspecialchars($item['description']) ?></p>
+                    <?php endif; ?>
+                </div>
+                <div class="producto-precio">
+                    <?php if (isset($item['original_price'])): ?>
+                        <span class="precio-original">$<?= htmlspecialchars($item['original_price']) ?></span>
+                    <?php endif; ?>
+                    <span class="precio-final">$<?= htmlspecialchars($item['price']) ?></span>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>

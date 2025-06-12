@@ -3,8 +3,8 @@
     "name": "Menú Revel",
     "address": "Falucho 2406, B7600 Mar del Plata, Provincia de Buenos Aires",
     "instagram": "revel_mdpubar",
-    "favicon": "/assets/icons/default.ico",
-    "logo": "/assets/images/logo.png"
+    "favicon": "/asset/icons/default.ico",
+    "logo": "/asset/images/logo.png"
   },
   "default_skin": "default",
   "default_module": "Revel - Café",
@@ -18,9 +18,7 @@
       "then": {
         "set_skin": "navidad",
         "set_title_suffix": " - ¡Feliz Navidad!",
-        "set_favicon": "/assets/icons/christmas.ico",
-        "set_banner": "/assets/banners/christmas.jpg",
-        "logo": "/assets/images/logo-navidad.png"
+        "set_favicon": "/asset/icons/christmas.ico"
       }
     },
     {
@@ -31,7 +29,7 @@
       },
       "then": {
         "set_skin": "dark",
-        "default_module": "Revel - Bar",
+        "default_module": "Revel - Bar"
       }
     }
   ],

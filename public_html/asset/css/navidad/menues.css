@@ -1,0 +1,42 @@
+/* public_html/asset/css/navidad/menues.css */
+.menues-title {
+    color: #c82a2a;
+    border-bottom: 2px solid #c82a2a;
+    padding-bottom: 10px;
+}
+
+.categoria-titulo {
+    margin-top: 20px;
+    color: #2b7d2b;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.producto {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #f0e2e2;
+}
+
+.producto-titulo {
+    font-size: 1.1em;
+    margin: 0;
+    color: #3a2d2d;
+}
+
+.producto-descripcion {
+    font-size: 0.9em;
+    color: #5c4b4b;
+    margin: 5px 0 0;
+}
+
+.precio-final {
+    font-weight: bold;
+    color: #c82a2a;
+}
+
+.precio-original {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 8px;
+}

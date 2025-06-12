@@ -7,17 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
             this.clientId = this.body.dataset.clientId;
             this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
 
-            this.skinStylesheet = document.getElementById('skin-stylesheet');
+            // Seleccionamos los elementos que vamos a modificar
+            this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
             this.favicon = document.getElementById('favicon');
             
             // --- Estado de la aplicación ---
             this.activeEvents = {}; // Un objeto para guardar los eventos actualmente activos
             this.timers = [];       // Guardaremos las referencias a nuestros timers
-            
-            // --- Información del Manifiesto (se cargará después) ---
-            this.profileTitle = '';
-            this.defaultSkin = 'default';
-            this.defaultFavicon = 'asset/favicon/default.png';
+            this.currentSkin = this.initialContext.default_skin || 'default';
         }
 
         /**
@@ -52,31 +49,27 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`Agenda recibida. Hora del servidor: ${server_time_iso}`);
             console.log(`Se encontraron ${events_agenda.length} eventos futuros.`);
 
-            // Primero, determinamos el estado inicial correcto
             this.determineInitialState(serverNow, events_agenda);
 
             events_agenda.forEach(event => {
                 const startTime = new Date(event.start_iso).getTime();
                 const endTime = new Date(event.end_iso).getTime();
 
-                // Calculamos el tiempo restante (delay) desde AHORA hasta que el evento empiece/termine
                 const delayUntilStart = startTime - serverNow;
                 const delayUntilEnd = endTime - serverNow;
                 
-                // Programamos el inicio del evento solo si es en el futuro
                 if (delayUntilStart > 0) {
                     const timer = setTimeout(() => {
-                        console.log(`%cINICIO EVENTO: ${event.id}`, 'color: green; font-weight: bold;');
-                        this.updateCurrentState(event.id, event.event_details, 'start');
+                        console.log(`%cINICIO EVENTO: ${event.event_details.name}`, 'color: green; font-weight: bold;');
+                        this.updateCurrentState(event.event_details, 'start');
                     }, delayUntilStart);
                     this.timers.push(timer);
                 }
 
-                // Programamos el fin del evento solo si es en el futuro
                 if (delayUntilEnd > 0) {
                     const timer = setTimeout(() => {
-                        console.log(`%cFIN EVENTO: ${event.id}`, 'color: red; font-weight: bold;');
-                        this.updateCurrentState(event.id, event.event_details, 'end');
+                        console.log(`%cFIN EVENTO: ${event.event_details.name}`, 'color: red; font-weight: bold;');
+                        this.updateCurrentState(event.event_details, 'end');
                     }, delayUntilEnd);
                     this.timers.push(timer);
                 }
@@ -91,72 +84,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 const startTime = new Date(event.start_iso).getTime();
                 const endTime = new Date(event.end_iso).getTime();
                 if (serverNow >= startTime && serverNow < endTime) {
-                    console.log(`El evento '${event.id}' ya estaba activo al cargar la página.`);
-                    this.activeEvents[event.id] = event.event_details;
+                    console.log(`El evento '${event.event_details.name}' ya estaba activo al cargar la página.`);
+                    this.activeEvents[event.event_details.name] = event.event_details;
                 }
             });
-            this.updateView(); // Actualizamos la vista con el estado inicial correcto.
+            this.updateView();
         }
 
         /**
          * Modifica el estado actual añadiendo o quitando un evento.
-         * @param {string} eventId - El ID del evento.
-         * @param {object} eventDetails - Los detalles completos del evento.
-         * @param {'start'|'end'} type - Si el evento está empezando o terminando.
          */
-        updateCurrentState(eventId, eventDetails, type) {
+        updateCurrentState(eventDetails, type) {
+            const eventName = eventDetails.name;
             if (type === 'start') {
-                this.activeEvents[eventId] = eventDetails;
+                this.activeEvents[eventName] = eventDetails;
             } else if (type === 'end') {
-                delete this.activeEvents[eventId];
+                delete this.activeEvents[eventName];
             }
             this.updateView();
         }
 
         /**
          * Actualiza la interfaz (DOM) basándose en el estado actual de los eventos activos.
-         * Se encarga de la lógica de prioridad.
          */
         updateView() {
             const events = Object.values(this.activeEvents);
             let winningEvent = null;
 
             if (events.length > 0) {
-                // Ordenamos por prioridad para encontrar el evento "ganador"
                 events.sort((a, b) => (b.priority || 0) - (a.priority || 0));
                 winningEvent = events[0];
             }
             
-            console.log("Actualizando vista. Evento ganador:", winningEvent ? winningEvent.id : 'Ninguno');
+            console.log("Actualizando vista. Evento ganador:", winningEvent ? winningEvent.name : 'Ninguno');
 
-            // --- Actualizar Apariencia (título, skin, favicon) ---
-            const skin = winningEvent?.skin || this.initialContext.default_skin || 'default';
-            const title = winningEvent?.title_modifier || this.initialContext.profile_title || document.title;
-            const faviconFile = winningEvent?.favicon_modifier || this.initialContext.default_favicon || 'default.png';
+            // --- Extraemos los datos del evento ganador o usamos los valores por defecto ---
+            const newSkin = winningEvent?.then?.set_skin || this.initialContext.default_skin;
+            const titleSuffix = winningEvent?.then?.set_title_suffix || '';
+            const newFavicon = winningEvent?.then?.set_favicon || this.initialContext.default_favicon;
 
-            document.title = title;
-            this.favicon.href = `/asset/favicon/${faviconFile}`;
-            this.skinStylesheet.href = `/asset/css/skin/${skin}.css`;
+            // --- Actualizamos el DOM ---
+            document.title = this.initialContext.profile_title + titleSuffix;
             
-            // --- Actualizar Vista de Módulos (ej: menú del catálogo) ---
-            this.updateMenuView(winningEvent);
-        }
-
-        /**
-         * Muestra u oculta los ítems del menú según el evento activo.
-         * @param {object|null} winningEvent - El evento de mayor prioridad activo.
-         */
-        updateMenuView(winningEvent) {
-            const productos = document.querySelectorAll('.producto[data-menu]');
-            let menuActivo = 'default'; // Menú por defecto
-
-            if (winningEvent?.data_modifiers?.catalog?.show_menu) {
-                menuActivo = winningEvent.data_modifiers.catalog.show_menu;
+            if (this.favicon) {
+                this.favicon.href = newFavicon;
             }
 
-            productos.forEach(producto => {
-                producto.style.display = (producto.dataset.menu === menuActivo) ? 'block' : 'none';
-            });
+            if (this.currentSkin !== newSkin) {
+                console.log(`Cambiando skin de '${this.currentSkin}' a '${newSkin}'`);
+                this.skinStylesheets.forEach(sheet => {
+                    const currentHref = sheet.getAttribute('href');
+                    const newHref = currentHref.replace(`/${this.currentSkin}/`, `/${newSkin}/`);
+                    sheet.setAttribute('href', newHref);
+                });
+                this.currentSkin = newSkin;
+            }
         }
     }
 

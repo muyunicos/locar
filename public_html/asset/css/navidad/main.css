@@ -1,0 +1,19 @@
+/* public_html/asset/css/navidad/main.css */
+body {
+    background-color: #f4e9e9;
+    color: #3a2d2d;
+    font-family: 'Georgia', serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+}
+
+#app-container {
+    max-width: 800px;
+    margin: auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(110, 4, 4, 0.2);
+    border: 1px solid #d4c2c2;
+}
