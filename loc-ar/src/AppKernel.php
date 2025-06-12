@@ -4,6 +4,9 @@ require_once __DIR__ . '/EventManager.php'; // Incluimos el nuevo motor
 
 function launchApp(string $clientId)
 {
+    if (!preg_match('/^[a-zA-Z0-9_-]+$/', $clientId)) {
+        die('Invalid client ID.');
+    }
     $manifestPath = __DIR__ . '/../../public_html/' . $clientId . '/datos/manifest.json';
     $manifest = json_decode(file_get_contents($manifestPath), true);
     
