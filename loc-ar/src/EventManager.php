@@ -11,16 +11,19 @@ class EventManager
         $this->timezone = new DateTimeZone('America/Argentina/Buenos_Aires');
     }
 
-    private function isDateInRange(array $event, DateTime $now): bool
+   private function isDateInRange(array $event, DateTime $now): bool
     {
-        if (empty($event['start_date']) || empty($event['end_date'])) {
+        // Buscamos la configuración dentro de when.date_range
+        $dateRange = $event['when']['date_range'] ?? [];
+
+        if (empty($dateRange['start']) || empty($dateRange['end'])) {
             return true; // No date range specified
         }
 
-        $startDate = DateTime::createFromFormat('Y-m-d', $event['start_date'], $this->timezone);
+        $startDate = DateTime::createFromFormat('Y-m-d', $dateRange['start'], $this->timezone);
         $startDate->setTime(0, 0, 0);
 
-        $endDate = DateTime::createFromFormat('Y-m-d', $event['end_date'], $this->timezone);
+        $endDate = DateTime::createFromFormat('Y-m-d', $dateRange['end'], $this->timezone);
         $endDate->setTime(23, 59, 59);
 
         return $now >= $startDate && $now <= $endDate;
@@ -28,33 +31,38 @@ class EventManager
 
     private function isDayActive(array $event, DateTime $now): bool
     {
-        if (empty($event['active_on_days'])) {
+        // La estructura de active_on_days ya es correcta en el manifest (si se usara)
+        if (empty($event['when']['active_on_days'])) {
             return true; // Active on all days
         }
         $currentDay = $now->format('N'); // 1 (for Monday) through 7 (for Sunday)
-        return in_array($currentDay, $event['active_on_days']);
+        return in_array($currentDay, $event['when']['active_on_days']);
     }
 
     private function isTimeActive(array $event, DateTime $now): bool
     {
-        if (empty($event['start_time']) || empty($event['end_time'])) {
+        // Buscamos la configuración dentro de when.time_range
+        $timeRange = $event['when']['time_range'] ?? [];
+
+        if (empty($timeRange['start']) || empty($timeRange['end'])) {
             return true; // No time range specified
         }
-
-        $startTime = DateTime::createFromFormat('H:i', $event['start_time'], $this->timezone);
-        $endTime = DateTime::createFromFormat('H:i', $event['end_time'], $this->timezone);
+        
+        // Creamos objetos DateTime usando solo la hora para comparar
+        $currentTime = DateTime::createFromFormat('H:i:s', $now->format('H:i:s'), $this->timezone);
+        $startTime = DateTime::createFromFormat('H:i', $timeRange['start'], $this->timezone);
+        $endTime = DateTime::createFromFormat('H:i', $timeRange['end'], $this->timezone);
 
         // Handle overnight events
         if ($startTime > $endTime) {
-            // Event crosses midnight
-            // Example: 22:00 to 02:00
-            // Active if current time is >= 22:00 OR <= 02:00
-            if ($now >= $startTime || $now <= $endTime) {
+            // Event crosses midnight (e.g., 20:00 to 07:00)
+            // Active if current time is >= start OR <= end
+            if ($currentTime >= $startTime || $currentTime <= $endTime) {
                 return true;
             }
         } else {
             // Normal same-day event
-            if ($now >= $startTime && $now <= $endTime) {
+            if ($currentTime >= $startTime && $currentTime <= $endTime) {
                 return true;
             }
         }
@@ -65,6 +73,11 @@ class EventManager
 
     private function isEventActive(array $event, DateTime $now): bool
     {
+        // También necesitamos actualizar esta función para que pase los datos correctos
+        if (!isset($event['when'])) {
+             // Si no hay sección 'when', el evento no es "timed" y no puede ser activado por tiempo.
+            return false;
+        }
         return $this->isDateInRange($event, $now) &&
                $this->isDayActive($event, $now) &&
                $this->isTimeActive($event, $now);

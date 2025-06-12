@@ -7,8 +7,12 @@ function get_module_data(array $moduleConfig, array $manifest, array $context, s
     }
     $itemsPath = __DIR__ . '/../../../public_html/' . $clientId . '/datos/menues' . $moduleID . '_items.json';
     
-    $items = json_decode(file_get_contents($itemsPath), true);
+    $data = json_decode(file_get_contents($itemsPath), true);
 
+    // Verificamos si los items están en una clave 'items' o si el archivo es el array directamente
+    $items = isset($data['items']) && is_array($data['items']) ? $data['items'] : $data;
+
+    // La lógica de descuento que sigue es correcta, no necesita cambios.
     if (isset($context['module_modifications']['catalog']['action']) && $context['module_modifications']['catalog']['action'] === 'apply_discount') {
         $discount = $context['module_modifications']['catalog']['value'];
         foreach ($items as &$item) {
