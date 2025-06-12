@@ -16,7 +16,7 @@
         "date_range": { "start": "2024-12-01", "end": "2024-12-26" }
       },
       "then": {
-        "set_skin": "christmas",
+        "set_skin": "navidad",
         "set_title_suffix": " - ¡Feliz Navidad!",
         "set_favicon": "/assets/icons/christmas.ico",
         "set_banner": "/assets/banners/christmas.jpg",
