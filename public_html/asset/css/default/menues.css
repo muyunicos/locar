@@ -1,161 +1,248 @@
-/* Estilo general del título del módulo */
+/*
+ * Hoja de estilos para el módulo de Menús.
+ * Versión 2.0: Enfocada en "mobile-first", con tipografía responsiva
+ * y mejoras de legibilidad para una experiencia de usuario óptima.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* VARIABLES GLOBALES (SKIN)                         */
+/* -------------------------------------------------------------------------- */
+/* Usar variables hace que cambiar la paleta de colores sea muy fácil.        */
+/* Simplemente cambias el valor aquí y se actualiza en todo el menú.          */
+
+:root {
+    --font-primary: 'Montserrat', sans-serif;
+    --font-secondary: 'Lato', sans-serif;
+    
+    --color-text-headings: #111;      /* Para títulos de categoría */
+    --color-text-primary: #333;       /* Para títulos de productos y precios */
+    --color-text-secondary: #666;     /* Para descripciones */
+    --color-accent: #0056b3;          /* Color para detalles y bordes */
+    
+    --border-color-light: #eee;       /* Bordes y separadores suaves */
+    --bg-color-hover: #f9f9f9;        /* Color al pasar el cursor sobre un producto */
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS GENERALES DEL MÓDULO                       */
+/* -------------------------------------------------------------------------- */
+
+body {
+    /* Asegura que 1rem = 16px por defecto, para consistencia. */
+    font-size: 16px; 
+}
+
+/* Título principal del menú (ej. "Menú Revel Bar") */
 .menues-title {
-    color: #333;
-    font-size: 2.5em;
-    font-weight: 300; /* Un peso más ligero para un look moderno */
+    font-family: var(--font-primary);
     text-align: center;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
-    margin-bottom: 40px;
+    font-weight: 300;
+    color: var(--color-text-primary);
+    /* TAMAÑO FLUIDO: se ajusta entre 2rem y 2.5rem según el ancho de la pantalla */
+    font-size: clamp(2rem, 8vw, 2.5rem);
+    border-bottom: 1px solid var(--border-color-light);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
 }
 
-.menues-title, .categoria-titulo, .subcategoria-titulo, .producto-titulo {
-    font-family: 'Montserrat', sans-serif;
-}
-
-/* Títulos de las categorías principales */
+/* Títulos de Categoría (ej. "Tapeos y Entradas") */
 .categoria-titulo {
-    font-size: 1.8em;
-    color: #111;
-    margin-top: 40px; /* Más espacio entre categorías */
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #0056b3; /* Un acento de color principal */
-}
-.categoria-titulo,
-.subcategoria-titulo {
+    font-family: var(--font-primary);
+    font-size: clamp(1.4rem, 6vw, 1.6rem); /* También fluido */
+    color: var(--color-text-headings);
+    border-bottom: 2px solid var(--color-accent);
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
     display: flex;
-    align-items: baseline; /* Alinea el título y la descripción por la base del texto */
-    flex-wrap: wrap;       /* Permite que la descripción pase abajo en pantallas muy pequeñas */
-    gap: 1em;              /* Espacio entre el título y su descripción */
+    flex-direction: column; /* En móvil, la descripción va abajo del título */
+    gap: 0.25rem;
 }
 
-/* Estilo para la nueva descripción */
-.titulo-descripcion {
-    font-size: 0.55em;         /* Tamaño relativo al título (H3 o H4) */
-    color: #666;
-    font-weight: 400;          /* Peso de fuente normal, no negrita */
-    font-style: italic;        /* Un toque de estilo con cursiva */
-    letter-spacing: normal;    /* Resetea cualquier espaciado de letra del título */
-    text-transform: none;      /* Resetea cualquier transformación de texto */
-    font-family: 'Lato', sans-serif; /* Opcional: usa la fuente del cuerpo del texto */
-}
-/* Títulos de las subcategorías */
+/* Títulos de Sub-Categoría (ej. "Burgers") */
 .subcategoria-titulo {
-    font-size: 1.3em;
+    font-family: var(--font-primary);
+    font-size: clamp(1.1rem, 5vw, 1.25rem);
     color: #444;
-    margin-top: 25px;
-    margin-bottom: 15px;
-    padding-left: 15px;
-    border-left: 4px solid #0056b3; /* Línea lateral para indicar anidamiento */
+    border-left: 4px solid var(--color-accent);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    display: flex;
+    flex-direction: column; /* También apilado en móvil */
+    gap: 0.25rem;
 }
 
-/* Contenedor de la lista de items */
+/* Descripción opcional para títulos de categoría/subcategoría */
+.titulo-descripcion {
+    font-family: var(--font-secondary);
+    font-size: 0.9rem; /* Un tamaño fijo y legible */
+    color: var(--color-text-secondary);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* ESTRUCTURA DE LA LISTA DE ITEMS                      */
+/* -------------------------------------------------------------------------- */
+
 .item-list {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Espacio entre productos */
+    gap: 0.5rem; /* Espacio vertical entre productos */
 }
 
-/* Estilo de cada producto individual */
+/* Contenedor de cada producto individual */
 .producto {
-    display: grid; /* Usamos Grid para un mejor control del alineamiento */
-    grid-template-columns: 1fr auto; /* La info toma el espacio disponible, el precio el necesario */
-    gap: 0 20px; /* Espacio horizontal entre info y precio */
-    padding: 15px 10px;
-    border-bottom: 1px solid #f0f0f0; /* Borde más sutil */
-    align-items: start;
-    transition: background-color 0.2s ease-in-out;
-}
-
-.producto:hover {
-    background-color: #f9f9f9; /* Feedback visual al pasar el ratón */
+    display: grid;
+    /* Col 1: Info (ocupa todo el espacio). Col 2: Precio (tamaño automático) */
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 1rem; /* 0.5rem de espacio vertical, 1rem horizontal */
+    padding: 1rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: start; /* Alinea los items al inicio de su celda de la grilla */
+    transition: background-color 0.2s ease;
 }
 
 .producto:last-child {
     border-bottom: none;
 }
 
-/* Información del producto (izquierda) */
+.producto:hover {
+    background-color: var(--bg-color-hover);
+}
+
+/* Info del producto (título y descripción) */
 .producto-info {
-    padding-right: 15px;
+    /* No necesita estilos, ya está en la primera columna del grid */
 }
 
 .producto-titulo {
-    font-size: 1.1em;
-    font-weight: 600; /* Hacemos el título un poco más pesado */
-    margin: 0 0 5px 0;
-    color: #333;
+    font-family: var(--font-primary);
+    font-size: 1rem; /* Tamaño de texto base, ideal para móvil */
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 0.25rem 0;
 }
 
 .producto-descripcion {
-    font-size: 0.9em;
-    color: #666;
+    font-family: var(--font-secondary);
+    font-size: 0.85rem; /* Ligeramente más pequeño para no quitar protagonismo */
+    color: var(--color-text-secondary);
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.4;
 }
 
-/* Precio del producto (derecha) */
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DEL PRECIO (CORREGIDO)                   */
+/* -------------------------------------------------------------------------- */
+
+/* Contenedor del precio */
 .producto-precio {
     text-align: right;
+    display: flex;
+    flex-direction: column; /* Apila precio original (si existe) sobre el final */
+    align-items: flex-end; /* Alinea los precios a la derecha */
+    justify-content: center; /* Centra verticalmente si los textos tienen distinta altura */
+    height: 100%;
+}
+
+/* Estilo común para ambos tipos de precio */
+.precio-final,
+.precio-original {
+    display: flex;
+    /* ALINEACIÓN CORREGIDA: alinea todos los componentes del precio por su base */
+    align-items: baseline; 
     white-space: nowrap; /* Evita que el precio se parta en dos líneas */
 }
 
-/* Contenedor principal del precio (final y original) */
-.precio-final,
-.precio-original {
-    display: flex;         /* Alinea horizontalmente las 3 partes del precio */
-    align-items: baseline; /* Alinea el texto sobre su línea base, se ve mejor */
-    white-space: nowrap;   /* Evita que el precio se parta en varias líneas */
-}
-
-/* El valor numérico principal del precio */
-.precio-valor {
-    /* Este mantiene el estilo principal (negrita, color) definido en .precio-final */
+/* Precio final (el que se cobra) */
+.precio-final {
     font-weight: 700;
+    font-size: 1.1rem; /* Un poco más grande para que destaque */
+    color: var(--color-text-primary);
 }
 
-/* Estilo para el símbolo de pesos "$" */
+/* Precio original (tachado, para ofertas) */
+.precio-original {
+    text-decoration: line-through;
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 0.2rem; /* Pequeño espacio si hay un precio final debajo */
+}
+
+/* Símbolo de moneda ($) */
 .precio-simbolo {
-    font-size: 0.65em;      /* Más pequeño que el número */
-    font-weight: 400;       /* Más ligero (no negrita) */
-    margin-right: 0.3em;    /* Un pequeño espacio a la derecha */
-    align-self: flex-start; /* Lo alinea un poco más arriba, para un look delicado */
-    padding-top: 2px;
+    font-size: 0.7em; /* 70% del tamaño del precio (sea final u original) */
+    font-weight: 400;
+    margin-right: 0.2em;
 }
 
-/* Estilo para la terminación ",-" */
+/* Parte decimal/terminación (,-) */
 .precio-decimales {
-    font-size: 0.65em;      /* Mismo tamaño que el símbolo */
-    font-weight: 400;       /* También más ligero */
-    color: #888;            /* Un color más suave para que sea menos prominente */
+    font-size: 0.7em;
+    font-weight: 400;
+    color: #888;
     margin-left: 0.1em;
 }
 
-/* Aseguramos que el precio tachado (original) se vea correctamente */
-.precio-original {
-    text-decoration: line-through;
-    color: #999;
-}
-.precio-original .precio-valor,
-.precio-original .precio-simbolo,
-.precio-original .precio-decimales {
-    color: inherit; /* Hereda el color gris y el tachado del padre */
+/* Nos aseguramos de que el precio tachado herede el color correcto */
+.precio-original .precio-decimales,
+.precio-original .precio-simbolo {
+    color: inherit;
 }
 
-/* Estilos para el pie de página del menú */
+
+/* -------------------------------------------------------------------------- */
+/* OTROS ESTILOS                               */
+/* -------------------------------------------------------------------------- */
+
 .menu-footer {
     text-align: center;
-    margin-top: 40px;
-    font-size: 0.9em;
+    margin-top: 2.5rem;
+    padding: 1rem;
+    font-size: 0.8rem;
     color: #888;
 }
 
-/* CLASE ADICIONAL PARA LAYOUT DE 2 COLUMNAS (ver Propuesta 3) */
+/* -------------------------------------------------------------------------- */
+/* MEDIA QUERIES (PARA PANTALLAS MÁS GRANDES)                */
+/* -------------------------------------------------------------------------- */
+
+/* A partir de 640px (tablets pequeños en vertical o móviles grandes) */
+@media (min-width: 640px) {
+    .categoria-titulo,
+    .subcategoria-titulo {
+        flex-direction: row; /* Pone el título y la descripción en la misma línea */
+        align-items: baseline;
+        gap: 1rem;
+    }
+}
+
+/* A partir de 768px (tablets en horizontal, desktops pequeños) */
 @media (min-width: 768px) {
+    /*
+     * LAYOUT DE 2 COLUMNAS (CORREGIDO)
+     * Solo se aplica a las categorías que tengan la clase "two-column".
+     */
     .categoria-container.two-column .item-list {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 5px 30px; /* Espacio vertical e horizontal */
+        grid-template-columns: 1fr 1fr; /* 2 columnas de igual tamaño */
+        /* Espacio vertical y horizontal entre productos en la grilla */
+        gap: 0.75rem 2rem;
+    }
+
+    /* Pequeña mejora visual para el modo de 2 columnas */
+    .categoria-container.two-column .producto {
+        border-bottom: none;
+        background-color: #fcfcfc;
+        border: 1px solid #f0f0f0;
+        border-radius: 4px;
+        padding: 1rem;
     }
 }
