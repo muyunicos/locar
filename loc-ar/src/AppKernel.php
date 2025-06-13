@@ -9,7 +9,7 @@ require_once __DIR__ . '/EventManager.php';
  *
  * @param string $clientId El identificador del cliente.
  */
-function launchApp(string $clientId)
+function launchApp(string $clientId, string $baseUrl)
 {
     // 1. Validar y cargar el manifiesto del cliente
     if (!preg_match('/^[a-zA-Z0-9_-]+$/', $clientId)) {
