@@ -1,21 +1,65 @@
 <?php
-// Función auxiliar para renderizar un producto.
+// loc-ar/templates/modules/menues.html
+
+// --- Función auxiliar para renderizar un producto ---
 function render_producto($item) {
-    // Si el item está oculto, no hacer nada.
+    // Si el item está oculto, no renderizar nada.
     if (isset($item['hidden']) && $item['hidden']) {
         return;
     }
-    // ... (el resto del código de la función render_producto es igual)
-    // ...
-}
-
-// Dentro del bucle principal
-foreach ($categorias as $categoria):
-    // Si la categoría entera está oculta, saltarla junto con todos sus ítems.
-    if (isset($categoria['hidden']) && $categoria['hidden']) {
-        continue;
-    }
 ?>
-    <div class="categoria-container">
+    <div class="producto">
+        <div class="producto-info">
+            <h3 class="producto-titulo"><?= htmlspecialchars($item['titulo']) ?></h3>
+            <?php if (!empty($item['descripcion'])): ?>
+                <p class="producto-descripcion"><?= htmlspecialchars($item['descripcion']) ?></p>
+            <?php endif; ?>
         </div>
-<?php endforeach; ?>
+        <div class="producto-precio">
+            <?php if (isset($item['original_price'])): ?>
+                <span class="precio-original">$<?= htmlspecialchars($item['original_price']) ?></span>
+            <?php endif; ?>
+            <span class="precio-final">$<?= htmlspecialchars($item['precio']) ?></span>
+        </div>
+    </div>
+<?php
+}
+?>
+
+<div class="module-container module-menues">
+    <h2 class="menues-title"><?= htmlspecialchars($menu_title) ?></h2>
+
+    <?php if (isset($error)): ?>
+        <p class="app-error"><?= htmlspecialchars($error) ?></p>
+    <?php else: ?>
+        <?php foreach ($categorias as $categoria): ?>
+            <?php 
+            // Si la categoría entera está oculta, la saltamos.
+            if (isset($categoria['hidden']) && $categoria['hidden']) continue; 
+            ?>
+            <div class="categoria-container">
+                <h3 class="categoria-titulo"><?= htmlspecialchars($categoria['titulo']) ?></h3>
+                <div class="item-list">
+                    <?php foreach ($categoria['items'] as $item): ?>
+                        <?php if (isset($item['es_subcategoria']) && $item['es_subcategoria']): ?>
+                            <div class="subcategoria-container">
+                                <h4 class="subcategoria-titulo"><?= htmlspecialchars($item['titulo']) ?></h4>
+                                <?php foreach ($item['items'] as $sub_item): ?>
+                                    <?php render_producto($sub_item); ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php else: ?>
+                            <?php render_producto($item); ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <?php if (!empty($footer_text)): ?>
+        <footer class="menu-footer">
+            <p><?= htmlspecialchars($footer_text) ?></p>
+        </footer>
+    <?php endif; ?>
+</div>

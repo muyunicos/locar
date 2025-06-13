@@ -46,25 +46,28 @@
         hamburgerBtn.addEventListener('click', () => navPanel.classList.toggle('open'));
 
         navPanel.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('nav-link')) {
-                e.preventDefault();
-                const moduleId = e.target.dataset.moduleId;
-                const clientId = document.body.dataset.clientId;
-                
-                // Ocultar panel
-                navPanel.classList.remove('open');
-                
-                // TODO: Crear un endpoint API que devuelva el HTML de un módulo.
-                // Por ejemplo: /api/getModule.php?client=${clientId}&id=${moduleId}
-                // const response = await fetch(`/api/getModule.php?client=${clientId}&id=${moduleId}`);
-                // const newHtml = await response.text();
-                // appContainer.innerHTML = newHtml;
-
-                // Placeholder hasta que la API esté lista:
-                appContainer.innerHTML = `<h2>Cargando Módulo ${moduleId}...</h2>`;
-                alert(`Deberíamos cargar el módulo con ID: ${moduleId} vía AJAX.`);
+        if (e.target.classList.contains('nav-link')) {
+            e.preventDefault();
+            const moduleId = e.target.dataset.moduleId;
+            const clientId = '<?= $client_id ?>'; // Inyectamos el ID de cliente desde PHP
+            
+            // Muestra un estado de carga
+            appContainer.innerHTML = '<h2>Cargando...</h2>';
+            navPanel.classList.remove('open');
+            
+            try {
+                const response = await fetch(`/api/getModule.php?client=${clientId}&id=${moduleId}`);
+                if (!response.ok) {
+                    throw new Error(`Error en la respuesta de la API: ${response.statusText}`);
+                }
+                const newHtml = await response.text();
+                appContainer.innerHTML = newHtml;
+            } catch (error) {
+                console.error('Error al cargar el módulo:', error);
+                appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo. Inténtalo de nuevo más tarde.</div>`;
             }
-        });
+        }
+    });
     });
     </script>
 </body>
