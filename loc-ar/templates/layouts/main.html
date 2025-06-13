@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($page_title) ?></title>
+    
+    <link id="favicon" rel="icon" href="<?= htmlspecialchars($favicon) ?>" type="image/x-icon">
+
+    <?php foreach ($stylesheets as $stylesheet): ?>
+        <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet) ?>" class="skin-stylesheet">
+    <?php endforeach; ?>
+
     <style> /* Estilos rápidos para el menú hamburguesa */
         .nav-header { display: flex; justify-content: space-between; align-items: center; }
         .hamburger-button { font-size: 2em; cursor: pointer; background: none; border: none; }
@@ -8,10 +18,11 @@
         .nav-panel.open { display: block; }
         .nav-panel ul { list-style: none; padding: 20px; }
         .nav-panel li a { display: block; padding: 10px; color: #333; text-decoration: none; }
+        .app-error { color: red; background-color: #ffecec; border: 1px solid red; padding: 10px; margin: 10px; border-radius: 5px; }
     </style>
 </head>
 
-<body ...>
+<body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>'>
 
     <div class="nav-panel" id="nav-panel">
         <ul>
@@ -36,38 +47,52 @@
     </div>
 
     <script src="/asset/js/event-handler.js"></script>
+
     <script>
-    // Lógica para el menú de navegación
     document.addEventListener('DOMContentLoaded', () => {
         const navPanel = document.getElementById('nav-panel');
         const hamburgerBtn = document.getElementById('hamburger-button');
         const appContainer = document.getElementById('module-content-wrapper');
 
+        // Esta línea es crucial. Obtenemos el client ID del body, que fue puesto ahí por PHP.
+        const clientId = document.body.dataset.clientId;
+
         hamburgerBtn.addEventListener('click', () => navPanel.classList.toggle('open'));
 
         navPanel.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('nav-link')) {
-            e.preventDefault();
-            const moduleId = e.target.dataset.moduleId;
-            const clientId = '<?= $client_id ?>'; // Inyectamos el ID de cliente desde PHP
-            
-            // Muestra un estado de carga
-            appContainer.innerHTML = '<h2>Cargando...</h2>';
-            navPanel.classList.remove('open');
-            
-            try {
-                const response = await fetch(`../api/getModule.php?client=<span class="math-inline">\{clientId\}&id\=</span>{moduleId}`);
-                if (!response.ok) {
-                    throw new Error(`Error en la respuesta de la API: ${response.statusText}`);
+            if (e.target && e.target.classList.contains('nav-link')) {
+                e.preventDefault();
+                const moduleId = e.target.dataset.moduleId;
+                
+                navPanel.classList.remove('open');
+                
+                // Verificamos que tenemos los datos necesarios ANTES de hacer la llamada
+                if (!clientId || !moduleId) {
+                    appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
+                    console.error("Error: clientId o moduleId faltante.", "Client ID:", clientId, "Module ID:", moduleId);
+                    return;
                 }
-                const newHtml = await response.text();
-                appContainer.innerHTML = newHtml;
-            } catch (error) {
-                console.error('Error al cargar el módulo:', error);
-                appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo. Inténtalo de nuevo más tarde.</div>`;
+
+                appContainer.innerHTML = `<h2>Cargando...</h2>`;
+                
+                try {
+                    // Usamos la ruta relativa `../` y las variables de JS con la sintaxis `${...}`
+                    const response = await fetch(`../api/getModule.php?client=${clientId}&id=${moduleId}`);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
+                    }
+
+                    const newHtml = await response.text();
+                    appContainer.innerHTML = newHtml;
+
+                } catch (error) {
+                    console.error('Error al cargar el módulo:', error);
+                    appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;
+                }
             }
-        }
-    });
+        });
     });
     </script>
 </body>
