@@ -74,7 +74,7 @@ function get_module_data(array $moduleConfig, array $manifest, array $context): 
     }
    return [
         'menu_title' => $data['titulo'] ?? $moduleConfig['title'],
-        'menu_image_url' => $data['imagen_url'] ?? null,
+        'menu_image_url' => $data['logo'] ?? null,
         'categorias' => $data['categorias'] ?? [],
         'footer_text' => $data['footer'] ?? '',
         'error' => $data['error'] ?? null
