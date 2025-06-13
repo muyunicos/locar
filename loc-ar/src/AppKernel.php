@@ -29,7 +29,7 @@ function launchApp()
 
     $finalContext = [
         'skin' => $activeEvent['then']['set_skin'] ?? $manifest['default_skin'],
-        'favicon' => $baseUrl . ltrim($activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'], '/'),
+        'favicon' => BASE_URL . ltrim($activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'], '/'),
         'logo_url' => $logoUrl
     ];
     
@@ -49,7 +49,7 @@ function launchApp()
     }
 
     $modulesContent = '';
-    $stylesheets = [$baseUrl . "asset/css/{$finalContext['skin']}/main.css"];
+    $stylesheets = [BASE_URL . "asset/css/{$finalContext['skin']}/main.css"];
 
     $activeModuleTitle = $activeEvent['then']['default_module'] ?? $manifest['default_module'];
 
@@ -71,7 +71,7 @@ if ($activeModuleConfig) {
             $modulesContent = View::render('modules/' . $moduleType, $moduleData);
             $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
             if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
-                 $stylesheets[] = $baseUrl . ltrim($moduleCssPath, '/');
+                 $stylesheets[] = BASE_URL . ltrim($moduleCssPath, '/');
             }
         } else {
             $modulesContent = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
