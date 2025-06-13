@@ -56,7 +56,7 @@
             navPanel.classList.remove('open');
             
             try {
-                const response = await fetch(`/api/getModule.php?client=${clientId}&id=${moduleId}`);
+                const response = await fetch(`../api/getModule.php?client=<span class="math-inline">\{clientId\}&id\=</span>{moduleId}`);
                 if (!response.ok) {
                     throw new Error(`Error en la respuesta de la API: ${response.statusText}`);
                 }
