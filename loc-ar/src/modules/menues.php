@@ -37,8 +37,7 @@ function get_module_data(array $moduleConfig, array $manifest, array $context): 
         ];
     }
 
-    $imageBaseUrl = rtrim(BASE_URL, '/') . '/' . $clientId . '/images/';
-    process_images_recursively($data, $clientId, BASE_URL);
+    process_images_recursively($data);
     
     $categorias = $data['categorias'] ?? [];
 
