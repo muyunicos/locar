@@ -1,19 +1,13 @@
 <?php
-// public_html/api/getModule.php
 header("Access-Control-Allow-Origin: https://test.loc.ar");
 header('Content-Type: application/json');
-// Para facilitar la depuración futura
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// Requerimos los componentes base
 require_once __DIR__ . '/../../loc-ar/src/View.php';
 require_once __DIR__ . '/../../loc-ar/src/EventManager.php';
 require_once __DIR__ . '/../../loc-ar/src/Utils.php';
 
-$baseUrl = 'https://loc.ar/';
-
-// --- Validaciones y Carga del Manifiesto ---
 $clientId = $_GET['client'] ?? '';
 $moduleId = $_GET['id'] ?? '';
 
@@ -29,7 +23,6 @@ if (!file_exists($manifestPath)) {
 }
 $manifest = json_decode(file_get_contents($manifestPath), true);
 
-// --- Encontrar la Configuración del Módulo Solicitado ---
 $moduleConfig = null;
 foreach ($manifest['modules'] as $module) {
     if ((string)$module['id'] === $moduleId) {
@@ -43,7 +36,6 @@ if (!$moduleConfig) {
     die("<div class='app-error'>Error: Módulo con ID '{$moduleId}' no encontrado.</div>");
 }
 
-// --- Renderizar el Módulo (La parte corregida) ---
 $moduleType = $moduleConfig['type'];
 $logicPath = __DIR__ . '/../../loc-ar/src/modules/' . $moduleType . '.php';
 
@@ -53,7 +45,6 @@ if (file_exists($logicPath)) {
     $eventManager = new EventManager($manifest['timed_events'] ?? []);
     $activeEventContext = $eventManager->getContext();
 
-    // Pasamos la $baseUrl para que las imágenes se carguen correctamente
     $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext, $clientId, $baseUrl);
     echo View::render('modules/' . $moduleType, $moduleData);
 
