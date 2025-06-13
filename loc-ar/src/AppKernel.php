@@ -21,10 +21,49 @@ function launchApp(string $clientId)
         'skin' => $activeEventContext['active_event']['then']['set_skin'] ?? $manifest['default_skin'],
         'favicon' => $activeEventContext['active_event']['then']['set_favicon'] ?? $manifest['profile_data']['favicon'],
     ];
+ $activeModuleTitle = $activeEventContext['active_event']['then']['default_module'] ?? $manifest['default_module'];
+
+    $finalContext = [ /* ... */ ];
+
+    // --- NUEVA LÓGICA PARA NAVEGACIÓN ---
+    $navigableModules = [];
+    $activeModuleConfig = null;
+
+    foreach ($manifest['modules'] as $moduleConfig) {
+        // Guardar la configuración del módulo activo
+        if ($moduleConfig['title'] === $activeModuleTitle) {
+            $activeModuleConfig = $moduleConfig;
+        }
+        // Añadir a la lista de navegación si está marcado para ello
+        if (isset($moduleConfig['show_in_nav']) && $moduleConfig['show_in_nav']) {
+            $navigableModules[] = [
+                'title' => $moduleConfig['title'],
+                'id' => $moduleConfig['id']
+            ];
+        }
+    }
+    // --- FIN DE LA NUEVA LÓGICA ---
 
     $modulesContent = '';
-    // <-- CAMBIO AQUÍ: La nueva ruta para los CSS
     $stylesheets = ["/asset/css/{$finalContext['skin']}/main.css"];
+
+    // Renderizar solo el módulo activo inicial
+    if ($activeModuleConfig) {
+        $moduleType = $activeModuleConfig['type'];
+        $logicPath = __DIR__ . '/modules/' . $moduleType . '.php';
+
+        if (file_exists($logicPath)) {
+            require_once $logicPath;
+            // Pasamos la config del módulo activo a get_module_data
+            $moduleData = get_module_data($activeModuleConfig, $manifest, $activeEventContext, $clientId);
+            $modulesContent .= View::render('modules/' . $moduleType, $moduleData);
+
+            $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
+            if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
+                $stylesheets[] = $moduleCssPath;
+            }
+        }
+    }
 
     foreach ($manifest['modules'] as $moduleConfig) {
         $moduleType = $moduleConfig['type'];
@@ -57,6 +96,7 @@ function launchApp(string $clientId)
         'stylesheets' => $stylesheets,
         'content' => $modulesContent,
         'client_id' => $clientId,
-        'initial_context_json' => json_encode($initialContextForJs)
+        'initial_context_json' => json_encode($initialContextForJs),
+        'navigable_modules' => $navigableModules // <-- Pasamos la lista a la vista!
     ]);
 }

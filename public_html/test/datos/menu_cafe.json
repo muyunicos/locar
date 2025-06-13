@@ -1,0 +1,43 @@
+{
+  "titulo": "Menú Revel Café",
+  "categorias": [
+    {
+      "titulo": "Bebidas",
+      "items": [
+        {
+          "titulo": "Cafetería",
+          "es_subcategoria": true,
+          "items": [
+            {
+              "titulo": "Café Espresso",
+              "descripcion": "Intenso café espresso recién molido.",
+              "precio": 2.5
+            },
+            {
+              "titulo": "Capuccino",
+              "descripcion": "Espresso con leche vaporizada y espuma.",
+              "precio": 3
+            }
+          ]
+        },
+        {
+            "titulo": "Cola",
+            "descripcion": "",
+            "precio": 5,
+            "hidden": true
+        }
+      ]
+    },
+    {
+      "titulo": "Panadería",
+      "items": [
+        {
+          "titulo": "Medialuna de Manteca",
+          "descripcion": "Clásica medialuna de manteca.",
+          "precio": 1.8
+        }
+      ]
+    }
+  ],
+  "footer": "&copy; 2025 Revel. Todos los derechos reservados."
+}

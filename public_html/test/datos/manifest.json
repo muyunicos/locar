@@ -34,7 +34,8 @@
     }
   ],
   "modules": [
-    { "type": "menues", "title": "Revel - Bar", "id": 2 },
-    { "type": "menues", "title": "Revel - Café", "id": 1 }
+    { "type": "menues", "title": "Revel - Bar", "id": 2, "show_in_nav": true, "data_file": "menu_bar.json" },
+    { "type": "menues", "title": "Revel - Café", "id": 1, "show_in_nav": true, "data_file": "menu_cafe.json" },
+    { "type": "gallery", "title": "Fotos del Local", "id": 3, "show_in_nav": false }
   ]
 }
