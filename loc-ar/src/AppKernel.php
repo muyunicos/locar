@@ -1,40 +1,51 @@
 <?php
+// loc-ar/src/AppKernel.php
+
 require_once __DIR__ . '/View.php';
 require_once __DIR__ . '/EventManager.php';
 
+/**
+ * Inicia y renderiza la aplicación para un cliente específico.
+ *
+ * @param string $clientId El identificador del cliente.
+ */
 function launchApp(string $clientId)
 {
+    // 1. Validar y cargar el manifiesto del cliente
     if (!preg_match('/^[a-zA-Z0-9_-]+$/', $clientId)) {
-        die('Invalid client ID.');
+        http_response_code(400);
+        die('Error: ID de cliente inválido.');
     }
     $manifestPath = __DIR__ . '/../../public_html/' . $clientId . '/datos/manifest.json';
     if (!file_exists($manifestPath)) {
-        die('Manifest file not found.');
+        http_response_code(404);
+        die('Error: Archivo de manifiesto no encontrado.');
     }
     $manifest = json_decode(file_get_contents($manifestPath), true);
-    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        http_response_code(500);
+        die('Error: El manifiesto contiene un JSON inválido.');
+    }
+
+    // 2. Determinar el contexto actual basado en eventos
     $eventManager = new EventManager($manifest['timed_events'] ?? []);
     $activeEventContext = $eventManager->getContext();
+    $activeEvent = $activeEventContext['active_event'];
 
+    // 3. Definir el contexto final para la vista (skin, favicon, título)
     $finalContext = [
-        'title' => $activeEventContext['active_event']['then']['set_title_suffix'] ?? $manifest['profile_data']['name'],
-        'skin' => $activeEventContext['active_event']['then']['set_skin'] ?? $manifest['default_skin'],
-        'favicon' => $activeEventContext['active_event']['then']['set_favicon'] ?? $manifest['profile_data']['favicon'],
+        'skin' => $activeEvent['then']['set_skin'] ?? $manifest['default_skin'],
+        'favicon' => $activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'],
     ];
- $activeModuleTitle = $activeEventContext['active_event']['then']['default_module'] ?? $manifest['default_module'];
+    
+    $pageTitle = $manifest['profile_data']['name'];
+    if (isset($activeEvent['then']['set_title_suffix'])) {
+        $pageTitle .= $activeEvent['then']['set_title_suffix'];
+    }
 
-    $finalContext = [ /* ... */ ];
-
-    // --- NUEVA LÓGICA PARA NAVEGACIÓN ---
+    // 4. Preparar la lista de módulos para el panel de navegación
     $navigableModules = [];
-    $activeModuleConfig = null;
-
     foreach ($manifest['modules'] as $moduleConfig) {
-        // Guardar la configuración del módulo activo
-        if ($moduleConfig['title'] === $activeModuleTitle) {
-            $activeModuleConfig = $moduleConfig;
-        }
-        // Añadir a la lista de navegación si está marcado para ello
         if (isset($moduleConfig['show_in_nav']) && $moduleConfig['show_in_nav']) {
             $navigableModules[] = [
                 'title' => $moduleConfig['title'],
@@ -42,61 +53,64 @@ function launchApp(string $clientId)
             ];
         }
     }
-    // --- FIN DE LA NUEVA LÓGICA ---
 
+    // 5. [OPTIMIZADO] Renderizar únicamente el módulo activo inicial
     $modulesContent = '';
     $stylesheets = ["/asset/css/{$finalContext['skin']}/main.css"];
 
-    // Renderizar solo el módulo activo inicial
+    // Determinar el título del módulo a cargar
+    $activeModuleTitle = $activeEvent['then']['default_module'] ?? $manifest['default_module'];
+
+    // Encontrar la configuración completa del módulo activo
+    $activeModuleConfig = null;
+    foreach ($manifest['modules'] as $module) {
+        if ($module['title'] === $activeModuleTitle) {
+            $activeModuleConfig = $module;
+            break;
+        }
+    }
+
+    // Si encontramos el módulo, lo renderizamos
     if ($activeModuleConfig) {
         $moduleType = $activeModuleConfig['type'];
         $logicPath = __DIR__ . '/modules/' . $moduleType . '.php';
 
         if (file_exists($logicPath)) {
             require_once $logicPath;
-            // Pasamos la config del módulo activo a get_module_data
+            
+            // Obtener los datos específicos del módulo
             $moduleData = get_module_data($activeModuleConfig, $manifest, $activeEventContext, $clientId);
-            $modulesContent .= View::render('modules/' . $moduleType, $moduleData);
+            
+            // Renderizar la plantilla del módulo con sus datos
+            $modulesContent = View::render('modules/' . $moduleType, $moduleData);
 
+            // Añadir la hoja de estilos del módulo, si existe
             $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
             if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
                 $stylesheets[] = $moduleCssPath;
             }
+        } else {
+            $modulesContent = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
         }
+    } else {
+        $modulesContent = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleTitle}' no fue encontrado en el manifiesto.</div>";
     }
 
-    foreach ($manifest['modules'] as $moduleConfig) {
-        $moduleType = $moduleConfig['type'];
-        $logicPath = __DIR__ . '/modules/' . $moduleType . '.php';
-
-        if (file_exists($logicPath)) {
-            require_once $logicPath;
-            $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext, $clientId);
-            $modulesContent .= View::render('modules/' . $moduleType, $moduleData);
-
-            // <-- CAMBIO AQUÍ: La nueva ruta para los CSS de módulos
-            $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
-            $publicPath = __DIR__ . '/../../public_html' . $moduleCssPath;
-            
-            if (file_exists($publicPath)) {
-                $stylesheets[] = $moduleCssPath;
-            }
-        }
-    }
-    
+    // 6. Preparar el contexto inicial para el JavaScript del frontend
     $initialContextForJs = [
         'profile_title' => $manifest['profile_data']['name'],
         'default_skin' => $manifest['default_skin'],
         'default_favicon' => $manifest['profile_data']['favicon'],
     ];
 
+    // 7. Renderizar la plantilla principal con todos los datos recopilados
     echo View::render('layouts/main', [
-        'page_title' => $finalContext['title'],
+        'page_title' => $pageTitle,
         'favicon' => $finalContext['favicon'],
         'stylesheets' => $stylesheets,
-        'content' => $modulesContent,
+        'content' => $modulesContent, // Contendrá solo el HTML del módulo activo
         'client_id' => $clientId,
         'initial_context_json' => json_encode($initialContextForJs),
-        'navigable_modules' => $navigableModules // <-- Pasamos la lista a la vista!
+        'navigable_modules' => $navigableModules,
     ]);
 }
