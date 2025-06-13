@@ -197,6 +197,24 @@ body {
 .categoria-titulo {
     font-size: clamp(1.6rem, 6vw, 1.9rem);
     font-weight: 600;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.categoria-titulo-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex-grow: 1;
+}
+
+.categoria-titulo-logo {
+    height: 35px;
+    width: auto;
+    flex-shrink: 0;
+    object-fit: contain;
 }
 
 .subcategoria-titulo {

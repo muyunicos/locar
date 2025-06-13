@@ -84,11 +84,16 @@ function render_producto($item) {
         </div>
         <?php else: ?>
         <h3 class="categoria-titulo">
-            <span><?= htmlspecialchars($categoria['titulo']) ?></span>
-            <?php if (!empty($categoria['descripcion'])): ?>
-            <small class="titulo-descripcion"
-                ><?= htmlspecialchars($categoria['descripcion']) ?></small
-            >
+            <div class="categoria-titulo-content">
+                <span><?= htmlspecialchars($categoria['titulo']) ?></span>
+                <?php if (!empty($categoria['descripcion'])): ?>
+                <small class="titulo-descripcion"
+                    ><?= htmlspecialchars($categoria['descripcion']) ?></small
+                >
+                <?php endif; ?>
+            </div>
+            <?php if (!empty($categoria['imagen_titulo_url'])): ?>
+                <img class="categoria-titulo-logo" src="<?= htmlspecialchars($categoria['imagen_titulo_url']) ?>" alt="">
             <?php endif; ?>
         </h3>
         <?php endif; ?>

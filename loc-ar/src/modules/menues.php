@@ -6,6 +6,10 @@ function process_images_recursively(array &$item)
         $item['imagen_url'] = Utils::buildImageUrl($item['imagen']);
     }
 
+    if (isset($item['imagen_titulo']) && !empty($item['imagen_titulo'])) {
+        $item['imagen_titulo_url'] = Utils::buildImageUrl($item['imagen_titulo']);
+    }
+
     if (isset($item['items']) && is_array($item['items'])) {
         foreach ($item['items'] as &$subItem) {
             process_images_recursively($subItem);

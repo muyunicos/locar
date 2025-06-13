@@ -49,8 +49,24 @@
     margin-bottom: 1.5rem;
     padding-bottom: 0.5rem;
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.categoria-titulo-content {
+    display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    flex-grow: 1;
+}
+
+.categoria-titulo-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .subcategoria-titulo {
@@ -208,7 +224,7 @@
 /* MEDIA QUERIES PARA RESPONSIVE
 /* -------------------------------------------------------------------------- */
 @media (min-width: 640px) {
-    .categoria-titulo,
+    .categoria-titulo-content,
     .subcategoria-titulo {
         flex-direction: row;
         align-items: baseline;

@@ -250,6 +250,25 @@ filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow
 .categoria-titulo {
     font-size: clamp(1.6rem, 6vw, 1.9rem);
     border-image: linear-gradient(to right, transparent, var(--revelbar-neon-fuchsia), transparent) 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.categoria-titulo-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex-grow: 1;
+}
+
+.categoria-titulo-logo {
+    height: 45px;
+    width: auto;
+    flex-shrink: 0;
+    object-fit: contain;
+    filter: drop-shadow(0 0 3px var(--revelbar-neon-fuchsia));
 }
 
 .subcategoria-titulo {
