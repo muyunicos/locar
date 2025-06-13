@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             this.updateView();
         }
-        
+
         updateCurrentState(eventDetails, type) {
             const eventName = eventDetails.name;
             if (type === 'start') {
@@ -109,7 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const newSkin = winningEvent?.then?.set_skin || this.initialContext.default_skin;
             const titleSuffix = winningEvent?.then?.set_title_suffix || '';
-            const newFavicon = winningEvent?.then?.set_favicon || this.initialContext.default_favicon;
+            const faviconPath = winningEvent?.then?.set_favicon || this.initialContext.default_favicon;
+
+            if (this.favicon && faviconPath) {
+                this.favicon.href = faviconPath.startsWith('http') ? faviconPath : `${this.baseUrl}${faviconPath.replace(/^\//, '')}`;
+            }
 
             document.title = this.initialContext.profile_title + titleSuffix;
             
@@ -126,6 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 this.currentSkin = newSkin;
             }
+        }
+
+        destroy() {
+            console.log('Limpiando todos los timers programados.');
+            this.timers.forEach(timer => clearTimeout(timer));
+            this.timers = []; // Vaciar el array
         }
     }
 

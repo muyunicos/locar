@@ -80,7 +80,7 @@ if ($activeModuleConfig) {
         $modulesContent = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleTitle}' no fue encontrado en el manifiesto.</div>";
     }
 
-    $initialContextForJs = [
+     $initialContextForJs = [
         'profile_title' => $manifest['profile_data']['name'],
         'default_skin' => $manifest['default_skin'],
         'default_favicon' => $manifest['profile_data']['favicon'],
@@ -95,5 +95,6 @@ if ($activeModuleConfig) {
         'client_id' => CLIENT_ID,
         'base_url' => BASE_URL,
         'navigable_modules' => $navigableModules,
+        'initial_context_json' => json_encode($initialContextForJs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)
     ]);
 }
