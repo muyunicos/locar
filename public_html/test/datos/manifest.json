@@ -2,9 +2,8 @@
   "profile_data": {
     "name": "Menú Revel",
     "address": "Falucho 2406, B7600 Mar del Plata, Provincia de Buenos Aires",
-    "instagram": "revel_mdpubar",
-    "favicon": "/asset/icons/default.ico",
-    "logo": "/asset/images/logo.png"
+    "favicon": "favicon.ico",
+    "logo": "logo.svg"
   },
   "default_skin": "default",
   "default_module": "Revel - Café",
