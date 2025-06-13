@@ -1,6 +1,7 @@
 {
   "titulo": "Menú Revel Café",
   "logo": "logo-cafe",
+  "skin": "revelcafe",
   "categorias": [
     {
       "titulo": "Cafetería de Especialidad e Infusiones",

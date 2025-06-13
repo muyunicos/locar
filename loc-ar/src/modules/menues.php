@@ -72,9 +72,10 @@ function get_module_data(array $moduleConfig, array $manifest, array $context): 
             }
         }
     }
-    
+
     return [
         'menu_title' => $data['titulo'] ?? $moduleConfig['title'],
+        'skin' => $data['skin'] ?? null,
         'menu_image_url' => Utils::buildImageUrl($data['logo'] ?? null),
         'categorias' => $data['categorias'] ?? [],
         'footer_text' => $data['footer'] ?? '',

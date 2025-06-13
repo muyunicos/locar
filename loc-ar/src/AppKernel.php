@@ -23,9 +23,9 @@ function launchApp()
     $eventManager = new EventManager($manifest['timed_events'] ?? []);
     $activeEventContext = $eventManager->getContext();
     $activeEvent = $activeEventContext['active_event'];
-
-    $logoName = $manifest['profile_data']['logo'] ?? null;
-    $logoUrl = $logoName ? Utils::buildImageUrl($logoName) : null;
+    $logoUrl = Utils::buildImageUrl($manifest['profile_data']['logo']);
+    $favicon = Utils::buildImageUrl($manifest['profile_data']['favicon']);
+    $globalSkin = $activeEvent['then']['set_skin'] ?? $manifest['default_skin'];
 
     $finalContext = [
         'skin' => $activeEvent['then']['set_skin'] ?? $manifest['default_skin'],
@@ -49,10 +49,10 @@ function launchApp()
     }
 
     $modulesContent = '';
-    $stylesheets = [BASE_URL . "asset/css/{$finalContext['skin']}/main.css"];
+    $stylesheets = [BASE_URL . "asset/css/{$globalSkin}/main.css"];
+    $moduleStylesheet = null;
 
     $activeModuleTitle = $activeEvent['then']['default_module'] ?? $manifest['default_module'];
-
     $activeModuleConfig = null;
     foreach ($manifest['modules'] as $module) {
         if ($module['title'] === $activeModuleTitle) {
@@ -67,12 +67,18 @@ if ($activeModuleConfig) {
 
         if (file_exists($logicPath)) {
             require_once $logicPath;
+
             $moduleData = get_module_data($activeModuleConfig, $manifest, $activeEventContext);
-            $modulesContent = View::render('modules/' . $moduleType, $moduleData);
-            $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
+            
+            $moduleSkin = $moduleData['skin'] ?? $globalSkin;
+            $moduleCssPath = "/asset/css/{$moduleSkin}/{$moduleType}.css";
+
             if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
-                 $stylesheets[] = BASE_URL . ltrim($moduleCssPath, '/');
+                 $moduleStylesheet = BASE_URL . ltrim($moduleCssPath, '/');
             }
+
+            $modulesContent = View::render('modules/' . $moduleType, $moduleData);
+
         } else {
             $modulesContent = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
         }
@@ -81,17 +87,18 @@ if ($activeModuleConfig) {
     }
 
      $initialContextForJs = [
-        'profile_title' => $manifest['profile_data']['name'],
-        'default_skin' => $manifest['default_skin'],
-        'default_favicon' => Utils::buildImageUrl($manifest['profile_data']['favicon']),
+        'profile_title' => $pageTitle,
+        'default_skin' => $globalSkin,
+        'default_favicon' => $favicon,
 
     ];
 
    echo View::render('layouts/main', [
         'page_title' => $pageTitle,
-        'favicon' => $finalContext['favicon'],
-        'logo_url' => $finalContext['logo_url'],
+        'favicon' => $favicon,
+        'logo_url' => $logoUrl,
         'stylesheets' => $stylesheets,
+        'module_stylesheet' => $moduleStylesheet,
         'content' => $modulesContent,
         'client_id' => CLIENT_ID,
         'base_url' => BASE_URL,

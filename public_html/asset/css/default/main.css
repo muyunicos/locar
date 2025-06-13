@@ -1,4 +1,4 @@
-/* public_html/skins/default/main.css */
+
 body {
     background-color: #f4f4f9;
     color: #333;
@@ -6,6 +6,7 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 20px;
+    font-size: 16px;
 }
 
 #app-container {
@@ -16,3 +17,12 @@ body {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+
+.nav-header { display: flex; justify-content: space-between; align-items: center; }
+.header-logo { height: 40px; width: auto; }
+.hamburger-button { font-size: 2em; cursor: pointer; background: none; border: none; }
+.nav-panel { display: none; position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); z-index: 1000; }
+.nav-panel.open { display: block; }
+.nav-panel ul { list-style: none; padding: 20px; }
+.nav-panel li a { display: block; padding: 10px; color: #333; text-decoration: none; }
+.app-error { color: red; background-color: #ffecec; border: 1px solid red; padding: 10px; margin: 10px; border-radius: 5px; }

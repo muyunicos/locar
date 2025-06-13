@@ -1,7 +1,7 @@
 <?php
 class Utils
 {
-    public static function buildImageUrl(string $imageName): ?string
+    public static function buildImageUrl(?string $imageName): ?string
     {
         if (empty($imageName)) {
             return null;
@@ -10,7 +10,7 @@ class Utils
         if (strpos($imageName, '.') === false) {
             $imageName .= '.webp';
         }
-        
+
         return rtrim(BASE_URL, '/') . '/' . CLIENT_ID . '/imagenes/' . $imageName;
     }
 }

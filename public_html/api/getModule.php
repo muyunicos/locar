@@ -1,6 +1,4 @@
 <?php
-header("Access-Control-Allow-Origin: https://test.loc.ar");
-header('Content-Type: application/json');
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -16,7 +14,6 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', CLIENT_ID) || !preg_match('/^[a-zA-Z0-9_-]
     http_response_code(400);
     die("<div class='app-error'>Error: ID de cliente o módulo inválido.</div>");
 }
-
 $manifestPath = __DIR__ . '/../' . CLIENT_ID . '/datos/manifest.json';
 if (!file_exists($manifestPath)) {
     http_response_code(404);
@@ -31,7 +28,6 @@ foreach ($manifest['modules'] as $module) {
         break;
     }
 }
-
 if (!$moduleConfig) {
     http_response_code(404);
     die("<div class='app-error'>Error: Módulo con ID '{$moduleId}' no encontrado.</div>");
@@ -45,9 +41,26 @@ if (file_exists($logicPath)) {
 
     $eventManager = new EventManager($manifest['timed_events'] ?? []);
     $activeEventContext = $eventManager->getContext();
-
+    $activeEvent = $activeEventContext['active_event'];
+    $globalSkin = $activeEvent['then']['set_skin'] ?? $manifest['default_skin'];
     $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext);
-    echo View::render('modules/' . $moduleType, $moduleData);
+
+    $moduleSkin = $moduleData['skin'] ?? $globalSkin;
+    
+    $cssUrl = null;
+    $moduleCssPath = "/asset/css/{$moduleSkin}/{$moduleType}.css";
+    if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
+        $cssUrl = BASE_URL . ltrim($moduleCssPath, '/');
+    }
+
+    $htmlContent = View::render('modules/' . $moduleType, $moduleData);
+
+    header("Access-Control-Allow-Origin: https://test.loc.ar");
+    header('Content-Type: application/json');
+    echo json_encode([
+        'html' => $htmlContent,
+        'css_url' => $cssUrl
+    ]);
 
 } else {
     http_response_code(500);

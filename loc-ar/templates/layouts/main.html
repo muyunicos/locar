@@ -13,16 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-    <style> /* Estilos rápidos para el menú hamburguesa */
-        .nav-header { display: flex; justify-content: space-between; align-items: center; }
-        .header-logo { height: 40px; width: auto; }
-        .hamburger-button { font-size: 2em; cursor: pointer; background: none; border: none; }
-        .nav-panel { display: none; position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); z-index: 1000; }
-        .nav-panel.open { display: block; }
-        .nav-panel ul { list-style: none; padding: 20px; }
-        .nav-panel li a { display: block; padding: 10px; color: #333; text-decoration: none; }
-        .app-error { color: red; background-color: #ffecec; border: 1px solid red; padding: 10px; margin: 10px; border-radius: 5px; }
-    </style>
+
 </head>
 
 <body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>' data-base-url="<?= htmlspecialchars($base_url) ?>">

@@ -1,11 +1,3 @@
-/*
- * Hoja de estilos para el módulo de Menús.
- * Versión 2.1: Mobile-first con imágenes de producto y layout flexible.
- */
-
-/* -------------------------------------------------------------------------- */
-/* VARIABLES GLOBALES (SKIN)
-/* -------------------------------------------------------------------------- */
 :root {
     --font-primary: 'Montserrat', sans-serif;
     --font-secondary: 'Lato', sans-serif;
@@ -23,9 +15,7 @@
 /* -------------------------------------------------------------------------- */
 /* ESTILOS GENERALES Y TÍTULOS
 /* -------------------------------------------------------------------------- */
-body {
-    font-size: 16px;
-}
+
 
 .menues-title {
     font-family: var(--font-primary);

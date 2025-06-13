@@ -4,7 +4,6 @@ function render_producto($item) {
     if (isset($item['hidden']) && $item['hidden']) {
         return;
     }
-    // Determina si el producto tiene imagen para aplicar una clase CSS
     $has_image = !empty($item['imagen_url']);
     $producto_class = 'producto' . ($has_image ? ' con-imagen' : ' sin-imagen');
 ?>
