@@ -4,13 +4,13 @@
     {
       "titulo": "Cafetería de Especialidad e Infusiones",
       "items": [
-        { "titulo": "Espresso", "descripcion": "Café 100% arábica.", "precio": 3500 },
+        { "titulo": "Espresso", "descripcion": "Café 100% arábica.", "imagen": "cafe", "precio": 3500 },
         { "titulo": "Espresso Doble", "descripcion": "", "precio": 4800 },
         { "titulo": "Cortado", "descripcion": "Un espresso con una pequeña cantidad de leche.", "precio": 4000 },
         { "titulo": "Lágrima", "descripcion": "Leche manchada con un toque de café.", "precio": 4000 },
         { "titulo": "Café con Leche", "descripcion": "", "precio": 4800 },
         { "titulo": "Capuchino", "descripcion": "Espresso, leche vaporizada y espuma de leche.", "precio": 4800 },
-        { "titulo": "Submarino", "descripcion": "Leche caliente con una barra de chocolate para sumergir.", "precio": 5000 },
+        { "titulo": "Submarino", "descripcion": "Leche caliente con una barra de chocolate para sumergir.", "imagen": "submarino", "precio": 5000 },
         { "titulo": "Chocolatada", "descripcion": "", "precio": 3000 },
         { "titulo": "Té (Variedades)", "descripcion": "Consultar por nuestra selección de tés.", "precio": 2000 }
       ]
@@ -18,7 +18,7 @@
     {
       "titulo": "Pastelería Artesanal",
       "items": [
-        { "titulo": "Medialuna", "descripcion": "Medialuna dulce de manteca.", "precio": 1600 },
+        { "titulo": "Medialuna", "descripcion": "Medialuna dulce de manteca.", "imagen": "medialuna", "precio": 1600 },
         { "titulo": "Medialuna con Jamón y Queso", "descripcion": "Recién tostada.", "precio": 4200 },
         {
           "titulo": "Pequeña Patit",
@@ -76,7 +76,7 @@
     {
       "titulo": "Bebidas sin Alcohol",
       "items": [
-        { "titulo": "Limonada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de limón, menta y jengibre.", "precio": 10000 },
+        { "titulo": "Limonada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de limón, menta y jengibre.", "imagen": "limonada", "precio": 10000 },
         { "titulo": "Pomelada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de pomelo y almíbar de romero.", "precio": 10000 },
         { "titulo": "Naranjada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de naranja ", "precio": 10000 },
         { "titulo": "Exprimido de Naranja", "descripcion": "", "precio": 6000 },

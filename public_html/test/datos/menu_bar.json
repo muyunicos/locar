@@ -41,7 +41,7 @@
           "items": [
             {
               "titulo": "Cheese Queen",
-              "descripcion": "Pan de papa y queso, blend de carne premium, doble queso cheddar, dambo, jamón natural y mayonesa casera.",
+              "descripcion": "Pan de papa y queso, blend de carne premium, doble queso cheddar, dambo, jamón natural y mayonesa casera.", "imagen": "hamburguesa",
               "precio": 15000
             },
             {
@@ -62,7 +62,7 @@
           "items": [
             {
               "titulo": "Mozzarella",
-              "descripcion": "Pizza con mozzarella y un toque de orégano fresco.",
+              "descripcion": "Pizza con mozzarella y un toque de orégano fresco.", "imagen": "pizza",
               "precio": 12000
             },
             {
