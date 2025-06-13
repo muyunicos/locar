@@ -35,7 +35,8 @@ function launchApp(string $clientId)
     // 3. Definir el contexto final para la vista (skin, favicon, título)
     $finalContext = [
         'skin' => $activeEvent['then']['set_skin'] ?? $manifest['default_skin'],
-        'favicon' => $activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'],
+        // Usamos $baseUrl para crear una ruta absoluta
+        'favicon' => $baseUrl . ltrim($activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'], '/'),
     ];
     
     $pageTitle = $manifest['profile_data']['name'];
@@ -56,7 +57,8 @@ function launchApp(string $clientId)
 
     // 5. [OPTIMIZADO] Renderizar únicamente el módulo activo inicial
     $modulesContent = '';
-    $stylesheets = ["/asset/css/{$finalContext['skin']}/main.css"];
+    $stylesheets = [$baseUrl . "asset/css/{$finalContext['skin']}/main.css"];
+
 
     // Determinar el título del módulo a cargar
     $activeModuleTitle = $activeEvent['then']['default_module'] ?? $manifest['default_module'];
@@ -87,7 +89,7 @@ function launchApp(string $clientId)
             // Añadir la hoja de estilos del módulo, si existe
             $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
             if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
-                $stylesheets[] = $moduleCssPath;
+                 $stylesheets[] = $baseUrl . ltrim($moduleCssPath, '/');
             }
         } else {
             $modulesContent = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
@@ -104,13 +106,14 @@ function launchApp(string $clientId)
     ];
 
     // 7. Renderizar la plantilla principal con todos los datos recopilados
-    echo View::render('layouts/main', [
+   echo View::render('layouts/main', [
         'page_title' => $pageTitle,
         'favicon' => $finalContext['favicon'],
         'stylesheets' => $stylesheets,
-        'content' => $modulesContent, // Contendrá solo el HTML del módulo activo
+        'content' => $modulesContent,
         'client_id' => $clientId,
         'initial_context_json' => json_encode($initialContextForJs),
         'navigable_modules' => $navigableModules,
+        'base_url' => $baseUrl, // <-- Pasamos la URL base a la plantilla
     ]);
 }

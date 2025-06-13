@@ -22,7 +22,7 @@
     </style>
 </head>
 
-<body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>'>
+<body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>' data-base-url="<?= htmlspecialchars($base_url) ?>">
 
     <div class="nav-panel" id="nav-panel">
         <ul>
@@ -46,16 +46,15 @@
         </main>
     </div>
 
-    <script src="/asset/js/event-handler.js"></script>
+    <script src="<?= htmlspecialchars($base_url) ?>asset/js/event-handler.js"></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const navPanel = document.getElementById('nav-panel');
         const hamburgerBtn = document.getElementById('hamburger-button');
         const appContainer = document.getElementById('module-content-wrapper');
-
-        // Esta línea es crucial. Obtenemos el client ID del body, que fue puesto ahí por PHP.
         const clientId = document.body.dataset.clientId;
+        const baseUrl = document.body.dataset.baseUrl;
 
         hamburgerBtn.addEventListener('click', () => navPanel.classList.toggle('open'));
 
@@ -77,7 +76,7 @@
                 
                 try {
                     // Usamos la ruta relativa `../` y las variables de JS con la sintaxis `${...}`
-                    const response = await fetch(`../api/getModule.php?client=${clientId}&id=${moduleId}`);
+                    const response = await fetch(`${baseUrl}api/getModule.php?client=${clientId}&id=${moduleId}`);
                     
                     if (!response.ok) {
                         const errorText = await response.text();
