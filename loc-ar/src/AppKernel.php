@@ -69,7 +69,7 @@ if ($activeModuleConfig) {
             require_once $logicPath;
             $moduleData = get_module_data($activeModuleConfig, $manifest, $activeEventContext);
             $modulesContent = View::render('modules/' . $moduleType, $moduleData);
-            moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
+            $moduleCssPath = "/asset/css/{$finalContext['skin']}/{$moduleType}.css";
             if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
                  $stylesheets[] = $baseUrl . ltrim($moduleCssPath, '/');
             }
