@@ -1,7 +1,6 @@
 <?php
 // public_html/api/getModule.php
 header("Access-Control-Allow-Origin: https://test.loc.ar");
-header("Access-Control-Allow-Origin: http://test.loc.ar");
 header('Content-Type: application/json');
 // Para facilitar la depuración futura
 ini_set('display_errors', 1);

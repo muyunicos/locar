@@ -1,6 +1,5 @@
 <?php
 header("Access-Control-Allow-Origin: https://test.loc.ar");
-header("Access-Control-Allow-Origin: http://test.loc.ar");
 header('Content-Type: application/json');
 
 // Incluimos la clase que modificamos en el paso anterior
