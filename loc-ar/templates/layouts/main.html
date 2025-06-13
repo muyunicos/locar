@@ -11,9 +11,7 @@
         <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet) ?>" class="skin-stylesheet">
     <?php endforeach; ?>
 
-    <?php if (isset($module_stylesheet) && $module_stylesheet): ?>
-        <link rel="stylesheet" id="module-stylesheet" href="<?= htmlspecialchars($module_stylesheet) ?>" class="skin-stylesheet">
-    <?php endif; ?>
+    <link rel="stylesheet" id="module-stylesheet" href="<?= htmlspecialchars($module_stylesheet ?? '') ?>" class="skin-stylesheet">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

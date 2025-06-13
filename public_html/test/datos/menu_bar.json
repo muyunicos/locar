@@ -1,6 +1,7 @@
 {
   "titulo": "Menú Revel Bar",
   "logo": "logo-bar",
+  "skin": "revelbar",
   "categorias": [
     {
       "titulo": "Tapeos y Entradas",
