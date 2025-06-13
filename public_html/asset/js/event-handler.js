@@ -116,10 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             document.title = this.initialContext.profile_title + titleSuffix;
-            
-            if (this.favicon) {
-                this.favicon.href = newFavicon;
-            }
 
             if (this.currentSkin !== newSkin) {
                 console.log(`Cambiando skin de '${this.currentSkin}' a '${newSkin}'`);
