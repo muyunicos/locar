@@ -12,12 +12,12 @@ define('CLIENT_ID', $_GET['client'] ?? '');
 define('BASE_URL', 'https://loc.ar/');
 $moduleId = $_GET['id'] ?? '';
 
-if (!preg_match('/^[a-zA-Z0-9_-]+$/', $clientId) || !preg_match('/^[a-zA-Z0-9_-]+$/', $moduleId)) {
+if (!preg_match('/^[a-zA-Z0-9_-]+$/', CLIENT_ID) || !preg_match('/^[a-zA-Z0-9_-]+$/', $moduleId)) {
     http_response_code(400);
     die("<div class='app-error'>Error: ID de cliente o módulo inválido.</div>");
 }
 
-$manifestPath = __DIR__ . '/../' . $clientId . '/datos/manifest.json';
+$manifestPath = __DIR__ . '/../' . CLIENT_ID . '/datos/manifest.json';
 if (!file_exists($manifestPath)) {
     http_response_code(404);
     die("<div class='app-error'>Error: Manifiesto no encontrado.</div>");
@@ -46,7 +46,7 @@ if (file_exists($logicPath)) {
     $eventManager = new EventManager($manifest['timed_events'] ?? []);
     $activeEventContext = $eventManager->getContext();
 
-    $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext, $clientId, $baseUrl);
+    $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext);
     echo View::render('modules/' . $moduleType, $moduleData);
 
 } else {
