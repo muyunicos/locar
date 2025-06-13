@@ -83,7 +83,8 @@ if ($activeModuleConfig) {
      $initialContextForJs = [
         'profile_title' => $manifest['profile_data']['name'],
         'default_skin' => $manifest['default_skin'],
-        'default_favicon' => $manifest['profile_data']['favicon'],
+        'default_favicon' => Utils::buildImageUrl($manifest['profile_data']['favicon']),
+
     ];
 
    echo View::render('layouts/main', [

@@ -111,11 +111,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const titleSuffix = winningEvent?.then?.set_title_suffix || '';
             const faviconPath = winningEvent?.then?.set_favicon || this.initialContext.default_favicon;
 
-            if (this.favicon && faviconPath) {
-                this.favicon.href = faviconPath.startsWith('http') ? faviconPath : `${this.baseUrl}${faviconPath.replace(/^\//, '')}`;
-            }
-
             document.title = this.initialContext.profile_title + titleSuffix;
+            
+            if (this.favicon && faviconPath) {
+                if (faviconPath.startsWith('/')) {
+                    this.favicon.href = `${this.baseUrl}${faviconPath.substring(1)}`;
+                } else {
+                    this.favicon.href = faviconPath;
+                }
+            }
 
             if (this.currentSkin !== newSkin) {
                 console.log(`Cambiando skin de '${this.currentSkin}' a '${newSkin}'`);
