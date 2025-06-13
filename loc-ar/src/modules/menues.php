@@ -11,6 +11,12 @@ function process_images_recursively(array &$item)
             process_images_recursively($subItem);
         }
     }
+
+    if (isset($item['categorias']) && is_array($item['categorias'])) {
+        foreach ($item['categorias'] as &$categoria) {
+            process_images_recursively($categoria);
+        }
+    }
 }
 
 function get_module_data(array $moduleConfig, array $manifest, array $context): array
