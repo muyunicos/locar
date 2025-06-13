@@ -42,7 +42,8 @@
           "items": [
             {
               "titulo": "Cheese Queen",
-              "descripcion": "Pan de papa y queso, blend de carne premium, doble queso cheddar, dambo, jamón natural y mayonesa casera.", "imagen": "hamburguesa",
+              "descripcion": "Pan de papa y queso, blend de carne premium, doble queso cheddar, dambo, jamón natural y mayonesa casera.",
+              "imagen": "hamburguesa",
               "precio": 15000
             },
             {

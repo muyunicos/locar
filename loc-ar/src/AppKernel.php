@@ -29,7 +29,7 @@ function launchApp()
 
     $finalContext = [
         'skin' => $activeEvent['then']['set_skin'] ?? $manifest['default_skin'],
-        'favicon' => BASE_URL . ltrim($activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'], '/'),
+        'favicon' => BASE_URL . CLIENT_ID . '/imagenes/' . ltrim($activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'], '/'),
         'logo_url' => $logoUrl
     ];
     
