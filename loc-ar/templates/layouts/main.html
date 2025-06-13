@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($page_title) ?></title>
     <link id="favicon" rel="icon" href="<?= htmlspecialchars($favicon) ?>" type="image/x-icon">
-    <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet) ?>" class="skin-stylesheet">
+    <?php foreach ($stylesheets as $stylesheet_url): ?>
+        <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet_url) ?>" class="skin-stylesheet">
+    <?php endforeach; ?>
     <link rel="stylesheet" id="module-stylesheet" href="<?= htmlspecialchars($module_stylesheet ?? '') ?>" class="skin-stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
