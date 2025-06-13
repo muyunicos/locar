@@ -33,7 +33,7 @@ function render_producto($item) {
             <?php
             if (isset($categoria['hidden']) && $categoria['hidden']) continue; 
             ?>
-            <div class="categoria-container">
+            <div class="categoria-container <?= isset($categoria['layout']) ? htmlspecialchars($categoria['layout']) : '' ?>">
                 <h3 class="categoria-titulo"><?= htmlspecialchars($categoria['titulo']) ?></h3>
                 <div class="item-list">
                     <?php foreach ($categoria['items'] as $item): ?>

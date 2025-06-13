@@ -1,8 +1,9 @@
 /* public_html/asset/css/navidad/main.css */
 body {
-    background-color: #f4e9e9;
-    color: #3a2d2d;
-    font-family: 'Georgia', serif;
+    background-color: #f4f4f9;
+    color: #333;
+    /* ANTES: font-family: sans-serif; */
+    font-family: 'Lato', sans-serif; /* <-- AÑADIR/MODIFICAR */
     line-height: 1.6;
     margin: 0;
     padding: 20px;

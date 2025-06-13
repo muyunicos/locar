@@ -1,67 +1,89 @@
-/* public_html/asset/css/default/menues.css */
+/* public_html/asset/css/default/menues.css - VERSIÓN MEJORADA */
 
+/* Estilo general del título del módulo */
 .menues-title {
-    color: #0056b3;
-    border-bottom: 2px solid #0056b3;
-    padding-bottom: 10px;
-    margin-bottom: 2rem; /* Añade más espacio debajo del título principal */
-}
-
-.categoria-titulo {
-    margin-top: 2.5rem; /* Más espacio entre categorías */
-    color: #333; /* Un poco más oscuro para más contraste */
+    color: #333;
+    font-size: 2.5em;
+    font-weight: 300; /* Un peso más ligero para un look moderno */
+    text-align: center;
     border-bottom: 1px solid #eee;
-    font-size: 1.5em; /* Título de categoría más grande */
-    padding-bottom: 0.5rem;
+    padding-bottom: 20px;
+    margin-bottom: 40px;
 }
 
-/* Estilo para subcategorías */
+.menues-title, .categoria-titulo, .subcategoria-titulo, .producto-titulo {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Títulos de las categorías principales */
+.categoria-titulo {
+    font-size: 1.8em;
+    color: #111;
+    margin-top: 40px; /* Más espacio entre categorías */
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0056b3; /* Un acento de color principal */
+}
+
+/* Títulos de las subcategorías */
 .subcategoria-titulo {
-    font-size: 1.2em;
-    color: #555;
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    padding-left: 10px;
-    border-left: 3px solid #0056b3;
+    font-size: 1.3em;
+    color: #444;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    padding-left: 15px;
+    border-left: 4px solid #0056b3; /* Línea lateral para indicar anidamiento */
 }
 
-.producto {
+/* Contenedor de la lista de items */
+.item-list {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Alinea los items al principio */
-    padding: 15px 10px; /* Más padding vertical */
-    border-bottom: 1px solid #f0f0f0; /* Borde más sutil */
-    transition: background-color 0.2s ease-in-out; /* Transición para hover */
+    flex-direction: column;
+    gap: 10px; /* Espacio entre productos */
 }
 
-.producto:last-child {
-    border-bottom: none; /* Quita el borde del último producto */
+/* Estilo de cada producto individual */
+.producto {
+    display: grid; /* Usamos Grid para un mejor control del alineamiento */
+    grid-template-columns: 1fr auto; /* La info toma el espacio disponible, el precio el necesario */
+    gap: 0 20px; /* Espacio horizontal entre info y precio */
+    padding: 15px 10px;
+    border-bottom: 1px solid #f0f0f0; /* Borde más sutil */
+    align-items: start;
+    transition: background-color 0.2s ease-in-out;
 }
 
 .producto:hover {
-    background-color: #f9f9f9; /* Un sutil fondo al pasar el ratón */
+    background-color: #f9f9f9; /* Feedback visual al pasar el ratón */
 }
 
+.producto:last-child {
+    border-bottom: none;
+}
+
+/* Información del producto (izquierda) */
 .producto-info {
-    margin-right: 15px; /* Espacio entre info y precio */
+    padding-right: 15px;
 }
 
 .producto-titulo {
     font-size: 1.1em;
-    margin: 0;
-    font-weight: 600; /* Un poco más de peso */
+    font-weight: 600; /* Hacemos el título un poco más pesado */
+    margin: 0 0 5px 0;
+    color: #333;
 }
 
 .producto-descripcion {
     font-size: 0.9em;
     color: #666;
-    margin: 5px 0 0;
-    max-width: 400px; /* Evita que la descripción sea demasiado larga */
+    margin: 0;
+    line-height: 1.5;
 }
 
+/* Precio del producto (derecha) */
 .producto-precio {
-    text-align: right; /* Alinea el texto del precio a la derecha */
-    flex-shrink: 0; /* Evita que la columna de precio se encoja */
+    text-align: right;
+    white-space: nowrap; /* Evita que el precio se parta en dos líneas */
 }
 
 .precio-final {
@@ -75,4 +97,22 @@
     color: #999;
     margin-right: 8px;
     font-size: 0.9em;
+    display: block; /* Para que se ubique arriba del precio final si ambos existen */
+}
+
+/* Estilos para el pie de página del menú */
+.menu-footer {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 0.9em;
+    color: #888;
+}
+
+/* CLASE ADICIONAL PARA LAYOUT DE 2 COLUMNAS (ver Propuesta 3) */
+@media (min-width: 768px) {
+    .categoria-container.two-column .item-list {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px 30px; /* Espacio vertical e horizontal */
+    }
 }

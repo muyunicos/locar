@@ -10,7 +10,9 @@
     <?php foreach ($stylesheets as $stylesheet): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet) ?>" class="skin-stylesheet">
     <?php endforeach; ?>
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style> /* Estilos rápidos para el menú hamburguesa */
         .nav-header { display: flex; justify-content: space-between; align-items: center; }
         .hamburger-button { font-size: 2em; cursor: pointer; background: none; border: none; }

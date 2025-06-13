@@ -94,6 +94,7 @@
     },
     {
       "titulo": "Cócteles de Autor y Clásicos",
+      "layout": "two-column",
       "items": [
         { "titulo": "Aperol Spritz", "descripcion": "", "precio": 9000 },
         { "titulo": "Gin Tonic Malaria", "descripcion": "", "precio": 9000 },
