@@ -26,7 +26,20 @@
 </head>
 
 <body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>' data-base-url="<?= htmlspecialchars($base_url) ?>">
-<div id="app-container">
+
+    <div class="nav-panel" id="nav-panel">
+        <ul>
+            <?php foreach ($navigable_modules as $navModule): ?>
+                <li>
+                    <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
+                        <?= htmlspecialchars($navModule['title']) ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+
+    <div id="app-container">
         <header class="nav-header">
             <?php if (!empty($logo_url)): ?>
                 <img src="<?= htmlspecialchars($logo_url) ?>" alt="Logo" class="header-logo">
@@ -67,7 +80,7 @@
             if (e.target && e.target.classList.contains('nav-link')) {
                 e.preventDefault();
                 navPanel.classList.remove('open');
-                
+                const moduleId = e.target.dataset.moduleId;
                 // Verificamos que tenemos los datos necesarios ANTES de hacer la llamada
                 if (!clientId || !moduleId) {
                     appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
