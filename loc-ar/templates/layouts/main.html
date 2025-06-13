@@ -10,10 +10,24 @@
     <?php foreach ($stylesheets as $stylesheet): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet) ?>" class="skin-stylesheet">
     <?php endforeach; ?>
+
+    <?php if (isset($module_stylesheet) && $module_stylesheet): ?>
+        <link rel="stylesheet" id="module-stylesheet" href="<?= htmlspecialchars($module_stylesheet) ?>" class="skin-stylesheet">
+    <?php endif; ?>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-
+    <style> /* Estilos rápidos para el menú hamburguesa */
+        .nav-header { display: flex; justify-content: space-between; align-items: center; }
+        .header-logo { height: 40px; width: auto; }
+        .hamburger-button { font-size: 2em; cursor: pointer; background: none; border: none; }
+        .nav-panel { display: none; position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); z-index: 1000; }
+        .nav-panel.open { display: block; }
+        .nav-panel ul { list-style: none; padding: 20px; }
+        .nav-panel li a { display: block; padding: 10px; color: #333; text-decoration: none; }
+        .app-error { color: red; background-color: #ffecec; border: 1px solid red; padding: 10px; margin: 10px; border-radius: 5px; }
+    </style>
 </head>
 
 <body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>' data-base-url="<?= htmlspecialchars($base_url) ?>">
@@ -54,13 +68,11 @@
         const clientId = document.body.dataset.clientId;
         const baseUrl = document.body.dataset.baseUrl;
 
-        // MEJORADO: Funcionalidad del menú hamburguesa
         hamburgerBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Evita que el clic se propague al documento
+            e.stopPropagation();
             navPanel.classList.toggle('open');
         });
 
-        // Cerrar el panel al hacer clic fuera
         document.addEventListener('click', (e) => {
             if (navPanel.classList.contains('open') && !navPanel.contains(e.target)) {
                 navPanel.classList.remove('open');
@@ -72,17 +84,15 @@
                 e.preventDefault();
                 navPanel.classList.remove('open');
                 const moduleId = e.target.dataset.moduleId;
-                // Verificamos que tenemos los datos necesarios ANTES de hacer la llamada
+                
                 if (!clientId || !moduleId) {
                     appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
-                    console.error("Error: clientId o moduleId faltante.", "Client ID:", clientId, "Module ID:", moduleId);
                     return;
                 }
 
                 appContainer.innerHTML = `<h2>Cargando...</h2>`;
                 
                 try {
-                    // Usamos la ruta relativa `../` y las variables de JS con la sintaxis `${...}`
                     const response = await fetch(`${baseUrl}api/getModule.php?client=${clientId}&id=${moduleId}`);
                     
                     if (!response.ok) {
@@ -90,8 +100,18 @@
                         throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
                     }
 
-                    const newHtml = await response.text();
-                    appContainer.innerHTML = newHtml;
+                    // Se espera una respuesta JSON
+                    const data = await response.json();
+
+                    // Se actualiza el contenido HTML
+                    appContainer.innerHTML = data.html;
+
+                    // Se busca el <link> del CSS del módulo y se actualiza su 'href'
+                    const moduleStylesheet = document.getElementById('module-stylesheet');
+                    if (moduleStylesheet && data.hasOwnProperty('css_url')) {
+                        // Se actualiza la URL. Si es null, se pone vacía para desactivar la hoja anterior.
+                        moduleStylesheet.href = data.css_url || '';
+                    }
 
                 } catch (error) {
                     console.error('Error al cargar el módulo:', error);
