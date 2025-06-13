@@ -192,3 +192,186 @@ body {
         transform: translateX(0);
     }
 }
+
+
+
+/*
+ * SKIN: revelbar
+ * FILE: menues.css
+ * DESCRIPTION: Estilos para el módulo de menús con temática neón.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS GENERALES Y TÍTULOS
+/* -------------------------------------------------------------------------- */
+.menues-title {
+    font-family: var(--font-primary);
+    text-align: center;
+    font-weight: 400;
+    color: #fff;
+    font-size: clamp(2.2rem, 8vw, 3rem);
+    border-bottom: 1px solid var(--revelbar-border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px var(--revelbar-neon-fuchsia), 
+                 0 0 10px var(--revelbar-neon-fuchsia),
+                 0 0 15px var(--revelbar-neon-fuchsia),
+                 0 0 20px #000;
+}
+
+.categoria-titulo,
+.subcategoria-titulo {
+    font-family: var(--font-primary);
+    color: #fff;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 0.75rem;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+
+    /* Efecto de brillo neón fucsia */
+    text-shadow: 0 0 4px #fff,
+                 0 0 8px var(--revelbar-neon-fuchsia),
+                 0 0 12px var(--revelbar-neon-fuchsia),
+                 0 0 16px var(--revelbar-neon-fuchsia);
+}
+
+.categoria-titulo {
+    font-size: clamp(1.6rem, 6vw, 1.9rem);
+    border-image: linear-gradient(to right, transparent, var(--revelbar-neon-fuchsia), transparent) 1;
+}
+
+.subcategoria-titulo {
+    font-size: clamp(1.2rem, 5vw, 1.4rem);
+    border-image: linear-gradient(to right, transparent, var(--revelbar-neon-cyan), transparent) 1;
+    
+    /* Efecto de brillo neón cyan para diferenciar */
+    text-shadow: 0 0 4px #fff,
+                 0 0 8px var(--revelbar-neon-cyan),
+                 0 0 12px var(--revelbar-neon-cyan),
+                 0 0 16px var(--revelbar-neon-cyan);
+}
+
+.titulo-descripcion {
+    font-family: var(--font-secondary);
+    font-size: 0.95rem;
+    color: var(--revelbar-text-secondary);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: normal;
+    text-transform: none;
+    text-shadow: none; /* Quitamos el brillo a la descripción */
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* ESTRUCTURA DE LA LISTA DE ITEMS
+/* -------------------------------------------------------------------------- */
+.item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.producto {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.producto:hover {
+    transform: translateY(-5px);
+    background-color: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2), inset 0 0 8px rgba(0, 229, 255, 0.1);
+}
+
+.producto-imagen-wrapper {
+    width: 85px;
+    height: 85px;
+    flex-shrink: 0;
+}
+
+.producto-imagen-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--revelbar-border-color);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.producto-details {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 1rem;
+    align-items: start;
+}
+
+.producto-titulo {
+    font-family: var(--font-primary);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--revelbar-text-primary);
+    margin: 0 0 0.25rem 0;
+}
+
+.producto-descripcion {
+    font-family: var(--font-secondary);
+    font-size: 0.85rem;
+    color: var(--revelbar-text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DEL PRECIO
+/* -------------------------------------------------------------------------- */
+.producto-precio {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    height: 100%;
+}
+
+.precio-final {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--revelbar-neon-cyan);
+    text-shadow: 0 0 5px var(--revelbar-neon-cyan);
+}
+
+.precio-original {
+    text-decoration: line-through;
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 0.2rem;
+}
+
+.precio-simbolo, .precio-decimales {
+    opacity: 0.7;
+    font-size: 0.8em;
+}
+
+/* -------------------------------------------------------------------------- */
+/* FOOTER DEL MENÚ
+/* -------------------------------------------------------------------------- */
+.menu-footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--revelbar-text-secondary);
+    border-top: 1px solid var(--revelbar-border-color);
+}
