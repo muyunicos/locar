@@ -43,6 +43,7 @@ if (file_exists($logicPath)) {
     $activeEventContext = $eventManager->getContext();
     $activeEvent = $activeEventContext['active_event'];
     $globalSkin = $activeEvent['then']['set_skin'] ?? $manifest['default_skin'];
+
     $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext);
 
     $moduleSkin = $moduleData['skin'] ?? $globalSkin;
