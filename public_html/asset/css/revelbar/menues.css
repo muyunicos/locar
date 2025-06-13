@@ -26,6 +26,7 @@
 /* EFECTO PARALLAX Y FONDO
 /* -------------------------------------------------------------------------- */
 /* El contenedor de parallax envuelve toda la app para crear el efecto */
+
 .parallax-container {
     height: 100vh;
     overflow-x: hidden;
@@ -104,9 +105,39 @@ body {
 .header-logo {
     height: 50px;
     width: auto;
-    filter: drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
+filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
+  animation: blink linear infinite 5s;
 }
 
+@keyframes blink {
+  79%{
+     filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
+  }
+  80% {
+    filter:  inherit;
+  }
+  81% {
+    filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
+  }
+  82% {
+    filter:  inherit;
+  }
+  83% {
+    filter: invert(1) drop-shadow(0 0 3px var(--revelbar-neon-fuchsia));
+  }
+  86% {
+    filter: invert(1) drop-shadow(0 0 3px var(--revelbar-neon-fuchsia));
+  }
+  87% {
+    filter: inherit;
+  }
+  88% {
+    filter: invert(1) drop-shadow(0 0 3px var(--revelbar-neon-fuchsia));
+  }
+  100% {
+    filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
+  }
+}
 .hamburger-button {
     font-size: 2.2em;
     cursor: pointer;
