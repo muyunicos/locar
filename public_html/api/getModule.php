@@ -8,7 +8,8 @@ require_once __DIR__ . '/../../loc-ar/src/View.php';
 require_once __DIR__ . '/../../loc-ar/src/EventManager.php';
 require_once __DIR__ . '/../../loc-ar/src/Utils.php';
 
-$clientId = $_GET['client'] ?? '';
+define('CLIENT_ID', $_GET['client'] ?? '');
+define('BASE_URL', 'https://loc.ar/');
 $moduleId = $_GET['id'] ?? '';
 
 if (!preg_match('/^[a-zA-Z0-9_-]+$/', $clientId) || !preg_match('/^[a-zA-Z0-9_-]+$/', $moduleId)) {
