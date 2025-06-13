@@ -103,11 +103,16 @@ function render_producto($item) {
             <?php if (isset($item['es_subcategoria']) && $item['es_subcategoria']): ?>
             <div class="subcategoria-container">
                 <h4 class="subcategoria-titulo">
-                    <span><?= htmlspecialchars($item['titulo']) ?></span>
-                    <?php if (!empty($item['descripcion'])): ?>
-                    <small class="titulo-descripcion"
-                        ><?= htmlspecialchars($item['descripcion']) ?></small
-                    >
+                    <div class="subcategoria-titulo-content">
+                        <span><?= htmlspecialchars($item['titulo']) ?></span>
+                        <?php if (!empty($item['descripcion'])): ?>
+                        <small class="titulo-descripcion"
+                            ><?= htmlspecialchars($item['descripcion']) ?></small
+                        >
+                        <?php endif; ?>
+                    </div>
+                    <?php if (!empty($item['imagen_titulo_url'])): ?>
+                        <img class="subcategoria-titulo-logo" src="<?= htmlspecialchars($item['imagen_titulo_url']) ?>" alt="">
                     <?php endif; ?>
                 </h4>
                 <?php foreach ($item['items'] as $sub_item): ?>

@@ -211,7 +211,7 @@ body {
 }
 
 .categoria-titulo-logo {
-    height: 35px;
+    height: 100px;
     width: auto;
     flex-shrink: 0;
     object-fit: contain;
@@ -224,6 +224,24 @@ body {
     border-left: 3px solid var(--cafe-accent-color);
     padding-left: 1rem;
     border-bottom-width: 1px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.subcategoria-titulo-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    flex-grow: 1;
+}
+
+.subcategoria-titulo-logo {
+    height: 100px;
+    width: auto;
+    flex-shrink: 0;
+    object-fit: contain;
 }
 
 .titulo-descripcion {

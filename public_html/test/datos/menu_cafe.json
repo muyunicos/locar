@@ -24,7 +24,7 @@
         { "titulo": "Medialuna con Jamón y Queso", "descripcion": "Recién tostada.", "precio": 4200 },
         {
           "titulo": "Pequeña Patit",
-          "imagen": "astor",
+          "imagen_titulo": "astor",
           "es_subcategoria": true,
           "items": [
             { "titulo": "Scon de Queso", "descripcion": "", "precio": 6500 },
@@ -37,7 +37,7 @@
         },
         {
           "titulo": "Tortas Autor",
-          "imagen": "astor",
+          "imagen_titulo": "astor",
           "es_subcategoria": true,
           "items": [
             { "titulo": "Bruce", "descripcion": "Bizcocho de chocolate negro, almíbar de frutos rojos, dulce de leche, corazón de frutos rojos y ganache de chocolate.", "precio": 14000 },
@@ -54,7 +54,7 @@
     },
     {
       "titulo": "Desayunos y Meriendas",
-      "imagen": "astor",
+      "imagen_titulo": "astor",
       "items": [
         { "titulo": "Combo Tradicional (para 2)", "descripcion": "Dos infusiones, dos tostadas, queso crema, mermelada artesanal y jugo de naranja.", "precio": 18000 },
         { "titulo": "Combo Liviano (para 2)", "descripcion": "Dos infusiones, dos tostadas de pan integral, queso crema, mermelada artesanal y yogur con frutas de estación.", "precio": 20000 },

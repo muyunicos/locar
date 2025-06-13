@@ -78,8 +78,24 @@
     margin-bottom: 1rem;
     padding-left: 1rem;
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.subcategoria-titulo-content {
+    display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    flex-grow: 1;
+}
+
+.subcategoria-titulo-logo {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .titulo-descripcion {
@@ -225,7 +241,7 @@
 /* -------------------------------------------------------------------------- */
 @media (min-width: 640px) {
     .categoria-titulo-content,
-    .subcategoria-titulo {
+    .subcategoria-titulo-content {
         flex-direction: row;
         align-items: baseline;
         gap: 1rem;
