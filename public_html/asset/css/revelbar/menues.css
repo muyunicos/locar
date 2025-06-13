@@ -28,7 +28,7 @@ body {
     background-color: var(--revelbar-bg-color); */
     color: var(--revelbar-text-primary);
     font-family: var(--font-secondary);
-    background: var(--revelbar-bg-color) url(https://loc.ar/test/imagenes/revelbar.jpg);
+    background: var(--revelbar-bg-color) url(https://loc.ar/revel/imagenes/revelbar.jpg);
     background-attachment: fixed;
     background-size: 100%;
     line-height: 1.7;
