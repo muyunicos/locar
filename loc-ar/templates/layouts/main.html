@@ -11,7 +11,7 @@
     <link rel="stylesheet" id="module-stylesheet" href="<?= htmlspecialchars($module_stylesheet ?? '') ?>" class="skin-stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Bona+Nova+SC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 
 </head>
 
@@ -20,9 +20,15 @@
         <ul>
             <?php foreach ($navigable_modules as $navModule): ?>
                 <li>
-                    <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
-                        <?= htmlspecialchars($navModule['title']) ?>
-                    </a>
+                    <?php if ($navModule['type'] === 'link'): ?>
+                        <a href="<?= htmlspecialchars($navModule['url']) ?>" class="nav-link is-external" target="_blank" rel="noopener noreferrer">
+                            <?= htmlspecialchars($navModule['title']) ?>
+                        </a>
+                    <?php else: ?>
+                        <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
+                            <?= htmlspecialchars($navModule['title']) ?>
+                        </a>
+                    <?php endif; ?>
                 </li>
             <?php endforeach; ?>
         </ul>
@@ -63,43 +69,51 @@
         });
 
         navPanel.addEventListener('click', async (e) => {
-            if (e.target && e.target.classList.contains('nav-link')) {
-                e.preventDefault();
+            const link = e.target.closest('.nav-link');
+            if (!link) return;
+
+            // Si es un enlace externo, solo cierra el panel y deja que el navegador haga el resto.
+            if (link.classList.contains('is-external')) {
                 navPanel.classList.remove('open');
-                const moduleId = e.target.dataset.moduleId;
+                return;
+            }
+
+            // Si es un enlace de módulo interno, previene la navegación y carga el contenido.
+            e.preventDefault();
+            navPanel.classList.remove('open');
+            const moduleId = link.dataset.moduleId;
+            
+            if (!clientId || !moduleId) {
+                appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
+                return;
+            }
+
+            appContainer.innerHTML = `<h2>Cargando...</h2>`;
+            
+            try {
+                const response = await fetch(`${baseUrl}api/getModule.php?client=${clientId}&id=${moduleId}`);
                 
-                if (!clientId || !moduleId) {
-                    appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
-                    return;
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
                 }
 
-                appContainer.innerHTML = `<h2>Cargando...</h2>`;
-                
-                try {
-                    const response = await fetch(`${baseUrl}api/getModule.php?client=${clientId}&id=${moduleId}`);
-                    
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
-                    }
+                // Se espera una respuesta JSON
+                const data = await response.json();
 
-                    // Se espera una respuesta JSON
-                    const data = await response.json();
+                // Se actualiza el contenido HTML
+                appContainer.innerHTML = data.html;
 
-                    // Se actualiza el contenido HTML
-                    appContainer.innerHTML = data.html;
-
-                    // Se busca el <link> del CSS del módulo y se actualiza su 'href'
-                    const moduleStylesheet = document.getElementById('module-stylesheet');
-                    if (moduleStylesheet && data.hasOwnProperty('css_url')) {
-                        // Se actualiza la URL. Si es null, se pone vacía para desactivar la hoja anterior.
-                        moduleStylesheet.href = data.css_url || '';
-                    }
-
-                } catch (error) {
-                    console.error('Error al cargar el módulo:', error);
-                    appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;
+                // Se busca el <link> del CSS del módulo y se actualiza su 'href'
+                const moduleStylesheet = document.getElementById('module-stylesheet');
+                if (moduleStylesheet && data.hasOwnProperty('css_url')) {
+                    // Se actualiza la URL. Si es null, se pone vacía para desactivar la hoja anterior.
+                    moduleStylesheet.href = data.css_url || '';
                 }
+
+            } catch (error) {
+                console.error('Error al cargar el módulo:', error);
+                appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;
             }
         });
     });

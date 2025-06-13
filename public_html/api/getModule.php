@@ -56,7 +56,7 @@ if (file_exists($logicPath)) {
 
     $htmlContent = View::render('modules/' . $moduleType, $moduleData);
 
-    header("Access-Control-Allow-Origin: https://test.loc.ar");
+    header("Access-Control-Allow-Origin: https://revel.loc.ar");
     header('Content-Type: application/json');
     echo json_encode([
         'html' => $htmlContent,

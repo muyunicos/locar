@@ -1,5 +1,5 @@
 <?php
-header("Access-Control-Allow-Origin: https://test.loc.ar");
+header("Access-Control-Allow-Origin: https://revel.loc.ar");
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../loc-ar/src/EventManager.php';

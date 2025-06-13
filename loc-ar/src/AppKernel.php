@@ -43,7 +43,9 @@ function launchApp()
         if (isset($moduleConfig['show_in_nav']) && $moduleConfig['show_in_nav']) {
             $navigableModules[] = [
                 'title' => $moduleConfig['title'],
-                'id' => $moduleConfig['id']
+                'id' => $moduleConfig['id'],
+                'type' => $moduleConfig['type'],
+                'url' => $moduleConfig['url'] ?? null
             ];
         }
     }
