@@ -9,8 +9,8 @@
 /* -------------------------------------------------------------------------- */
 :root {
     --revelbar-bg-color: #0d0d1a; /* Un fondo azul-negro muy oscuro */
-    --revelbar-surface-color: rgba(18, 18, 33, 0.85); /* Superficies con transparencia */
-    --revelbar-border-color: rgba(255, 0, 150, 0.3); /* Borde neón fucsia sutil */
+    --revelbar-surface-color: rgba(18, 18, 33, 0.5); /* Superficies con transparencia */
+    --revelbar-border-color: rgba(203, 103, 162, 0.5); /* Borde neón fucsia sutil */
     --revelbar-text-primary: #f0f0f5; /* Texto principal casi blanco */
     --revelbar-text-secondary: #a0a0b0; /* Texto secundario más apagado */
 
@@ -21,72 +21,36 @@
     --font-secondary: 'Lato', sans-serif;
 }
 
-
-/* -------------------------------------------------------------------------- */
-/* EFECTO PARALLAX Y FONDO
-/* -------------------------------------------------------------------------- */
-/* El contenedor de parallax envuelve toda la app para crear el efecto */
-
-.parallax-container {
-    height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
-    perspective: 2px;
-}
-
-/* El pseudo-elemento ::before crea la capa de fondo fija */
-.parallax-container::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: -1;
-    
-    background-image: url('https://images.pexels.com/photos/325117/pexels-photo-325117.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2');
-    background-size: cover;
-    background-position: center center;
-    
-    /* La magia del parallax: se mueve más lento porque está más "lejos" */
-    transform: translateZ(-1px) scale(1.5);
-
-    /* Filtro para oscurecer y dar un tono azulado al fondo */
-    filter: brightness(0.4) saturate(1.2) hue-rotate(220deg);
-}
-
-
 /* -------------------------------------------------------------------------- */
 /* ESTILOS GENERALES DEL CUERPO Y CONTENEDOR
 /* -------------------------------------------------------------------------- */
 body {
-    background-color: var(--revelbar-bg-color);
+    background-color: var(--revelbar-bg-color); */
     color: var(--revelbar-text-primary);
     font-family: var(--font-secondary);
+    background: var(--revelbar-bg-color) url(https://loc.ar/test/imagenes/revelbar.jpg);
+    background-attachment: fixed;
+    background-size: 100%;
     line-height: 1.7;
     margin: 0;
-    padding: 0; /* El padding se manejará en los contenedores internos */
+    padding: 0;
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Envolvemos el contenido principal para separarlo del fondo */
 #app-container {
-    width: 100%;
+    width: calc(100% - 80px);
     max-width: 850px;
-    margin: 5vh auto;
+    margin: 15vh auto;
     background: var(--revelbar-surface-color);
     padding: 25px clamp(15px, 4vw, 40px);
     border-radius: 12px;
-    border: 1px solid var(--revelbar-border-color);
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--revelbar-neon-fuchsia-shadow);
-    
-    /* Permite que los elementos con backdrop-filter funcionen */
+    border: 2px solid var(--revelbar-border-color);
+
     position: relative; 
     z-index: 1;
 
-    /* Efecto de "vidrio esmerilado" sobre el fondo */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -95,13 +59,26 @@ body {
 /* ENCABEZADO Y NAVEGACIÓN
 /* -------------------------------------------------------------------------- */
 .nav-header {
-    display: flex;
+   display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--revelbar-border-color);
+    padding: 20px;
+    top: 0;
+    width: calc(100% - 40px);
+    position: fixed;
+    z-index: 2;
+    background-color: #150f2366;
+    backdrop-filter: blur(2px);
+}
+.nav-header.scrolled {
+    border-bottom: 2px solid var(--revelbar-border-color);
 }
 
+.menu-header-image-container {
+    text-align: center;
+    line-height: 0;
+    margin: 0 0 -3em;
+}
 .header-logo {
     height: 50px;
     width: auto;
