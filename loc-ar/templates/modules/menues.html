@@ -1,27 +1,24 @@
 <?php
-// loc-ar/templates/modules/menues.html
 
-// --- Función auxiliar para renderizar un producto ---
 function render_producto($item) {
-    // Si el item está oculto, no renderizar nada.
     if (isset($item['hidden']) && $item['hidden']) {
         return;
     }
 ?>
-    <div class="producto">
-        <div class="producto-info">
-            <h3 class="producto-titulo"><?= htmlspecialchars($item['titulo']) ?></h3>
-            <?php if (!empty($item['descripcion'])): ?>
-                <p class="producto-descripcion"><?= htmlspecialchars($item['descripcion']) ?></p>
-            <?php endif; ?>
-        </div>
-        <div class="producto-precio">
-            <?php if (isset($item['original_price'])): ?>
-                <span class="precio-original">$<?= htmlspecialchars($item['original_price']) ?></span>
-            <?php endif; ?>
-            <span class="precio-final">$<?= htmlspecialchars($item['precio']) ?></span>
-        </div>
+<div class="producto">
+    <div class="producto-info">
+        <h3 class="producto-titulo"><?= htmlspecialchars($item['titulo']) ?></h3>
+        <?php if (!empty($item['descripcion'])): ?>
+            <p class="producto-descripcion"><?= htmlspecialchars($item['descripcion']) ?></p>
+        <?php endif; ?>
     </div>
+    <div class="producto-precio">
+        <?php if (isset($item['original_price'])): ?>
+            <span class="precio-original">$<?= htmlspecialchars($item['original_price']) ?></span>
+        <?php endif; ?>
+        <span class="precio-final">$<?= htmlspecialchars($item['precio']) ?></span>
+    </div>
+</div>
 <?php
 }
 ?>
@@ -33,8 +30,7 @@ function render_producto($item) {
         <p class="app-error"><?= htmlspecialchars($error) ?></p>
     <?php else: ?>
         <?php foreach ($categorias as $categoria): ?>
-            <?php 
-            // Si la categoría entera está oculta, la saltamos.
+            <?php
             if (isset($categoria['hidden']) && $categoria['hidden']) continue; 
             ?>
             <div class="categoria-container">

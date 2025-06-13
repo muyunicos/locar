@@ -1,0 +1,139 @@
+{
+  "titulo": "Menú Revel Bar",
+  "categorias": [
+    {
+      "titulo": "Tapeos y Entradas",
+      "items": [
+        {
+          "titulo": "Rabas",
+          "descripcion": "Anillas de calamar rebozadas, acompañadas con salsa picante y limón.",
+          "precio": 18000
+        },
+        {
+          "titulo": "Tablita de Quesos",
+          "descripcion": "Selección de quesos artesanales, encurtidos, mayonesa de sriracha y pickles.",
+          "precio": 13500
+        },
+        {
+          "titulo": "Tequeños",
+          "descripcion": "Dedos de queso envueltos en masa crujiente, servidos con alioli de la casa.",
+          "precio": 8500
+        },
+        {
+          "titulo": "Papas Fritas",
+          "descripcion": "Crocantes por fuera, tiernas por dentro, con un toque de pimentón y alioli para acompañar.",
+          "precio": 10000
+        },
+        {
+          "titulo": "Tacos (2 u.)",
+          "descripcion": "Carne braseada a fuego lento, mayonesa de berenjenas ahumadas, vegetales frescos y cebolla crispy. Opción vegetariana con hongos portobello.",
+          "precio": 11500
+        }
+      ]
+    },
+    {
+      "titulo": "Platos Principales",
+      "descripcion": "Todas vienen acompañadas de papas fritas.",
+      "items": [
+        {
+          "titulo": "Burgers",
+          "es_subcategoria": true,
+          "items": [
+            {
+              "titulo": "Cheese Queen",
+              "descripcion": "Pan de papa y queso, blend de carne premium, doble queso cheddar, dambo, jamón natural y mayonesa casera.",
+              "precio": 15000
+            },
+            {
+              "titulo": "Mushroom",
+              "descripcion": "Pan de papa y queso, medallón de hongos, doble queso dambo, cebolla caramelizada, pepinillos y salsa Royal.",
+              "precio": 15000
+            },
+            {
+              "titulo": "Bendita Tentación",
+              "descripcion": "Pan de papa, blend de carne premium, panceta crujiente, morrones asados, huevo a la plancha, mozzarella y mayonesa de ajo.",
+              "precio": 15000
+            }
+          ]
+        },
+        {
+          "titulo": "Pizzas en tablita",
+          "es_subcategoria": true,
+          "items": [
+            {
+              "titulo": "Mozzarella",
+              "descripcion": "Pizza con mozzarella y un toque de orégano fresco.",
+              "precio": 12000
+            },
+            {
+              "titulo": "Napolitana",
+              "descripcion": "Mozzarella, rodajas de tomate fresco y un delicado aceite de albahaca.",
+              "precio": 13000
+            },
+            {
+              "titulo": "Cuatro Quesos Revel",
+              "descripcion": "Intensa combinación de roquefort, parmesano, provolone y aceitunas negras.",
+              "precio": 13000
+            },
+            {
+              "titulo": "Jamón Crudo y Rúcula",
+              "descripcion": "Mozzarella, jamón crudo de primera calidad y hojas de rúcula fresca.",
+              "precio": 15000
+            }
+          ]
+        },
+        {
+          "titulo": "Ensaladas Frescas",
+          "es_subcategoria": true,
+          "items": [
+            { "titulo": "César", "descripcion": "Mix de hojas verdes, pollo grillado, croutones, aderezo César y parmesano.", "precio": 11000 },
+            { "titulo": "Hojas Verdes", "descripcion": "Mix de hojas verdes, tomates cherry y aderezo de la casa.", "precio": 8000 }
+          ]
+        }
+      ]
+    },
+    {
+      "titulo": "Cócteles de Autor y Clásicos",
+      "items": [
+        { "titulo": "Aperol Spritz", "descripcion": "", "precio": 9000 },
+        { "titulo": "Gin Tonic Malaria", "descripcion": "", "precio": 9000 },
+        { "titulo": "Fernet con Coca-Cola", "descripcion": "", "precio": 9000 },
+        { "titulo": "Caipiroska", "descripcion": "", "precio": 8000 },
+        { "titulo": "Mojito Clásico", "descripcion": "", "precio": 7500 },
+        { "titulo": "Caipirinha", "descripcion": "", "precio": 7500 },
+        { "titulo": "Campari Orange", "descripcion": "", "precio": 7500 },
+        { "titulo": "Negroni", "descripcion": "", "precio": 7500 },
+        { "titulo": "Cynar con Pomelo", "descripcion": "", "precio": 6500 },
+        { "titulo": "Vermú Carpano Rosso", "descripcion": "", "precio": 5500 }
+      ]
+    },
+    {
+      "titulo": "Vinos y Espumantes",
+      "descripcion": "Consulta nuestra carta de vinos por botella.",
+      "items": [
+        { "titulo": "Copa de Vino", "descripcion": "Selección del día (Malbec, Cabernet Sauvignon, Chardonnay).", "precio": 6000 },
+        { "titulo": "Copa de Espumante", "descripcion": "Extra Brut.", "precio": 9000 }
+      ]
+    },
+    {
+      "titulo": "Cervezas",
+      "items": [
+        { "titulo": "Miller (Lata 330cc)", "descripcion": "", "precio": 5000 },
+        { "titulo": "Heineken (Lata 473cc)", "descripcion": "", "precio": 6000 }
+      ]
+    },
+    {
+      "titulo": "Bebidas sin Alcohol",
+      "items": [
+        { "titulo": "Limonada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de limón, menta y jengibre.", "precio": 10000 },
+        { "titulo": "Pomelada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de pomelo y almíbar de romero.", "precio": 10000 },
+        { "titulo": "Naranjada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de naranja ", "precio": 10000 },
+        { "titulo": "Exprimido de Naranja", "descripcion": "", "precio": 6000 },
+        { "titulo": "Gaseosas Línea Coca-Cola", "descripcion": "Coca-Cola, Sprite, Fanta Naranja, Fanta Pomelo.", "precio": 4000 },
+        { "titulo": "Agua Tónica", "descripcion": "", "precio": 4000 },
+        { "titulo": "Agua Mineral", "descripcion": "Con o sin gas.", "precio": 3000 }
+      ]
+    }
+  ],
+  "footer": "© 2025 Revel Bar. Todos los derechos reservados."
+}

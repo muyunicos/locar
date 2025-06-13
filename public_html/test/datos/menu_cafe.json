@@ -2,42 +2,89 @@
   "titulo": "Menú Revel Café",
   "categorias": [
     {
-      "titulo": "Bebidas",
+      "titulo": "Cafetería de Especialidad e Infusiones",
       "items": [
+        { "titulo": "Espresso", "descripcion": "Café 100% arábica.", "precio": 3500 },
+        { "titulo": "Espresso Doble", "descripcion": "", "precio": 4800 },
+        { "titulo": "Cortado", "descripcion": "Un espresso con una pequeña cantidad de leche.", "precio": 4000 },
+        { "titulo": "Lágrima", "descripcion": "Leche manchada con un toque de café.", "precio": 4000 },
+        { "titulo": "Café con Leche", "descripcion": "", "precio": 4800 },
+        { "titulo": "Capuchino", "descripcion": "Espresso, leche vaporizada y espuma de leche.", "precio": 4800 },
+        { "titulo": "Submarino", "descripcion": "Leche caliente con una barra de chocolate para sumergir.", "precio": 5000 },
+        { "titulo": "Chocolatada", "descripcion": "", "precio": 3000 },
+        { "titulo": "Té (Variedades)", "descripcion": "Consultar por nuestra selección de tés.", "precio": 2000 }
+      ]
+    },
+    {
+      "titulo": "Pastelería Artesanal",
+      "items": [
+        { "titulo": "Medialuna", "descripcion": "Medialuna dulce de manteca.", "precio": 1600 },
+        { "titulo": "Medialuna con Jamón y Queso", "descripcion": "Recién tostada.", "precio": 4200 },
         {
-          "titulo": "Cafetería",
+          "titulo": "Pequeña Patit",
           "es_subcategoria": true,
           "items": [
-            {
-              "titulo": "Café Espresso",
-              "descripcion": "Intenso café espresso recién molido.",
-              "precio": 2.5
-            },
-            {
-              "titulo": "Capuccino",
-              "descripcion": "Espresso con leche vaporizada y espuma.",
-              "precio": 3
-            }
+            { "titulo": "Scon de Queso", "descripcion": "", "precio": 6500 },
+            { "titulo": "Scon con Salame", "descripcion": "", "precio": 7000 },
+            { "titulo": "Scon con Queso Azul", "descripcion": "", "precio": 7000 },
+            { "titulo": "Roll de Canela", "descripcion": "", "precio": 7000 },
+            { "titulo": "Alfajor XXL", "descripcion": "Maicena, glasé, tipo Block o banana.", "precio": 6000 },
+            { "titulo": "Cookies 2.0 (150g)", "descripcion": "Crumble cookies rellenas. Consultá los sabores del día.", "precio": 6000 }
           ]
         },
         {
-            "titulo": "Cola",
-            "descripcion": "",
-            "precio": 5,
-            "hidden": true
+          "titulo": "Tortas Autor",
+          "es_subcategoria": true,
+          "items": [
+            { "titulo": "Bruce", "descripcion": "Bizcocho de chocolate negro, almíbar de frutos rojos, dulce de leche, corazón de frutos rojos y ganache de chocolate.", "precio": 14000 },
+            { "titulo": "Pistacho", "descripcion": "Bizcocho de chocolate y cerveza negra artesanal, crema de queso y frutas de estación.", "precio": 14000 },
+            { "titulo": "Revel", "descripcion": "Clásico Red Velvet de toques ácidos y chocolate, con creamcheese y frutos rojos.", "precio": 14000 },
+            { "titulo": "Mini Torta Blondie", "descripcion": "Brownie de chocolate blanco con dulce de leche, crema chantilly y frutos rojos.", "precio": 14000 },
+            { "titulo": "Matcha y Limón", "descripcion": "Bizcocho de té matcha con toques de limón, crema de cítricos, curd de limón y corazón de frutas.", "precio": 14000 },
+            { "titulo": "Mini Torta Brownie", "descripcion": "Brownie doble chocolate con dulce de leche y crema mocca.", "precio": 14000 },
+            { "titulo": "Banana Split", "descripcion": "Bizcocho de bananas caramelizadas, dulce de leche, crema chantilly y rodajas de banana fresca.", "precio": 14000 },
+            { "titulo": "Carrot Cake", "descripcion": "Bizcocho especiado de zanahoria con creamcheese de naranja y frutas de estación.", "precio": 14000 }
+          ]
         }
       ]
     },
     {
-      "titulo": "Panadería",
+      "titulo": "Desayunos y Meriendas",
+      "items": [
+        { "titulo": "Combo Tradicional (para 2)", "descripcion": "Dos infusiones, dos tostadas, queso crema, mermelada artesanal y jugo de naranja.", "precio": 18000 },
+        { "titulo": "Combo Liviano (para 2)", "descripcion": "Dos infusiones, dos tostadas de pan integral, queso crema, mermelada artesanal y yogur con frutas de estación.", "precio": 20000 },
+        { "titulo": "Combo Avocado (para 2)", "descripcion": "Dos infusiones, jugo de naranja, dos tostada con queso crema, huevos revueltos y palta.", "precio": 20000 },
+        { "titulo": "Combo Proteico (para 2)", "descripcion": "Dos infusiones, jugo de naranja, huevos revueltos con panceta y queso crema.", "precio": 22000 },
+        { "titulo": "Combo Revel (para 2)", "descripcion": "Dos infusiones, vaso de limonada, bagel de jamón crudo con rúcula y parmesano, vaso de yogur con granola y bowl de frutas.", "precio": 30000 },
+        { "titulo": "Degustación Astor (para 3)", "descripcion": "Tres infusiones, tres Aperol Spritz, una porción de torta a elección, tostadas con queso crema y mermelada, crumble cookies, alfajor XXL, scon de queso, roll de canela y porción de chipá.", "precio": 60000 }
+      ]
+    },
+    {
+      "titulo": "Almuerzos",
       "items": [
         {
-          "titulo": "Medialuna de Manteca",
-          "descripcion": "Clásica medialuna de manteca.",
-          "precio": 1.8
-        }
+          "titulo": "Ensaladas Frescas",
+          "es_subcategoria": true,
+          "items": [
+            { "titulo": "César", "descripcion": "Mix de hojas verdes, pollo grillado, croutones, aderezo César y parmesano.", "precio": 11000 },
+            { "titulo": "Hojas Verdes", "descripcion": "Mix de hojas verdes, tomates cherry y aderezo de la casa.", "precio": 8000 }
+          ]
+        },
+        { "titulo": "Tacos (2 u.)", "descripcion": "Carne braseada, mayonesa de berenjenas, vegetales frescos y cebolla crispy. Opción vegetariana con hongos portobello.", "precio": 11500 }
+      ]
+    },
+    {
+      "titulo": "Bebidas sin Alcohol",
+      "items": [
+        { "titulo": "Limonada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de limón, menta y jengibre.", "precio": 10000 },
+        { "titulo": "Pomelada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de pomelo y almíbar de romero.", "precio": 10000 },
+        { "titulo": "Naranjada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de naranja ", "precio": 10000 },
+        { "titulo": "Exprimido de Naranja", "descripcion": "", "precio": 6000 },
+        { "titulo": "Gaseosas Línea Coca-Cola", "descripcion": "Coca-Cola, Sprite, Fanta Naranja, Fanta Pomelo.", "precio": 4000 },
+        { "titulo": "Agua Tónica", "descripcion": "", "precio": 4000 },
+        { "titulo": "Agua Mineral", "descripcion": "Con o sin gas.", "precio": 3000 }
       ]
     }
   ],
-  "footer": "&copy; 2025 Revel. Todos los derechos reservados."
+  "footer": "© 2025 Revel Café. Todos los derechos reservados."
 }
