@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
             this.body = document.body;
             this.clientId = this.body.dataset.clientId;
             this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
+            
+            // --- NUEVO: Obtenemos la URL base ---
+            this.baseUrl = this.body.dataset.baseUrl;
 
             // Seleccionamos los elementos que vamos a modificar
             this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
@@ -25,9 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Scheduler Error: Client ID no encontrado.');
                 return;
             }
+            
+            // --- MODIFICADO: Verificamos que la baseUrl exista ---
+            if (!this.baseUrl) {
+                console.error('Scheduler Error: Base URL no encontrada en el body.');
+                return;
+            }
 
             try {
-                const response = await fetch(`/api/agenda.php?client=${this.clientId}`);
+                // --- MODIFICADO: Usamos la URL base para la llamada a la API ---
+                const response = await fetch(`${this.baseUrl}api/agenda.php?client=${this.clientId}`);
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 
                 const agendaData = await response.json();
@@ -127,6 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.title = this.initialContext.profile_title + titleSuffix;
             
             if (this.favicon) {
+                // La URL del favicon ya viene absoluta desde el backend (AppKernel.php),
+                // así que no necesitamos anteponer la baseUrl aquí.
                 this.favicon.href = newFavicon;
             }
 
@@ -134,6 +146,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Cambiando skin de '${this.currentSkin}' a '${newSkin}'`);
                 this.skinStylesheets.forEach(sheet => {
                     const currentHref = sheet.getAttribute('href');
+                    // Esta lógica de reemplazo sigue siendo válida porque las URLs
+                    // completas generadas por el backend mantendrán la misma estructura.
                     const newHref = currentHref.replace(`/${this.currentSkin}/`, `/${newSkin}/`);
                     sheet.setAttribute('href', newHref);
                 });
