@@ -4,7 +4,7 @@
   "skin": "revelcafe",
   "categorias": [
     {
-      "titulo": "Cafetería de Especialidad e Infusiones",
+      "titulo": "Cafetería e Infusiones",
       "items": [
         { "titulo": "Espresso", "descripcion": "Café 100% arábica.", "imagen": "cafe", "precio": 3500 },
         { "titulo": "Espresso Doble", "descripcion": "", "precio": 4800 },

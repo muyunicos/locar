@@ -77,6 +77,9 @@ body {
     line-height: 0;
     margin: 0 0 -3em;
 }
+.menu-header-image-container img {
+        max-width: 50%;
+}
 .header-logo {
     height: 50px;
     width: auto;
@@ -170,7 +173,7 @@ body {
 /* ESTILOS GENERALES Y TÍTULOS
 /* -------------------------------------------------------------------------- */
 .menues-title {
-    font-family: 'Playfair Display', serif; /* Usamos una fuente serif para elegancia */
+    font-family: 'Bona Nova SC', serif; /* Usamos una fuente serif para elegancia */
     text-align: center;
     font-weight: 500;
     color: var(--cafe-text-primary);
@@ -183,7 +186,7 @@ body {
 
 .categoria-titulo,
 .subcategoria-titulo {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Bona Nova SC', serif;
     color: var(--cafe-text-primary);
     border-bottom: 2px solid var(--cafe-accent-color);
     padding-bottom: 0.75rem;
@@ -195,8 +198,9 @@ body {
 }
 
 .categoria-titulo {
-    font-size: clamp(1.6rem, 6vw, 1.9rem);
+   font-size: clamp(1.6rem, 6vw, 1.9rem);
     font-weight: 600;
+    text-align: center;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
@@ -211,7 +215,7 @@ body {
 }
 
 .categoria-titulo-logo {
-    height: 100px;
+    height: 80px;
     width: auto;
     flex-shrink: 0;
     object-fit: contain;
@@ -238,7 +242,7 @@ body {
 }
 
 .subcategoria-titulo-logo {
-    height: 100px;
+    height: 80px;
     width: auto;
     flex-shrink: 0;
     object-fit: contain;
