@@ -22,7 +22,24 @@
     padding-bottom: 10px;
     border-bottom: 2px solid #0056b3; /* Un acento de color principal */
 }
+.categoria-titulo,
+.subcategoria-titulo {
+    display: flex;
+    align-items: baseline; /* Alinea el título y la descripción por la base del texto */
+    flex-wrap: wrap;       /* Permite que la descripción pase abajo en pantallas muy pequeñas */
+    gap: 1em;              /* Espacio entre el título y su descripción */
+}
 
+/* Estilo para la nueva descripción */
+.titulo-descripcion {
+    font-size: 0.55em;         /* Tamaño relativo al título (H3 o H4) */
+    color: #666;
+    font-weight: 400;          /* Peso de fuente normal, no negrita */
+    font-style: italic;        /* Un toque de estilo con cursiva */
+    letter-spacing: normal;    /* Resetea cualquier espaciado de letra del título */
+    text-transform: none;      /* Resetea cualquier transformación de texto */
+    font-family: 'Lato', sans-serif; /* Opcional: usa la fuente del cuerpo del texto */
+}
 /* Títulos de las subcategorías */
 .subcategoria-titulo {
     font-size: 1.3em;
@@ -84,18 +101,46 @@
     white-space: nowrap; /* Evita que el precio se parta en dos líneas */
 }
 
-.precio-final {
-    font-weight: bold;
-    color: #000;
-    font-size: 1.1em;
+/* Contenedor principal del precio (final y original) */
+.precio-final,
+.precio-original {
+    display: flex;         /* Alinea horizontalmente las 3 partes del precio */
+    align-items: baseline; /* Alinea el texto sobre su línea base, se ve mejor */
+    white-space: nowrap;   /* Evita que el precio se parta en varias líneas */
 }
 
+/* El valor numérico principal del precio */
+.precio-valor {
+    /* Este mantiene el estilo principal (negrita, color) definido en .precio-final */
+    font-weight: 700;
+}
+
+/* Estilo para el símbolo de pesos "$" */
+.precio-simbolo {
+    font-size: 0.65em;      /* Más pequeño que el número */
+    font-weight: 400;       /* Más ligero (no negrita) */
+    margin-right: 0.3em;    /* Un pequeño espacio a la derecha */
+    align-self: flex-start; /* Lo alinea un poco más arriba, para un look delicado */
+    padding-top: 2px;
+}
+
+/* Estilo para la terminación ",-" */
+.precio-decimales {
+    font-size: 0.65em;      /* Mismo tamaño que el símbolo */
+    font-weight: 400;       /* También más ligero */
+    color: #888;            /* Un color más suave para que sea menos prominente */
+    margin-left: 0.1em;
+}
+
+/* Aseguramos que el precio tachado (original) se vea correctamente */
 .precio-original {
     text-decoration: line-through;
     color: #999;
-    margin-right: 8px;
-    font-size: 0.9em;
-    display: block; /* Para que se ubique arriba del precio final si ambos existen */
+}
+.precio-original .precio-valor,
+.precio-original .precio-simbolo,
+.precio-original .precio-decimales {
+    color: inherit; /* Hereda el color gris y el tachado del padre */
 }
 
 /* Estilos para el pie de página del menú */

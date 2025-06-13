@@ -33,10 +33,10 @@
     },
     {
       "titulo": "Platos Principales",
-      "descripcion": "Todas vienen acompañadas de papas fritas.",
       "items": [
         {
           "titulo": "Burgers",
+          "descripcion": "Todas vienen acompañadas de papas fritas.",
           "es_subcategoria": true,
           "items": [
             {

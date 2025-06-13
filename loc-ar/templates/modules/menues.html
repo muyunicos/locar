@@ -14,9 +14,18 @@ function render_producto($item) {
     </div>
     <div class="producto-precio">
         <?php if (isset($item['original_price'])): ?>
-            <span class="precio-original">$<?= htmlspecialchars($item['original_price']) ?></span>
+            <span class="precio-original">
+                <span class="precio-simbolo">$</span>
+                <span class="precio-valor"><?= htmlspecialchars(number_format($item['original_price'], 0, ',', '.')) ?></span>
+                <span class="precio-decimales">,-</span>
+            </span>
         <?php endif; ?>
-        <span class="precio-final">$<?= htmlspecialchars($item['precio']) ?></span>
+        
+        <span class="precio-final">
+            <span class="precio-simbolo">$</span>
+            <span class="precio-valor"><?= htmlspecialchars(number_format($item['precio'], 0, ',', '.')) ?></span>
+            <span class="precio-decimales">,-</span>
+        </span>
     </div>
 </div>
 <?php
@@ -34,12 +43,22 @@ function render_producto($item) {
             if (isset($categoria['hidden']) && $categoria['hidden']) continue; 
             ?>
             <div class="categoria-container <?= isset($categoria['layout']) ? htmlspecialchars($categoria['layout']) : '' ?>">
-                <h3 class="categoria-titulo"><?= htmlspecialchars($categoria['titulo']) ?></h3>
+                <h3 class="categoria-titulo">
+                    <span><?= htmlspecialchars($categoria['titulo']) ?></span>
+                    <?php if (!empty($categoria['descripcion'])): ?>
+                        <small class="titulo-descripcion"><?= htmlspecialchars($categoria['descripcion']) ?></small>
+                    <?php endif; ?>
+                </h3>
                 <div class="item-list">
                     <?php foreach ($categoria['items'] as $item): ?>
                         <?php if (isset($item['es_subcategoria']) && $item['es_subcategoria']): ?>
                             <div class="subcategoria-container">
-                                <h4 class="subcategoria-titulo"><?= htmlspecialchars($item['titulo']) ?></h4>
+                                <h4 class="subcategoria-titulo">
+                                    <span><?= htmlspecialchars($item['titulo']) ?></span>
+                                    <?php if (!empty($item['descripcion'])): ?>
+                                        <small class="titulo-descripcion"><?= htmlspecialchars($item['descripcion']) ?></small>
+                                    <?php endif; ?>
+                                </h4>
                                 <?php foreach ($item['items'] as $sub_item): ?>
                                     <?php render_producto($sub_item); ?>
                                 <?php endforeach; ?>
