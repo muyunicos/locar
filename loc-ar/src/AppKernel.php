@@ -3,7 +3,7 @@
 
 require_once __DIR__ . '/View.php';
 require_once __DIR__ . '/EventManager.php';
-
+require_once __DIR__ . '/Utils.php'; 
 /**
  * Inicia y renderiza la aplicación para un cliente específico.
  *
@@ -33,10 +33,13 @@ function launchApp(string $clientId, string $baseUrl)
     $activeEvent = $activeEventContext['active_event'];
 
     // 3. Definir el contexto final para la vista (skin, favicon, título)
+    $logoName = $manifest['profile_data']['logo'] ?? null;
+    $logoUrl = $logoName ? Utils::buildImageUrl($logoName, $clientId, $baseUrl) : null;
+
     $finalContext = [
         'skin' => $activeEvent['then']['set_skin'] ?? $manifest['default_skin'],
-        // Usamos $baseUrl para crear una ruta absoluta
         'favicon' => $baseUrl . ltrim($activeEvent['then']['set_favicon'] ?? $manifest['profile_data']['favicon'], '/'),
+        'logo_url' => $logoUrl
     ];
     
     $pageTitle = $manifest['profile_data']['name'];
@@ -81,7 +84,7 @@ function launchApp(string $clientId, string $baseUrl)
             require_once $logicPath;
             
             // Obtener los datos específicos del módulo
-            $moduleData = get_module_data($activeModuleConfig, $manifest, $activeEventContext, $clientId);
+            $moduleData = get_module_data($activeModuleConfig, $manifest, $activeEventContext, $clientId, $baseUrl);
             
             // Renderizar la plantilla del módulo con sus datos
             $modulesContent = View::render('modules/' . $moduleType, $moduleData);
@@ -109,11 +112,12 @@ function launchApp(string $clientId, string $baseUrl)
    echo View::render('layouts/main', [
         'page_title' => $pageTitle,
         'favicon' => $finalContext['favicon'],
+        'logo_url' => $finalContext['logo_url'], // <-- Pasamos la URL del logo
         'stylesheets' => $stylesheets,
         'content' => $modulesContent,
         'client_id' => $clientId,
         'initial_context_json' => json_encode($initialContextForJs),
         'navigable_modules' => $navigableModules,
-        'base_url' => $baseUrl, // <-- Pasamos la URL base a la plantilla
+        'base_url' => $baseUrl,
     ]);
 }

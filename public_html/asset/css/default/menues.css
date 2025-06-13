@@ -1,66 +1,68 @@
 /*
  * Hoja de estilos para el módulo de Menús.
- * Versión 2.0: Enfocada en "mobile-first", con tipografía responsiva
- * y mejoras de legibilidad para una experiencia de usuario óptima.
+ * Versión 2.1: Mobile-first con imágenes de producto y layout flexible.
  */
 
 /* -------------------------------------------------------------------------- */
-/* VARIABLES GLOBALES (SKIN)                         */
+/* VARIABLES GLOBALES (SKIN)
 /* -------------------------------------------------------------------------- */
-/* Usar variables hace que cambiar la paleta de colores sea muy fácil.        */
-/* Simplemente cambias el valor aquí y se actualiza en todo el menú.          */
-
 :root {
     --font-primary: 'Montserrat', sans-serif;
     --font-secondary: 'Lato', sans-serif;
-    
-    --color-text-headings: #111;      /* Para títulos de categoría */
-    --color-text-primary: #333;       /* Para títulos de productos y precios */
-    --color-text-secondary: #666;     /* Para descripciones */
-    --color-accent: #0056b3;          /* Color para detalles y bordes */
-    
-    --border-color-light: #eee;       /* Bordes y separadores suaves */
-    --bg-color-hover: #f9f9f9;        /* Color al pasar el cursor sobre un producto */
+
+    --color-text-headings: #111;
+    --color-text-primary: #333;
+    --color-text-secondary: #666;
+    --color-accent: #0056b3;
+
+    --border-color-light: #eee;
+    --bg-color-hover: #f9f9f9;
 }
 
 
 /* -------------------------------------------------------------------------- */
-/* ESTILOS GENERALES DEL MÓDULO                       */
+/* ESTILOS GENERALES Y TÍTULOS
 /* -------------------------------------------------------------------------- */
-
 body {
-    /* Asegura que 1rem = 16px por defecto, para consistencia. */
-    font-size: 16px; 
+    font-size: 16px;
 }
 
-/* Título principal del menú (ej. "Menú Revel Bar") */
 .menues-title {
     font-family: var(--font-primary);
     text-align: center;
     font-weight: 300;
     color: var(--color-text-primary);
-    /* TAMAÑO FLUIDO: se ajusta entre 2rem y 2.5rem según el ancho de la pantalla */
     font-size: clamp(2rem, 8vw, 2.5rem);
     border-bottom: 1px solid var(--border-color-light);
     padding-bottom: 1rem;
     margin-bottom: 2rem;
 }
 
-/* Títulos de Categoría (ej. "Tapeos y Entradas") */
+.menu-header-image-container,
+.categoria-image-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.menu-header-image-container img,
+.categoria-image-container img {
+    max-width: 250px;
+    height: auto;
+}
+
 .categoria-titulo {
     font-family: var(--font-primary);
-    font-size: clamp(1.4rem, 6vw, 1.6rem); /* También fluido */
+    font-size: clamp(1.4rem, 6vw, 1.6rem);
     color: var(--color-text-headings);
     border-bottom: 2px solid var(--color-accent);
     margin-top: 2.5rem;
     margin-bottom: 1.5rem;
     padding-bottom: 0.5rem;
     display: flex;
-    flex-direction: column; /* En móvil, la descripción va abajo del título */
+    flex-direction: column;
     gap: 0.25rem;
 }
 
-/* Títulos de Sub-Categoría (ej. "Burgers") */
 .subcategoria-titulo {
     font-family: var(--font-primary);
     font-size: clamp(1.1rem, 5vw, 1.25rem);
@@ -70,14 +72,13 @@ body {
     margin-bottom: 1rem;
     padding-left: 1rem;
     display: flex;
-    flex-direction: column; /* También apilado en móvil */
+    flex-direction: column;
     gap: 0.25rem;
 }
 
-/* Descripción opcional para títulos de categoría/subcategoría */
 .titulo-descripcion {
     font-family: var(--font-secondary);
-    font-size: 0.9rem; /* Un tamaño fijo y legible */
+    font-size: 0.9rem;
     color: var(--color-text-secondary);
     font-weight: 400;
     font-style: italic;
@@ -87,24 +88,20 @@ body {
 
 
 /* -------------------------------------------------------------------------- */
-/* ESTRUCTURA DE LA LISTA DE ITEMS                      */
+/* ESTRUCTURA DE LA LISTA DE ITEMS
 /* -------------------------------------------------------------------------- */
-
 .item-list {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem; /* Espacio vertical entre productos */
+    gap: 0.5rem;
 }
 
-/* Contenedor de cada producto individual */
 .producto {
-    display: grid;
-    /* Col 1: Info (ocupa todo el espacio). Col 2: Precio (tamaño automático) */
-    grid-template-columns: 1fr auto;
-    gap: 0.5rem 1rem; /* 0.5rem de espacio vertical, 1rem horizontal */
+    display: flex;
+    gap: 1rem;
+    align-items: center;
     padding: 1rem 0;
-    border-bottom: 1px solid #f0f0f0;
-    align-items: start; /* Alinea los items al inicio de su celda de la grilla */
+    border-bottom: 1px solid var(--border-color-light);
     transition: background-color 0.2s ease;
 }
 
@@ -116,14 +113,30 @@ body {
     background-color: var(--bg-color-hover);
 }
 
-/* Info del producto (título y descripción) */
-.producto-info {
-    /* No necesita estilos, ya está en la primera columna del grid */
+.producto-imagen-wrapper {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+}
+
+.producto-imagen-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.producto-details {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 1rem;
+    align-items: start;
 }
 
 .producto-titulo {
     font-family: var(--font-primary);
-    font-size: 1rem; /* Tamaño de texto base, ideal para móvil */
+    font-size: 1rem;
     font-weight: 600;
     color: var(--color-text-primary);
     margin: 0 0 0.25rem 0;
@@ -131,7 +144,7 @@ body {
 
 .producto-descripcion {
     font-family: var(--font-secondary);
-    font-size: 0.85rem; /* Ligeramente más pequeño para no quitar protagonismo */
+    font-size: 0.85rem;
     color: var(--color-text-secondary);
     margin: 0;
     line-height: 1.4;
@@ -139,51 +152,43 @@ body {
 
 
 /* -------------------------------------------------------------------------- */
-/* ESTILOS DEL PRECIO (CORREGIDO)                   */
+/* ESTILOS DEL PRECIO
 /* -------------------------------------------------------------------------- */
-
-/* Contenedor del precio */
 .producto-precio {
     text-align: right;
     display: flex;
-    flex-direction: column; /* Apila precio original (si existe) sobre el final */
-    align-items: flex-end; /* Alinea los precios a la derecha */
-    justify-content: center; /* Centra verticalmente si los textos tienen distinta altura */
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
     height: 100%;
 }
 
-/* Estilo común para ambos tipos de precio */
 .precio-final,
 .precio-original {
     display: flex;
-    /* ALINEACIÓN CORREGIDA: alinea todos los componentes del precio por su base */
-    align-items: baseline; 
-    white-space: nowrap; /* Evita que el precio se parta en dos líneas */
+    align-items: baseline;
+    white-space: nowrap;
 }
 
-/* Precio final (el que se cobra) */
 .precio-final {
     font-weight: 700;
-    font-size: 1.1rem; /* Un poco más grande para que destaque */
+    font-size: 1.1rem;
     color: var(--color-text-primary);
 }
 
-/* Precio original (tachado, para ofertas) */
 .precio-original {
     text-decoration: line-through;
     font-size: 0.85rem;
     color: #999;
-    margin-bottom: 0.2rem; /* Pequeño espacio si hay un precio final debajo */
+    margin-bottom: 0.2rem;
 }
 
-/* Símbolo de moneda ($) */
 .precio-simbolo {
-    font-size: 0.7em; /* 70% del tamaño del precio (sea final u original) */
+    font-size: 0.7em;
     font-weight: 400;
     margin-right: 0.2em;
 }
 
-/* Parte decimal/terminación (,-) */
 .precio-decimales {
     font-size: 0.7em;
     font-weight: 400;
@@ -191,7 +196,6 @@ body {
     margin-left: 0.1em;
 }
 
-/* Nos aseguramos de que el precio tachado herede el color correcto */
 .precio-original .precio-decimales,
 .precio-original .precio-simbolo {
     color: inherit;
@@ -199,9 +203,8 @@ body {
 
 
 /* -------------------------------------------------------------------------- */
-/* OTROS ESTILOS                               */
+/* OTROS ESTILOS
 /* -------------------------------------------------------------------------- */
-
 .menu-footer {
     text-align: center;
     margin-top: 2.5rem;
@@ -210,34 +213,26 @@ body {
     color: #888;
 }
 
-/* -------------------------------------------------------------------------- */
-/* MEDIA QUERIES (PARA PANTALLAS MÁS GRANDES)                */
-/* -------------------------------------------------------------------------- */
 
-/* A partir de 640px (tablets pequeños en vertical o móviles grandes) */
+/* -------------------------------------------------------------------------- */
+/* MEDIA QUERIES PARA RESPONSIVE
+/* -------------------------------------------------------------------------- */
 @media (min-width: 640px) {
     .categoria-titulo,
     .subcategoria-titulo {
-        flex-direction: row; /* Pone el título y la descripción en la misma línea */
+        flex-direction: row;
         align-items: baseline;
         gap: 1rem;
     }
 }
 
-/* A partir de 768px (tablets en horizontal, desktops pequeños) */
 @media (min-width: 768px) {
-    /*
-     * LAYOUT DE 2 COLUMNAS (CORREGIDO)
-     * Solo se aplica a las categorías que tengan la clase "two-column".
-     */
     .categoria-container.two-column .item-list {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* 2 columnas de igual tamaño */
-        /* Espacio vertical y horizontal entre productos en la grilla */
+        grid-template-columns: 1fr 1fr;
         gap: 0.75rem 2rem;
     }
 
-    /* Pequeña mejora visual para el modo de 2 columnas */
     .categoria-container.two-column .producto {
         border-bottom: none;
         background-color: #fcfcfc;

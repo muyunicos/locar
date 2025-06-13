@@ -13,10 +13,24 @@
  * @param string $clientId El ID del cliente.
  * @return array Los datos listos para ser renderizados por la plantilla.
  */
-function get_module_data(array $moduleConfig, array $manifest, array $context, string $clientId): array
+function process_images_recursively(array &$item, string $clientId, string $baseUrl)
+{
+    if (isset($item['imagen']) && !empty($item['imagen'])) {
+        // Llamamos al método estático desde nuestra clase de utilidades
+        $item['imagen_url'] = Utils::buildImageUrl($item['imagen'], $clientId, $baseUrl);
+    }
+
+    if (isset($item['items']) && is_array($item['items'])) {
+        foreach ($item['items'] as &$subItem) {
+            process_images_recursively($subItem, $clientId, $baseUrl);
+        }
+    }
+}
+
+function get_module_data(array $moduleConfig, array $manifest, array $context, string $clientId, string $baseUrl): array
 {
     // 1. Construir la ruta al archivo de datos usando la configuración del manifest.
-    $dataPath = __DIR__ . '/../../../public_html/' . $clientId . '/datos/' . $moduleConfig['data_file']; //
+    $dataPath = __DIR__ . '/../../../public_html/' . $clientId . '/datos/' . $moduleConfig['data_file'];
 
     // 2. Verificar si el archivo de datos existe.
     if (!file_exists($dataPath)) {
@@ -41,6 +55,8 @@ function get_module_data(array $moduleConfig, array $manifest, array $context, s
             'error' => 'Error de sintaxis en el archivo JSON: ' . htmlspecialchars($moduleConfig['data_file'])
         ];
     }
+    $imageBaseUrl = rtrim($baseUrl, '/') . '/' . $clientId . '/images/';
+    process_images_recursively($data, $clientId, $baseUrl);
     
     $categorias = $data['categorias'] ?? [];
 
@@ -78,9 +94,11 @@ function get_module_data(array $moduleConfig, array $manifest, array $context, s
 
     // 5. Devolver el array final con los datos para la plantilla.
     // Usamos el operador de fusión de null (??) para evitar errores si las claves no existen en el JSON.
-    return [
-        'menu_title' => $data['titulo'] ?? $moduleConfig['title'], //
-        'categorias' => $categorias, //
-        'footer_text' => $data['footer'] ?? '' //
+   return [
+        'menu_title' => $data['titulo'] ?? $moduleConfig['title'],
+        'menu_image_url' => $data['imagen_url'] ?? null,
+        'categorias' => $data['categorias'] ?? [],
+        'footer_text' => $data['footer'] ?? '',
+        'error' => $data['error'] ?? null
     ];
 }

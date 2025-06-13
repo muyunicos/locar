@@ -9,6 +9,9 @@ error_reporting(E_ALL);
 // Requerimos los componentes base
 require_once __DIR__ . '/../../loc-ar/src/View.php';
 require_once __DIR__ . '/../../loc-ar/src/EventManager.php';
+require_once __DIR__ . '/../../loc-ar/src/Utils.php';
+
+$baseUrl = 'https://loc.ar/';
 
 // --- Validaciones y Carga del Manifiesto ---
 $clientId = $_GET['client'] ?? '';
@@ -42,15 +45,16 @@ if (!$moduleConfig) {
 
 // --- Renderizar el Módulo (La parte corregida) ---
 $moduleType = $moduleConfig['type'];
-$logicPath = __DIR__ . '/../../loc-ar/src/modules/' . $moduleType . '.php'; // Determinamos la ruta DINÁMICAMENTE
+$logicPath = __DIR__ . '/../../loc-ar/src/modules/' . $moduleType . '.php';
 
 if (file_exists($logicPath)) {
-    require_once $logicPath; // Incluimos SÓLO el archivo de lógica que necesitamos
+    require_once $logicPath;
 
     $eventManager = new EventManager($manifest['timed_events'] ?? []);
     $activeEventContext = $eventManager->getContext();
 
-    $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext, $clientId);
+    // Pasamos la $baseUrl para que las imágenes se carguen correctamente
+    $moduleData = get_module_data($moduleConfig, $manifest, $activeEventContext, $clientId, $baseUrl);
     echo View::render('modules/' . $moduleType, $moduleData);
 
 } else {

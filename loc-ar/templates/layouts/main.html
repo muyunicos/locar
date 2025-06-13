@@ -15,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
     <style> /* Estilos rápidos para el menú hamburguesa */
         .nav-header { display: flex; justify-content: space-between; align-items: center; }
+        .header-logo { height: 40px; width: auto; }
         .hamburger-button { font-size: 2em; cursor: pointer; background: none; border: none; }
         .nav-panel { display: none; position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: #fff; box-shadow: -2px 0 5px rgba(0,0,0,0.2); z-index: 1000; }
         .nav-panel.open { display: block; }
@@ -25,26 +26,17 @@
 </head>
 
 <body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>' data-base-url="<?= htmlspecialchars($base_url) ?>">
-
-    <div class="nav-panel" id="nav-panel">
-        <ul>
-            <?php foreach ($navigable_modules as $navModule): ?>
-                <li>
-                    <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
-                        <?= htmlspecialchars($navModule['title']) ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-
-    <div id="app-container">
+<div id="app-container">
         <header class="nav-header">
-            <h1 id="page-main-title"><?= htmlspecialchars($page_title) ?></h1>
+            <?php if (!empty($logo_url)): ?>
+                <img src="<?= htmlspecialchars($logo_url) ?>" alt="Logo" class="header-logo">
+            <?php else: ?>
+                <h1 id="page-main-title"><?= htmlspecialchars($page_title) ?></h1>
+            <?php endif; ?>
             <button class="hamburger-button" id="hamburger-button">&#9776;</button>
         </header>
         <main id="module-content-wrapper">
-            <?= $content /* El contenido inicial del módulo se inyecta aquí */ ?>
+            <?= $content ?>
         </main>
     </div>
 
@@ -58,13 +50,22 @@
         const clientId = document.body.dataset.clientId;
         const baseUrl = document.body.dataset.baseUrl;
 
-        hamburgerBtn.addEventListener('click', () => navPanel.classList.toggle('open'));
+        // MEJORADO: Funcionalidad del menú hamburguesa
+        hamburgerBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evita que el clic se propague al documento
+            navPanel.classList.toggle('open');
+        });
+
+        // Cerrar el panel al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (navPanel.classList.contains('open') && !navPanel.contains(e.target)) {
+                navPanel.classList.remove('open');
+            }
+        });
 
         navPanel.addEventListener('click', async (e) => {
             if (e.target && e.target.classList.contains('nav-link')) {
                 e.preventDefault();
-                const moduleId = e.target.dataset.moduleId;
-                
                 navPanel.classList.remove('open');
                 
                 // Verificamos que tenemos los datos necesarios ANTES de hacer la llamada

@@ -4,14 +4,24 @@ function render_producto($item) {
     if (isset($item['hidden']) && $item['hidden']) {
         return;
     }
+    // Determina si el producto tiene imagen para aplicar una clase CSS
+    $has_image = !empty($item['imagen_url']);
+    $producto_class = 'producto' . ($has_image ? ' con-imagen' : ' sin-imagen');
 ?>
-<div class="producto">
-    <div class="producto-info">
-        <h3 class="producto-titulo"><?= htmlspecialchars($item['titulo']) ?></h3>
-        <?php if (!empty($item['descripcion'])): ?>
-            <p class="producto-descripcion"><?= htmlspecialchars($item['descripcion']) ?></p>
-        <?php endif; ?>
-    </div>
+<div class="<?= $producto_class ?>">
+    <?php if ($has_image): ?>
+        <div class="producto-imagen-wrapper">
+            <img src="<?= htmlspecialchars($item['imagen_url']) ?>" alt="<?= htmlspecialchars($item['titulo']) ?>" loading="lazy">
+        </div>
+    <?php endif; ?>
+
+    <div class="producto-details">
+        <div class="producto-info">
+            <h3 class="producto-titulo"><?= htmlspecialchars($item['titulo']) ?></h3>
+            <?php if (!empty($item['descripcion'])): ?>
+                <p class="producto-descripcion"><?= htmlspecialchars($item['descripcion']) ?></p>
+            <?php endif; ?>
+        </div>
     <div class="producto-precio">
         <?php if (isset($item['original_price'])): ?>
             <span class="precio-original">
@@ -28,28 +38,41 @@ function render_producto($item) {
         </span>
     </div>
 </div>
+</div>
 <?php
 }
 ?>
 
 <div class="module-container module-menues">
-    <h2 class="menues-title"><?= htmlspecialchars($menu_title) ?></h2>
+    <?php if (!empty($menu_image_url)): ?>
+        <div class="menu-header-image-container">
+            <img src="<?= htmlspecialchars($menu_image_url) ?>" alt="<?= htmlspecialchars($menu_title) ?>">
+        </div>
+    <?php else: ?>
+        <h2 class="menues-title"><?= htmlspecialchars($menu_title) ?></h2>
+    <?php endif; ?>
 
     <?php if (isset($error)): ?>
         <p class="app-error"><?= htmlspecialchars($error) ?></p>
     <?php else: ?>
         <?php foreach ($categorias as $categoria): ?>
-            <?php
-            if (isset($categoria['hidden']) && $categoria['hidden']) continue; 
-            ?>
+            <?php if (isset($categoria['hidden']) && $categoria['hidden']) continue; ?>
+
             <div class="categoria-container <?= isset($categoria['layout']) ? htmlspecialchars($categoria['layout']) : '' ?>">
-                <h3 class="categoria-titulo">
-                    <span><?= htmlspecialchars($categoria['titulo']) ?></span>
-                    <?php if (!empty($categoria['descripcion'])): ?>
-                        <small class="titulo-descripcion"><?= htmlspecialchars($categoria['descripcion']) ?></small>
-                    <?php endif; ?>
-                </h3>
-                <div class="item-list">
+                <?php if (!empty($categoria['imagen_url'])): ?>
+                    <div class="categoria-image-container">
+                        <img src="<?= htmlspecialchars($categoria['imagen_url']) ?>" alt="<?= htmlspecialchars($categoria['titulo']) ?>">
+                    </div>
+                <?php else: ?>
+                    <h3 class="categoria-titulo">
+                        <span><?= htmlspecialchars($categoria['titulo']) ?></span>
+                        <?php if (!empty($categoria['descripcion'])): ?>
+                            <small class="titulo-descripcion"><?= htmlspecialchars($categoria['descripcion']) ?></small>
+                        <?php endif; ?>
+                    </h3>
+                <?php endif; ?>
+                
+                 <div class="item-list">
                     <?php foreach ($categoria['items'] as $item): ?>
                         <?php if (isset($item['es_subcategoria']) && $item['es_subcategoria']): ?>
                             <div class="subcategoria-container">
@@ -72,9 +95,4 @@ function render_producto($item) {
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <?php if (!empty($footer_text)): ?>
-        <footer class="menu-footer">
-            <p><?= htmlspecialchars($footer_text) ?></p>
-        </footer>
-    <?php endif; ?>
-</div>
+    </div>
