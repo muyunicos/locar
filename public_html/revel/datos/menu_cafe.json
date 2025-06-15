@@ -32,7 +32,7 @@
             { "titulo": "Scon con Queso Azul", "descripcion": "", "precio": 7000 },
             { "titulo": "Roll de Canela", "descripcion": "", "precio": 7000 },
             { "titulo": "Alfajor XXL", "descripcion": "Maicena, glasé, tipo Block o banana.", "precio": 6000 },
-            { "titulo": "Cookies 2.0 (150g)", "descripcion": "Crumble cookies rellenas. Consultá los sabores del día.", "precio": 6000 }
+            { "titulo": "Cookies 2.0 (150g)", "descripcion": "Crumble cookies rellenas. Consultá los sabores del día.", "imagen": "cookie",  "precio": 6000 }
           ]
         },
         {

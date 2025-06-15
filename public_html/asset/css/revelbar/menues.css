@@ -1,22 +1,11 @@
-/*
- * SKIN: revelbar
- * FILE: main.css
- * DESCRIPTION: Estilos principales para la apariencia oscura y neón.
- */
-
-/* -------------------------------------------------------------------------- */
-/* VARIABLES DE LA SKIN
-/* -------------------------------------------------------------------------- */
 :root {
-    --revelbar-bg-color: #0d0d1a; /* Un fondo azul-negro muy oscuro */
-    --revelbar-surface-color: rgba(18, 18, 33, 0.5); /* Superficies con transparencia */
-    --revelbar-border-color: rgba(203, 103, 162, 0.5); /* Borde neón fucsia sutil */
-    --revelbar-text-primary: #f0f0f5; /* Texto principal casi blanco */
-    --revelbar-text-secondary: #a0a0b0; /* Texto secundario más apagado */
-
+    --revelbar-bg-color: #0d0d1a;
+    --revelbar-surface-color: rgba(18, 18, 33, 0.5);
+    --revelbar-border-color: rgba(203, 103, 162, 0.5);
+    --revelbar-text-primary: #f0f0f5;
+    --revelbar-text-secondary: #a0a0b0;
     --revelbar-neon-fuchsia: #ff0096;
     --revelbar-neon-cyan: #00e5ff;
-    
     --font-primary: 'Montserrat', sans-serif;
     --font-secondary: 'Lato', sans-serif;
 }
@@ -25,7 +14,7 @@
 /* ESTILOS GENERALES DEL CUERPO Y CONTENEDOR
 /* -------------------------------------------------------------------------- */
 body {
-    background-color: var(--revelbar-bg-color); */
+    background-color: var(--revelbar-bg-color);
     color: var(--revelbar-text-primary);
     font-family: var(--font-secondary);
     background: var(--revelbar-bg-color) url(https://loc.ar/revel/imagenes/revelbar.jpg);
@@ -47,12 +36,8 @@ body {
     padding: 25px clamp(15px, 4vw, 40px);
     border-radius: 12px;
     border: 2px solid var(--revelbar-border-color);
-
-    position: relative; 
+    position: relative;
     z-index: 1;
-
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
 }
 
 /* -------------------------------------------------------------------------- */

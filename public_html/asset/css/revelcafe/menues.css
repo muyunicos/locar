@@ -1,23 +1,13 @@
-/*
- * SKIN: revelcafe
- * FILE: main.css
- * DESCRIPTION: Estilos principales con una temática de café parisino, clásica y elegante.
- */
-
-/* -------------------------------------------------------------------------- */
-/* VARIABLES DE LA SKIN
-/* -------------------------------------------------------------------------- */
 :root {
-    --cafe-bg-color: #f5f0e9; /* Un fondo crema cálido y sutil */
-    --cafe-surface-color: #ffffff; /* Superficies blancas y limpias, como la loza */
-    --cafe-border-color: #ddd3c7; /* Un color de borde suave, derivado del fondo */
-    --cafe-text-primary: #3d352e; /* Texto principal en un tono café oscuro, casi negro */
-    --cafe-text-secondary: #8c7f73; /* Texto secundario en un tono sepia */
+    --cafe-bg-color: #f5f0e9;
+    --cafe-surface-color: #ffffff;
+    --cafe-border-color: #ddd3c7;
+    --cafe-text-primary: #3d352e;
+    --cafe-text-secondary: #8c7f73;
 
-    --cafe-accent-color: #8B4513; /* Un acento en "SaddleBrown", recuerda al cuero o madera */
-    --cafe-accent-hover: #a0522d; /* Un tono siena para el hover */
+    --cafe-accent-color: #8B4513;
+    --cafe-accent-hover: #a0522d;
 
-    /* Se mantienen las fuentes para consistencia, pero se usarán de forma diferente */
     --font-primary: 'Montserrat', sans-serif; 
     --font-secondary: 'Lato', sans-serif;
 }
