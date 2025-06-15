@@ -55,6 +55,7 @@ body {
     background-color: #150f2366;
     backdrop-filter: blur(2px);
 }
+
 .nav-header.scrolled {
     border-bottom: 2px solid var(--revelbar-border-color);
 }
@@ -64,11 +65,12 @@ body {
     line-height: 0;
     margin: 0 0 -3em;
 }
+
 .header-logo {
     height: 50px;
     width: auto;
-filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
-  animation: blink linear infinite 5s;
+    filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
+    /* animation: blink linear infinite 5s; */
 }
 
 @keyframes blink {
@@ -100,6 +102,7 @@ filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow
     filter: invert(1) drop-shadow(0 0 5px var(--revelbar-neon-fuchsia))  drop-shadow(0 0 5px var(--revelbar-neon-fuchsia));
   }
 }
+
 .hamburger-button {
     font-size: 2.2em;
     cursor: pointer;
