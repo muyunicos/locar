@@ -2,7 +2,7 @@
 header("Access-Control-Allow-Origin: https://revel.loc.ar");
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../../loc-ar/src/EventManager.php';
+require_once __DIR__ . '/../../test/src/EventManager.php';
 
 $clientId = $_GET['client'] ?? '';
 

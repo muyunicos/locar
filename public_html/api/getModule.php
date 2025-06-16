@@ -2,9 +2,9 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require_once __DIR__ . '/../../loc-ar/src/View.php';
-require_once __DIR__ . '/../../loc-ar/src/EventManager.php';
-require_once __DIR__ . '/../../loc-ar/src/Utils.php';
+require_once __DIR__ . '/../../test/src/View.php';
+require_once __DIR__ . '/../../test/src/EventManager.php';
+require_once __DIR__ . '/../../test/src/Utils.php';
 
 define('CLIENT_ID', $_GET['client'] ?? '');
 define('BASE_URL', 'https://loc.ar/');
@@ -39,7 +39,7 @@ if (!$moduleConfig) {
 
 $moduleType = $moduleConfig['type'];
 
-$logicPath = __DIR__ . '/../../loc-ar/src/modules/' . $moduleType . '.php';
+$logicPath = __DIR__ . '/../../test/src/modules/' . $moduleType . '.php';
 
 if (file_exists($logicPath)) {
     require_once $logicPath;
