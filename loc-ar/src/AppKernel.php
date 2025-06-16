@@ -20,91 +20,79 @@ function launchApp()
         die('Error: El manifiesto contiene un JSON inválido.');
     }
 
-    $eventManager = new EventManager($manifest['timed_events'] ?? []);
+    $pageTitle = $manifest['titulo'];
+    $pageName = $manifest['nombre'];
+
+    $eventManager = new EventManager($manifest['eventos'] ?? []);
     $activeEventContext = $eventManager->getContext();
     $activeEvent = $activeEventContext['active_event'];
-    $logoUrl = Utils::buildImageUrl($manifest['profile_data']['logo']);
-    $favicon = Utils::buildImageUrl($manifest['profile_data']['favicon']);
-    $globalSkin = $activeEvent['then']['set_skin'] ?? $manifest['default_skin'];
 
-    $finalContext = [
-        'skin' => $activeEvent['then']['set_skin'] ?? $manifest['default_skin'],
-        'favicon' => BASE_URL . CLIENT_ID . '/imagenes/' . ltrim($manifest['profile_data']['favicon']),
-        'logo_url' => $logoUrl
-    ];
-    
-    $pageTitle = $manifest['profile_data']['name'];
-    if (isset($activeEvent['then']['set_title_suffix'])) {
-        $pageTitle .= $activeEvent['then']['set_title_suffix'];
+    $logoUrl = Utils::buildImageUrl($activeEvent['cambios']['logo'] ?? $manifest['logo']);
+    $favicon = Utils::buildImageUrl($activeEvent['cambios']['favicon'] ?? $manifest['favicon']);
+    $mainSkin = $activeEvent['cambios']['skin'] ?? $manifest['skin'];
+    $mainStylesheet = BASE_URL . "asset/css/{$mainSkin}/main.css";
+
+    $activeEvent['cambios']['skin'] ?? $manifest['skin']
+
+    if (isset($activeEvent['cambios']['sufijo'])) {
+        $pageTitle .= $activeEvent['cambios']['sufijo'];
     }
 
     $navigableModules = [];
-    foreach ($manifest['modules'] as $moduleConfig) {
-        if (isset($moduleConfig['show_in_nav']) && $moduleConfig['show_in_nav']) {
+    foreach ($manifest['modulos'] as $moduleConfig) {
+        if (isset($moduleConfig['navegacion']) && $moduleConfig['navegacion']) {
             $navigableModules[] = [
-                'title' => $moduleConfig['title'],
+                'title' => $moduleConfig['titulo'],
                 'id' => $moduleConfig['id'],
-                'type' => $moduleConfig['type'],
+                'type' => $moduleConfig['tipo'],
                 'url' => $moduleConfig['url'] ?? null
             ];
         }
     }
 
-    $modulesContent = '';
-    $stylesheets = [BASE_URL . "asset/css/{$globalSkin}/main.css"];
-    $moduleStylesheet = null;
-
-    $activeModuleTitle = $activeEvent['then']['default_module'] ?? $manifest['default_module'];
+    $content = '';
     $activeModuleConfig = null;
-    foreach ($manifest['modules'] as $module) {
-        if ($module['title'] === $activeModuleTitle) {
+    $activeModuleId = $activeEvent['cambios']['modulo'] ?? $manifest['modulo'];
+    foreach ($manifest['modulos'] as $module) {
+        if ($module['id'] === $activeModuleId) {
             $activeModuleConfig = $module;
             break;
         }
     }
 
 if ($activeModuleConfig) {
-        $moduleType = $activeModuleConfig['type'];
+        $moduleType = $activeModuleConfig['tipo'];
         $logicPath = __DIR__ . '/modules/' . $moduleType . '.php';
 
         if (file_exists($logicPath)) {
             require_once $logicPath;
 
-            $moduleData = get_module_data($activeModuleConfig, $manifest, $activeEventContext);
+            $moduleData = get_module_data($activeModuleConfig, $activeEventContext);
             
-            $moduleSkin = $moduleData['skin'] ?? $globalSkin;
-            $moduleCssPath = "/asset/css/{$moduleSkin}/{$moduleType}.css";
+            $moduleSkin = $moduleData['skin'] ?? $mainSkin;
 
             if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
-                 $moduleStylesheet = BASE_URL . ltrim($moduleCssPath, '/');
+                $moduleStylesheet = BASE_URL . "/asset/css/{$moduleSkin}/{$moduleType}.css";
             }
 
-            $modulesContent = View::render('modules/' . $moduleType, $moduleData);
+            $content = View::render('modules/' . $moduleType, $moduleData);
 
         } else {
-            $modulesContent = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
+            $content = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
         }
     } else {
-        $modulesContent = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleTitle}' no fue encontrado en el manifiesto.</div>";
+        $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleTitle}' no fue encontrado en el manifiesto.</div>";
     }
-
-     $initialContextForJs = [
-        'profile_title' => $pageTitle,
-        'default_skin' => $globalSkin,
-        'default_favicon' => $favicon,
-
-    ];
 
    echo View::render('layouts/main', [
         'page_title' => $pageTitle,
         'favicon' => $favicon,
         'logo_url' => $logoUrl,
-        'stylesheets' => $stylesheets,
+        'main_stylesheet' => $mainStylesheet,
         'module_stylesheet' => $moduleStylesheet,
-        'content' => $modulesContent,
+        'content' => $content,
         'client_id' => CLIENT_ID,
         'base_url' => BASE_URL,
-        'navigable_modules' => $navigableModules,
-        'initial_context_json' => json_encode($initialContextForJs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)
+        'navigable_modules' => $navigableModules
     ]);
 }

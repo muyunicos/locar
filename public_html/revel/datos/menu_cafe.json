@@ -2,7 +2,8 @@
   "titulo": "Menú Revel Café",
   "logo": "logo-cafe",
   "skin": "revelcafe",
-  "categorias": [
+  "sufijo": " - Café",
+  "items": [
     {
       "titulo": "Cafetería e Infusiones",
       "items": [
@@ -24,8 +25,8 @@
         { "titulo": "Medialuna con Jamón y Queso", "descripcion": "Recién tostada.", "precio": 4200 },
         {
           "titulo": "Pequeña Patit",
-          "imagen_titulo": "astor",
-          "es_subcategoria": true,
+          "imagen": "astor",
+          "es_cat": true,
           "items": [
             { "titulo": "Scon de Queso", "descripcion": "", "precio": 6500 },
             { "titulo": "Scon con Salame", "descripcion": "", "precio": 7000 },
@@ -37,8 +38,8 @@
         },
         {
           "titulo": "Tortas Autor",
-          "imagen_titulo": "astor",
-          "es_subcategoria": true,
+          "imagen": "astor",
+          "es_cat": true,
           "items": [
             { "titulo": "Bruce", "descripcion": "Bizcocho de chocolate negro, almíbar de frutos rojos, dulce de leche, corazón de frutos rojos y ganache de chocolate.", "precio": 14000 },
             { "titulo": "Pistacho", "descripcion": "Bizcocho de chocolate y cerveza negra artesanal, crema de queso y frutas de estación.", "precio": 14000 },
@@ -54,7 +55,7 @@
     },
     {
       "titulo": "Desayunos y Meriendas",
-      "imagen_titulo": "astor",
+      "imagen": "astor",
       "items": [
         { "titulo": "Combo Tradicional (para 2)", "descripcion": "Dos infusiones, dos tostadas, queso crema, mermelada artesanal y jugo de naranja.", "precio": 18000 },
         { "titulo": "Combo Liviano (para 2)", "descripcion": "Dos infusiones, dos tostadas de pan integral, queso crema, mermelada artesanal y yogur con frutas de estación.", "precio": 20000 },
@@ -69,7 +70,7 @@
       "items": [
         {
           "titulo": "Ensaladas Frescas",
-          "es_subcategoria": true,
+          "es_cat": true,
           "items": [
             { "titulo": "César", "descripcion": "Mix de hojas verdes, pollo grillado, croutones, aderezo César y parmesano.", "precio": 11000 },
             { "titulo": "Hojas Verdes", "descripcion": "Mix de hojas verdes, tomates cherry y aderezo de la casa.", "precio": 8000 }

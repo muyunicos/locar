@@ -5,34 +5,23 @@ function process_images_recursively(array &$item)
     if (isset($item['imagen']) && !empty($item['imagen'])) {
         $item['imagen_url'] = Utils::buildImageUrl($item['imagen']);
     }
-
-    if (isset($item['imagen_titulo']) && !empty($item['imagen_titulo'])) {
-        $item['imagen_titulo_url'] = Utils::buildImageUrl($item['imagen_titulo']);
-    }
-
     if (isset($item['items']) && is_array($item['items'])) {
         foreach ($item['items'] as &$subItem) {
             process_images_recursively($subItem);
         }
     }
-
-    if (isset($item['categorias']) && is_array($item['categorias'])) {
-        foreach ($item['categorias'] as &$categoria) {
-            process_images_recursively($categoria);
-        }
-    }
 }
 
-function get_module_data(array $moduleConfig, array $manifest, array $context): array
+function get_module_data(array $moduleConfig, array $context): array
 {
-    $dataPath = __DIR__ . '/../../../public_html/' . CLIENT_ID . '/datos/' . $moduleConfig['data_file'];
+    $dataPath = __DIR__ . '/../../../public_html/' . CLIENT_ID . '/datos/' . $moduleConfig['url'];
     
     if (!file_exists($dataPath)) {
         return [
-            'menu_title' => $moduleConfig['title'],
+            'menu_title' => $moduleConfig['titulo'],
             'categorias' => [],
             'footer_text' => '',
-            'error' => 'Archivo de datos no encontrado: ' . htmlspecialchars($moduleConfig['data_file'])
+            'error' => 'Archivo de datos no encontrado: ' . htmlspecialchars($moduleConfig['url'])
         ];
     }
 
@@ -40,7 +29,7 @@ function get_module_data(array $moduleConfig, array $manifest, array $context): 
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         return [
-            'menu_title' => $moduleConfig['title'],
+            'menu_title' => $moduleConfig['titulo'],
             'categorias' => [],
             'footer_text' => '',
             'error' => 'Error de sintaxis en el archivo JSON: ' . htmlspecialchars($moduleConfig['data_file'])
@@ -78,10 +67,10 @@ function get_module_data(array $moduleConfig, array $manifest, array $context): 
     }
 
     return [
-        'menu_title' => $data['titulo'] ?? $moduleConfig['title'],
+        'menu_title' => $data['titulo'] ?? $moduleConfig['titulo'],
         'skin' => $data['skin'] ?? null,
         'menu_image_url' => Utils::buildImageUrl($data['logo'] ?? null),
-        'categorias' => $data['categorias'] ?? [],
+        'items' => $data['items'] ?? [],
         'footer_text' => $data['footer'] ?? '',
         'error' => $data['error'] ?? null
     ];

@@ -1,20 +1,31 @@
 <?php
 
-function render_producto($item) {
-    if (isset($item['hidden']) && $item['hidden']) {
-        return;
+if (!function_exists('render_image')) {
+    function render_image($url, $alt, $class = '', $loading = 'lazy') {
+        if (empty($url)) return;
+?>
+
+<img 
+    src="<?= htmlspecialchars($url) ?>" 
+    alt="<?= htmlspecialchars($alt) ?>" 
+    <?= !empty($class) ? 'class="' . htmlspecialchars($class) . '"' : '' ?> 
+    <?= !empty($loading) ? 'loading="' . htmlspecialchars($loading) . '"' : '' ?>
+/>
+<?php
     }
-    $has_image = !empty($item['imagen_url']);
-    $producto_class = 'producto' . ($has_image ? ' con-imagen' : ' sin-imagen');
+}
+
+if (!function_exists('render_producto')) {
+    function render_producto($item) {
+        if (isset($item['hidden']) && $item['hidden']) return;
+        
+        $has_image = !empty($item['imagen_url']);
+        $producto_class = 'producto' . ($has_image ? ' con-imagen' : ' sin-imagen');
 ?>
 <div class="<?= $producto_class ?>">
     <?php if ($has_image): ?>
     <div class="producto-imagen-wrapper">
-        <img
-            src="<?= htmlspecialchars($item['imagen_url']) ?>"
-            alt="<?= htmlspecialchars($item['titulo']) ?>"
-            loading="lazy"
-        />
+        <?php render_image($item['imagen_url'], $item['titulo']); ?>
     </div>
     <?php endif; ?>
 
@@ -31,102 +42,101 @@ function render_producto($item) {
         </div>
         <div class="producto-precio">
             <?php if (isset($item['original_price'])): ?>
-            <span class="precio-original">
-                <span class="precio-simbolo">$</span>
-                <span class="precio-valor"
-                    ><?= htmlspecialchars(number_format($item['original_price'], 0, ',', '.')) ?></span
-                >
-                <span class="precio-decimales">,-</span>
-            </span>
+            <span class="precio-original">$ <?= htmlspecialchars(number_format($item['original_price'], 0, ',', '.')) ?></span>
             <?php endif; ?>
-
-            <span class="precio-final">
-                <span class="precio-simbolo">$</span>
-                <span class="precio-valor"
-                    ><?= htmlspecialchars(number_format($item['precio'], 0, ',', '.')) ?></span
-                >
-                <span class="precio-decimales">,-</span>
-            </span>
+            <span class="precio-final">$ <?= htmlspecialchars(number_format($item['precio'], 0, ',', '.')) ?></span>
         </div>
     </div>
 </div>
 <?php
+    }
+}
+
+if (!function_exists('render_menu_level')) {
+    function render_menu_level($items_array) {
+        if (empty($items_array)) return;
+
+        foreach ($items_array as $item) {
+            if (isset($item['hidden']) && $item['hidden']) continue;
+
+            // Si es una categoría anidada, la renderiza y procesa sus hijos.
+            if (isset($item['es_cat']) && $item['es_cat']) {
+?>
+<div class="subcategoria-container">
+    <h4 class="subcategoria-titulo">
+        <div class="subcategoria-titulo-content">
+            <span><?= htmlspecialchars($item['titulo']) ?></span>
+            <?php if (!empty($item['descripcion'])): ?>
+            <small class="titulo-descripcion"><?= htmlspecialchars($item['descripcion']) ?></small>
+            <?php endif; ?>
+        </div>
+        <?php if (!empty($item['imagen_titulo_url'])): ?>
+            <?php render_image($item['imagen_titulo_url'], '', 'subcategoria-titulo-logo'); ?>
+        <?php endif; ?>
+    </h4>
+    <div class="item-list">
+        <?php render_menu_level($item['items']); // <-- Llamada recursiva ?>
+    </div>
+</div>
+<?php
+            } else {
+                // Si no, es un producto normal.
+                render_producto($item);
+            }
+        }
+    }
 }
 ?>
 
+
 <div class="module-container module-menues">
+    
+    <?php /* Título del menú (puede ser una imagen o texto) */ ?>
     <?php if (!empty($menu_image_url)): ?>
     <div class="menu-header-image-container">
-        <img
-            src="<?= htmlspecialchars($menu_image_url) ?>"
-            alt="<?= htmlspecialchars($menu_title) ?>"
-        />
+        <?php render_image($menu_image_url, $menu_title); ?>
     </div>
     <?php else: ?>
     <h2 class="menues-title"><?= htmlspecialchars($menu_title) ?></h2>
     <?php endif; ?>
 
-    <?php if (isset($error)): ?>
+    <?php /* Manejo de errores o renderizado de categorías */ ?>
+    <?php if (isset($error) && !empty($error)): ?>
     <p class="app-error"><?= htmlspecialchars($error) ?></p>
     <?php else: ?>
-    <?php foreach ($categorias as $categoria): ?>
-    <?php if (isset($categoria['hidden']) && $categoria['hidden']) continue; ?>
+        <?php foreach ($categorias as $categoria): ?>
+            <?php if (isset($categoria['hidden']) && $categoria['hidden']) continue; ?>
 
-    <div
-        class="categoria-container <?= isset($categoria['layout']) ? htmlspecialchars($categoria['layout']) : '' ?>"
-    >
-        <?php if (!empty($categoria['imagen_url'])): ?>
-        <div class="categoria-image-container">
-            <img
-                src="<?= htmlspecialchars($categoria['imagen_url']) ?>"
-                alt="<?= htmlspecialchars($categoria['titulo']) ?>"
-            />
-        </div>
-        <?php else: ?>
-        <h3 class="categoria-titulo">
-            <div class="categoria-titulo-content">
-                <span><?= htmlspecialchars($categoria['titulo']) ?></span>
-                <?php if (!empty($categoria['descripcion'])): ?>
-                <small class="titulo-descripcion"
-                    ><?= htmlspecialchars($categoria['descripcion']) ?></small
-                >
-                <?php endif; ?>
-            </div>
-            <?php if (!empty($categoria['imagen_titulo_url'])): ?>
-                <img class="categoria-titulo-logo" src="<?= htmlspecialchars($categoria['imagen_titulo_url']) ?>" alt="">
-            <?php endif; ?>
-        </h3>
-        <?php endif; ?>
-
-        <div class="item-list">
-            <?php foreach ($categoria['items'] as $item): ?>
-            <?php if (isset($item['es_subcategoria']) && $item['es_subcategoria']): ?>
-            <div class="subcategoria-container">
-                <h4 class="subcategoria-titulo">
-                    <div class="subcategoria-titulo-content">
-                        <span><?= htmlspecialchars($item['titulo']) ?></span>
-                        <?php if (!empty($item['descripcion'])): ?>
-                        <small class="titulo-descripcion"
-                            ><?= htmlspecialchars($item['descripcion']) ?></small
-                        >
+            <div class="categoria-container <?= isset($categoria['layout']) ? htmlspecialchars($categoria['layout']) : '' ?>">
+                
+                <?php /* Título de la categoría (puede ser una imagen o texto) */ ?>
+                <?php if (!empty($categoria['imagen_url'])): ?>
+                <div class="categoria-image-container">
+                    <?php render_image($categoria['imagen_url'], $categoria['titulo']); ?>
+                </div>
+                <?php else: ?>
+                <h3 class="categoria-titulo">
+                    <div class="categoria-titulo-content">
+                        <span><?= htmlspecialchars($categoria['titulo']) ?></span>
+                        <?php if (!empty($categoria['descripcion'])): ?>
+                        <small class="titulo-descripcion"><?= htmlspecialchars($categoria['descripcion']) ?></small>
                         <?php endif; ?>
                     </div>
-                    <?php if (!empty($item['imagen_titulo_url'])): ?>
-                        <img class="subcategoria-titulo-logo" src="<?= htmlspecialchars($item['imagen_titulo_url']) ?>" alt="">
+                    <?php if (!empty($categoria['imagen_titulo_url'])): ?>
+                        <?php render_image($categoria['imagen_titulo_url'], '', 'categoria-titulo-logo'); ?>
                     <?php endif; ?>
-                </h4>
-                <?php foreach ($item['items'] as $sub_item): ?>
-                <?php render_producto($sub_item); ?>
-                <?php endforeach; ?>
+                </h3>
+                <?php endif; ?>
+
+                <?php /* Lista de items dentro de la categoría */ ?>
+                <div class="item-list">
+                    <?php render_menu_level($categoria['items']); // Inicia el renderizado recursivo ?>
+                </div>
             </div>
-            <?php else: ?>
-            <?php render_producto($item); ?>
-            <?php endif; ?>
-            <?php endforeach; ?>
-        </div>
-    </div>
-    <?php endforeach; ?>
+        <?php endforeach; ?>
     <?php endif; ?>
+    
+    <?php /* Footer del menú */ ?>
     <?php if (!empty($footer_text)): ?>
     <footer class="menu-footer">
         <p><?= htmlspecialchars($footer_text) ?></p>

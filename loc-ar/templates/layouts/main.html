@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($page_title) ?></title>
     <link id="favicon" rel="icon" href="<?= htmlspecialchars($favicon) ?>" type="image/x-icon">
-    <?php foreach ($stylesheets as $stylesheet_url): ?>
-        <link rel="stylesheet" href="<?= htmlspecialchars($stylesheet_url) ?>" class="skin-stylesheet">
-    <?php endforeach; ?>
+    <link rel="stylesheet" id="main-stylesheet" href="<?= htmlspecialchars($main_stylesheet ?? '') ?>" class="skin-stylesheet">
     <link rel="stylesheet" id="module-stylesheet" href="<?= htmlspecialchars($module_stylesheet ?? '') ?>" class="skin-stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,13 +70,11 @@
             const link = e.target.closest('.nav-link');
             if (!link) return;
 
-            // Si es un enlace externo, solo cierra el panel y deja que el navegador haga el resto.
             if (link.classList.contains('is-external')) {
                 navPanel.classList.remove('open');
                 return;
             }
 
-            // Si es un enlace de módulo interno, previene la navegación y carga el contenido.
             e.preventDefault();
             navPanel.classList.remove('open');
             const moduleId = link.dataset.moduleId;
@@ -91,6 +87,7 @@
             appContainer.innerHTML = `<h2>Cargando...</h2>`;
             
             try {
+
                 const response = await fetch(`${baseUrl}api/getModule.php?client=${clientId}&id=${moduleId}`);
                 
                 if (!response.ok) {
@@ -98,19 +95,12 @@
                     throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
                 }
 
-                // Se espera una respuesta JSON
                 const data = await response.json();
-
-                // Se actualiza el contenido HTML
-                appContainer.innerHTML = data.html;
-
-                // Se busca el <link> del CSS del módulo y se actualiza su 'href'
                 const moduleStylesheet = document.getElementById('module-stylesheet');
                 if (moduleStylesheet && data.hasOwnProperty('css_url')) {
-                    // Se actualiza la URL. Si es null, se pone vacía para desactivar la hoja anterior.
                     moduleStylesheet.href = data.css_url || '';
                 }
-
+                appContainer.innerHTML = data.html;
             } catch (error) {
                 console.error('Error al cargar el módulo:', error);
                 appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;

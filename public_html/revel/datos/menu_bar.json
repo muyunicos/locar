@@ -2,9 +2,11 @@
   "titulo": "Menú Revel Bar",
   "logo": "logo-bar",
   "skin": "revelbar",
-  "categorias": [
+  "sufijo": " - Bar",
+  "items": [
     {
       "titulo": "Tapeos y Entradas",
+      "es_cat": true,
       "items": [
         {
           "titulo": "Rabas",
@@ -35,11 +37,12 @@
     },
     {
       "titulo": "Platos Principales",
+      "es_cat": true,
       "items": [
         {
           "titulo": "Burgers",
           "descripcion": "Todas vienen acompañadas de papas fritas.",
-          "es_subcategoria": true,
+          "es_cat": true,
           "items": [
             {
               "titulo": "Cheese Queen",
@@ -61,7 +64,7 @@
         },
         {
           "titulo": "Pizzas en tablita",
-          "es_subcategoria": true,
+          "es_cat": true,
           "items": [
             {
               "titulo": "Mozzarella",
@@ -87,7 +90,7 @@
         },
         {
           "titulo": "Ensaladas Frescas",
-          "es_subcategoria": true,
+          "es_cat": true,
           "items": [
             { "titulo": "César", "descripcion": "Mix de hojas verdes, pollo grillado, croutones, aderezo César y parmesano.", "precio": 11000 },
             { "titulo": "Hojas Verdes", "descripcion": "Mix de hojas verdes, tomates cherry y aderezo de la casa.", "precio": 8000 }
@@ -97,6 +100,7 @@
     },
     {
       "titulo": "Cócteles de Autor y Clásicos",
+      "es_cat": true,
       "layout": "two-column",
       "items": [
         { "titulo": "Aperol Spritz", "descripcion": "", "precio": 9000 },

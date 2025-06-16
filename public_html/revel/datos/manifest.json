@@ -1,41 +1,39 @@
 {
-  "profile_data": {
-    "name": "Menú Revel",
-    "address": "Falucho 2406, B7600 Mar del Plata, Provincia de Buenos Aires",
-    "favicon": "favicon.ico",
-    "logo": "logo.svg"
-  },
-  "default_skin": "default",
-  "default_module": "Revel - Café",
-  "timed_events": [
+  "nombre": "Menú Revel",
+  "direccion": "Falucho 2406, B7600 Mar del Plata, Provincia de Buenos Aires",
+  "titulo": "Revel",
+  "favicon": "favicon.ico",
+  "logo": "logo.svg",
+  "skin": "default",
+  "modulo": 1,
+  "eventos": [
     {
-      "name": "Navidad",
-      "priority": 100,
-      "when": {
+      "nombre": "Navidad",
+      "prioridad": 100,
+      "cuando": {
         "date_range": { "start": "2024-12-01", "end": "2024-12-26" }
       },
-      "then": {
-        "set_skin": "navidad",
-        "set_title_suffix": " - ¡Feliz Navidad!",
-        "set_favicon": "/asset/icons/christmas.ico"
+      "cambios": {
+        "skin": "navidad",
+        "title_suffix": " - ¡Feliz Navidad!",
+        "favicon": "/asset/icons/christmas.ico"
       }
     },
     {
-      "name": "Noche",
-      "priority": 10,
-      "when": {
+      "nombre": "Noche",
+      "prioridad": 10,
+      "cuando": {
         "time_range": { "start": "20:00", "end": "07:00" }
       },
-      "then": {
-        "set_skin": "dark",
-        "default_module": "Revel - Bar"
+      "cambios": {
+        "module": 2
       }
     }
   ],
-  "modules": [
-    { "type": "menues", "title": "Revel - Bar", "id": 2, "show_in_nav": true, "data_file": "menu_bar.json" },
-    { "type": "menues", "title": "Revel - Café", "id": 1, "show_in_nav": true, "data_file": "menu_cafe.json" },
-    { "type": "link", "title": "Instagram", "id": 3, "show_in_nav": true, "url": "https://www.instagram.com/revel.mdq/" },
-    { "type": "gallery", "title": "Fotos del Local", "id": 4, "show_in_nav": false }
+  "modulos": [
+    { "tipo": "menues", "titulo": "Menú Bar", "id": 2, "navegacion": true, "url": "menu_bar.json" },
+    { "tipo": "menues", "titulo": "Menú Café", "id": 1, "navegacion": true, "url": "menu_cafe.json" },
+    { "tipo": "link", "titulo": "Instagram", "id": 3, "navegacion": true, "url": "https://www.instagram.com/revel.mdq/" },
+    { "tipo": "galeria", "titulo": "Fotos del Local", "id": 4, "navegacion": false }
   ]
 }
