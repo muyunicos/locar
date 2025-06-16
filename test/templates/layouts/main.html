@@ -45,7 +45,7 @@
         </main>
     </div>
 
-    <script src="<?= htmlspecialchars($base_url) ?>asset/js/event-handler.js"></script>
+    <script src="<?= htmlspecialchars($base_url) ?>test/asset/js/event-handler.js"></script>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -88,7 +88,7 @@
             
             try {
 
-                const response = await fetch(`${baseUrl}api/getModule.php?client=${clientId}&id=${moduleId}`);
+                const response = await fetch(`${baseUrl}test/api/getModule.php?client=${clientId}&id=${moduleId}`);
                 
                 if (!response.ok) {
                     const errorText = await response.text();

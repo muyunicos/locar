@@ -19,7 +19,7 @@ function get_module_data(array $moduleConfig, array $context): array
     if (!file_exists($dataPath)) {
         return [
             'menu_title' => $moduleConfig['titulo'],
-            'categorias' => [],
+            'items' => [],
             'footer_text' => '',
             'error' => 'Archivo de datos no encontrado: ' . htmlspecialchars($moduleConfig['url'])
         ];
@@ -30,7 +30,7 @@ function get_module_data(array $moduleConfig, array $context): array
     if (json_last_error() !== JSON_ERROR_NONE) {
         return [
             'menu_title' => $moduleConfig['titulo'],
-            'categorias' => [],
+            'items' => [],
             'footer_text' => '',
             'error' => 'Error de sintaxis en el archivo JSON: ' . htmlspecialchars($moduleConfig['data_file'])
         ];
@@ -38,14 +38,13 @@ function get_module_data(array $moduleConfig, array $context): array
 
     process_images_recursively($data);
     
-    $categorias = $data['categorias'] ?? [];
+    $items = $data['items'] ?? [];
 
     if (isset($context['module_modifications']['menu']['action']) && $context['module_modifications']['menu']['action'] === 'apply_discount') {
         $discount = $context['module_modifications']['menu']['value'];
-        foreach ($categorias as &$categoria) {
+        foreach ($items as &$categoria) {
             foreach ($categoria['items'] as &$item) {
-                // Si el item es una subcategoría, iteramos un nivel más.
-                if (isset($item['es_subcategoria']) && $item['es_subcategoria']) { //
+                if (isset($item['es_cat']) && $item['es_subcategoria']) {
                     foreach ($item['items'] as &$producto) {
                         if (isset($producto['precio'])) {
                             $originalPrice = (float)$producto['precio'];

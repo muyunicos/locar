@@ -54,7 +54,7 @@ if (file_exists($logicPath)) {
     $moduleSkin = $moduleData['skin'] ?? $globalSkin;
     
     $cssUrl = null;
-    $moduleCssPath = "/asset/css/{$moduleSkin}/{$moduleType}.css";
+    $moduleCssPath = "/test/asset/css/{$moduleSkin}/{$moduleType}.css";
     if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
         $cssUrl = BASE_URL . ltrim($moduleCssPath, '/');
     }

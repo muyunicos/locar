@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch(`${this.baseUrl}api/agenda.php?client=${this.clientId}`);
+                const response = await fetch(`${this.baseUrl}test/api/agenda.php?client=${this.clientId}`);
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 
                 const agendaData = await response.json();

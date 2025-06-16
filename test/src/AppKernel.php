@@ -30,7 +30,7 @@ function launchApp()
     $logoUrl = Utils::buildImageUrl($activeEvent['cambios']['logo'] ?? $manifest['logo']);
     $favicon = Utils::buildImageUrl($activeEvent['cambios']['favicon'] ?? $manifest['favicon']);
     $mainSkin = $activeEvent['cambios']['skin'] ?? $manifest['skin'];
-    $mainStylesheet = BASE_URL . "asset/css/{$mainSkin}/main.css";
+    $mainStylesheet = BASE_URL . "test/asset/css/{$mainSkin}/main.css";
 
     if (isset($activeEvent['cambios']['sufijo'])) {
         $pageTitle .= $activeEvent['cambios']['sufijo'];
@@ -68,11 +68,7 @@ if ($activeModuleConfig) {
             $moduleData = get_module_data($activeModuleConfig, $activeEventContext);
             
             $moduleSkin = $moduleData['skin'] ?? $mainSkin;
-            
-
-            if (file_exists(__DIR__ . '/../../public_html' . $moduleSkin)) {
-                $moduleStylesheet = BASE_URL . "/asset/css/{$moduleSkin}/{$moduleType}.css";
-            }
+            $moduleStylesheet = BASE_URL . "/test/asset/css/{$moduleSkin}/{$moduleType}.css";
 
             $content = View::render('modules/' . $moduleType, $moduleData);
 
