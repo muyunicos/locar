@@ -32,8 +32,6 @@ function launchApp()
     $mainSkin = $activeEvent['cambios']['skin'] ?? $manifest['skin'];
     $mainStylesheet = BASE_URL . "asset/css/{$mainSkin}/main.css";
 
-    $activeEvent['cambios']['skin'] ?? $manifest['skin']
-
     if (isset($activeEvent['cambios']['sufijo'])) {
         $pageTitle .= $activeEvent['cambios']['sufijo'];
     }
@@ -70,8 +68,9 @@ if ($activeModuleConfig) {
             $moduleData = get_module_data($activeModuleConfig, $activeEventContext);
             
             $moduleSkin = $moduleData['skin'] ?? $mainSkin;
+            
 
-            if (file_exists(__DIR__ . '/../../public_html' . $moduleCssPath)) {
+            if (file_exists(__DIR__ . '/../../public_html' . $moduleSkin)) {
                 $moduleStylesheet = BASE_URL . "/asset/css/{$moduleSkin}/{$moduleType}.css";
             }
 
@@ -81,7 +80,7 @@ if ($activeModuleConfig) {
             $content = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
         }
     } else {
-        $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleTitle}' no fue encontrado en el manifiesto.</div>";
+        $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleId}' no fue encontrado en el manifiesto.</div>";
     }
 
    echo View::render('layouts/main', [
