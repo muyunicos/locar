@@ -1,30 +1,17 @@
-/*
- * SKIN: revelcafe
- * FILE: main.css
- * DESCRIPTION: Estilos principales con una temática de café parisino, clásica y elegante.
- */
-
-/* -------------------------------------------------------------------------- */
-/* VARIABLES DE LA SKIN
-/* -------------------------------------------------------------------------- */
 :root {
-    --cafe-bg-color: #f5f0e9; /* Un fondo crema cálido y sutil */
-    --cafe-surface-color: #ffffff; /* Superficies blancas y limpias, como la loza */
-    --cafe-border-color: #ddd3c7; /* Un color de borde suave, derivado del fondo */
-    --cafe-text-primary: #3d352e; /* Texto principal en un tono café oscuro, casi negro */
-    --cafe-text-secondary: #8c7f73; /* Texto secundario en un tono sepia */
+    --cafe-bg-color: #f5f0e9;
+    --cafe-surface-color: #ffffff;
+    --cafe-border-color: #ddd3c7;
+    --cafe-text-primary: #3d352e;
+    --cafe-text-secondary: #8c7f73;
 
-    --cafe-accent-color: #8B4513; /* Un acento en "SaddleBrown", recuerda al cuero o madera */
-    --cafe-accent-hover: #a0522d; /* Un tono siena para el hover */
+    --cafe-accent-color: #8B4513;
+    --cafe-accent-hover: #a0522d;
 
-    /* Se mantienen las fuentes para consistencia, pero se usarán de forma diferente */
     --font-primary: 'Montserrat', sans-serif; 
     --font-secondary: 'Lato', sans-serif;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ESTILOS GENERALES DEL CUERPO Y CONTENEDOR
-/* -------------------------------------------------------------------------- */
 body {
     background-color: var(--cafe-bg-color);
     color: var(--cafe-text-primary);
@@ -50,9 +37,6 @@ body {
     z-index: 1;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ENCABEZADO Y NAVEGACIÓN
-/* -------------------------------------------------------------------------- */
 .nav-header {
     display: flex;
     justify-content: space-between;
@@ -62,21 +46,17 @@ body {
     width: calc(100% - 40px);
     position: fixed;
     z-index: 2;
-    background-color: rgba(245, 240, 233, 0.85); /* Fondo crema semi-transparente */
+    background-color: rgba(245, 240, 233, 0.85);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    border-bottom: 1px solid transparent; /* Transición suave para el borde */
+    border-bottom: 1px solid transparent;
     transition: border-color 0.3s ease;
 }
 
 .nav-header.scrolled {
     border-bottom: 1px solid var(--cafe-border-color);
 }
-.menu-header-image-container {
-    text-align: center;
-    line-height: 0;
-    margin: 0 0 -3em;
-}
+
 .header-logo {
     height: 50px;
     width: auto;
@@ -133,12 +113,9 @@ body {
 
 .nav-panel li a:hover {
     color: var(--cafe-accent-color);
-    background-color: rgba(139, 69, 19, 0.05); /* Color acento muy suave */
+    background-color: rgba(139, 69, 19, 0.05);
 }
 
-/* -------------------------------------------------------------------------- */
-/* CLASES DE UTILIDAD Y ERRORES
-/* -------------------------------------------------------------------------- */
 .app-error {
     color: #9c4242;
     background-color: #fceeee;
@@ -149,9 +126,6 @@ body {
     text-align: center;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ANIMACIONES
-/* -------------------------------------------------------------------------- */
 @keyframes slideIn {
     from {
         transform: translateX(100%);

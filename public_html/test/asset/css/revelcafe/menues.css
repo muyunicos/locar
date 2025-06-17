@@ -12,156 +12,16 @@
     --font-secondary: 'Lato', sans-serif;
 }
 
-/* -------------------------------------------------------------------------- */
-/* ESTILOS GENERALES DEL CUERPO Y CONTENEDOR
-/* -------------------------------------------------------------------------- */
-body {
-    background-color: var(--cafe-bg-color);
-    color: var(--cafe-text-primary);
-    font-family: var(--font-secondary);
-    line-height: 1.7;
-    margin: 0;
-    padding: 0;
-    font-size: 16px;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-#app-container {
-    width: calc(100% - 80px);
-    max-width: 850px;
-    margin: 15vh auto;
-    background: var(--cafe-surface-color);
-    padding: 25px clamp(15px, 4vw, 40px);
-    border-radius: 8px;
-    border: 1px solid var(--cafe-border-color);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    position: relative; 
-    z-index: 1;
-}
-
-/* -------------------------------------------------------------------------- */
-/* ENCABEZADO Y NAVEGACIÓN
-/* -------------------------------------------------------------------------- */
-.nav-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    top: 0;
-    width: calc(100% - 40px);
-    position: fixed;
-    z-index: 2;
-    background-color: rgba(245, 240, 233, 0.85); /* Fondo crema semi-transparente */
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    border-bottom: 1px solid transparent; /* Transición suave para el borde */
-    transition: border-color 0.3s ease;
-}
-
-.nav-header.scrolled {
-    border-bottom: 1px solid var(--cafe-border-color);
-}
 .menu-header-image-container {
     text-align: center;
     line-height: 0;
     margin: 0 0 -3em;
 }
+
 .menu-header-image-container img {
         max-width: 50%;
 }
-.header-logo {
-    height: 50px;
-    width: auto;
-}
 
-.hamburger-button {
-    font-size: 2.2em;
-    cursor: pointer;
-    background: none;
-    border: none;
-    color: var(--cafe-text-primary);
-    transition: color 0.3s ease;
-}
-
-.hamburger-button:hover {
-    color: var(--cafe-accent-color);
-}
-
-.nav-panel {
-    display: none;
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 280px;
-    height: 100%;
-    background-color: var(--cafe-surface-color);
-    border-left: 1px solid var(--cafe-border-color);
-    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-}
-
-.nav-panel.open {
-    display: block;
-    animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.nav-panel ul {
-    list-style: none;
-    padding: 60px 20px 20px 20px;
-    margin: 0;
-}
-
-.nav-panel li a {
-    display: block;
-    padding: 15px 20px;
-    color: var(--cafe-text-secondary);
-    text-decoration: none;
-    font-family: var(--font-primary);
-    font-weight: 600;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    transition: color 0.3s ease, background-color 0.3s ease;
-}
-
-.nav-panel li a:hover {
-    color: var(--cafe-accent-color);
-    background-color: rgba(139, 69, 19, 0.05); /* Color acento muy suave */
-}
-
-/* -------------------------------------------------------------------------- */
-/* CLASES DE UTILIDAD Y ERRORES
-/* -------------------------------------------------------------------------- */
-.app-error {
-    color: #9c4242;
-    background-color: #fceeee;
-    border: 1px solid #e5c1c1;
-    padding: 15px;
-    margin: 15px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-/* -------------------------------------------------------------------------- */
-/* ANIMACIONES
-/* -------------------------------------------------------------------------- */
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-    }
-    to {
-        transform: translateX(0);
-    }
-}
-/*
- * SKIN: revelcafe
- * FILE: menues.css
- * DESCRIPTION: Estilos para el módulo de menús con temática clásica y refinada.
- */
-
-/* -------------------------------------------------------------------------- */
-/* ESTILOS GENERALES Y TÍTULOS
-/* -------------------------------------------------------------------------- */
 .menues-title {
     font-family: 'Bona Nova SC', serif;
     text-align: center;
@@ -174,8 +34,7 @@ body {
     letter-spacing: 1px;
 }
 
-.categoria-titulo,
-.subcategoria-titulo {
+.c-titulo {
     font-family: 'Bona Nova SC', serif;
     color: var(--cafe-text-primary);
     border-bottom: 2px solid var(--cafe-accent-color);
@@ -187,7 +46,7 @@ body {
     gap: 0.3rem;
 }
 
-.categoria-titulo {
+.c-titulo {
    font-size: clamp(1.6rem, 6vw, 1.9rem);
     font-weight: 600;
     text-align: center;
@@ -197,21 +56,21 @@ body {
     gap: 1rem;
 }
 
-.categoria-titulo-content {
+.c-titulo-content {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
     flex-grow: 1;
 }
 
-.categoria-titulo-logo {
+.c-titulo img {
     height: 80px;
     width: auto;
     flex-shrink: 0;
     object-fit: contain;
 }
 
-.subcategoria-titulo {
+.c-container .item-list .c-container .c-titulo {
     font-size: clamp(1.2rem, 5vw, 1.4rem);
     font-weight: 600;
     border-bottom-color: var(--cafe-border-color);
@@ -224,19 +83,6 @@ body {
     gap: 1rem;
 }
 
-.subcategoria-titulo-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    flex-grow: 1;
-}
-
-.subcategoria-titulo-logo {
-    height: 80px;
-    width: auto;
-    flex-shrink: 0;
-    object-fit: contain;
-}
 
 .titulo-descripcion {
     font-family: var(--font-secondary);
@@ -248,10 +94,6 @@ body {
     text-transform: none;
 }
 
-
-/* -------------------------------------------------------------------------- */
-/* ESTRUCTURA DE LA LISTA DE ITEMS
-/* -------------------------------------------------------------------------- */
 .item-list {
     display: flex;
     flex-direction: column;
@@ -314,10 +156,6 @@ body {
     line-height: 1.5;
 }
 
-
-/* -------------------------------------------------------------------------- */
-/* ESTILOS DEL PRECIO
-/* -------------------------------------------------------------------------- */
 .item-precio {
     text-align: right;
     display: flex;
@@ -347,9 +185,6 @@ body {
     font-weight: 400;
 }
 
-/* -------------------------------------------------------------------------- */
-/* FOOTER DEL MENÚ
-/* -------------------------------------------------------------------------- */
 .menu-footer {
     text-align: center;
     margin-top: 3rem;

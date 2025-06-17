@@ -31,30 +31,20 @@ if (!function_exists("render_item")) {
             }
             $has_image = !empty($item["imagen_url"]);
             if (isset($item["es_cat"]) && $item["es_cat"]) { ?>
-<div class="categoria-container <?= isset($item["layout"])
+<div class="c-container <?= isset($item["layout"])
     ? htmlspecialchars($item["layout"])
     : "" ?>">
-    
-   <?php if ($has_image): ?>
-    <div class="categoria-image-container">
-        <?php render_image($item["imagen_url"], $item["titulo"]); ?>
-    </div>
-    <?php endif; ?>
-    <h3 class="categoria-titulo">
-        <div class="categoria-titulo-content">
+    <h3 class="c-titulo">
+        <div class="c-titulo-content">
             <span><?= htmlspecialchars($item["titulo"]) ?></span>
             <?php if (!empty($item["descripcion"])): ?>
-            <small class="titulo-descripcion"><?= htmlspecialchars(
+            <small class="c-titulo-descripcion"><?= htmlspecialchars(
                 $item["descripcion"]
             ) ?></small>
             <?php endif; ?>
         </div>
-        <?php if (!empty($item["imagen_titulo_url"])): ?>
-            <?php render_image(
-                $item["imagen_titulo_url"],
-                "",
-                "categoria-titulo-logo"
-            ); ?>
+        <?php if ($has_image): ?>
+            <?php render_image($item["imagen_url"]); ?>
         <?php endif; ?>
     </h3>
 
@@ -63,25 +53,25 @@ if (!function_exists("render_item")) {
     </div>
 </div>
 <?php } else { ?>
-<div class="producto">
+<div class="item">
     <?php if ($has_image): ?>
-    <div class="producto-imagen-wrapper">
+    <div class="item-imagen-wrapper">
         <?php render_image($item["imagen_url"], $item["titulo"]); ?>
     </div>
     <?php endif; ?>
 
-    <div class="producto-details">
-        <div class="producto-info">
-            <h3 class="producto-titulo">
+    <div class="item-details">
+        <div class="item-info">
+            <h3 class="item-titulo">
                 <?= htmlspecialchars($item["titulo"]) ?>
             </h3>
             <?php if (!empty($item["descripcion"])): ?>
-            <p class="producto-descripcion">
+            <p class="item-descripcion">
                 <?= htmlspecialchars($item["descripcion"]) ?>
             </p>
             <?php endif; ?>
         </div>
-        <div class="producto-precio">
+        <div class="item-precio">
             <?php if (isset($item["original_price"])): ?>
             <span class="precio-original">
                 <span class="precio-simbolo">$</span>
