@@ -6,6 +6,7 @@
   "items": [
     {
       "titulo": "Cafetería e Infusiones",
+      "es_cat": true,
       "items": [
         { "titulo": "Espresso", "descripcion": "Café 100% arábica.", "imagen": "cafe", "precio": 3500 },
         { "titulo": "Espresso Doble", "descripcion": "", "precio": 4800 },
@@ -20,6 +21,7 @@
     },
     {
       "titulo": "Pastelería Artesanal",
+      "es_cat": true,
       "items": [
         { "titulo": "Medialuna", "descripcion": "Medialuna dulce de manteca.", "imagen": "medialuna", "precio": 1600 },
         { "titulo": "Medialuna con Jamón y Queso", "descripcion": "Recién tostada.", "precio": 4200 },
@@ -55,6 +57,7 @@
     },
     {
       "titulo": "Desayunos y Meriendas",
+      "es_cat": true,
       "imagen": "astor",
       "items": [
         { "titulo": "Combo Tradicional (para 2)", "descripcion": "Dos infusiones, dos tostadas, queso crema, mermelada artesanal y jugo de naranja.", "precio": 18000 },
@@ -67,6 +70,7 @@
     },
     {
       "titulo": "Almuerzos",
+      "es_cat": true,
       "items": [
         {
           "titulo": "Ensaladas Frescas",
@@ -81,6 +85,7 @@
     },
     {
       "titulo": "Bebidas sin Alcohol",
+      "es_cat": true,
       "items": [
         { "titulo": "Limonada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de limón, menta y jengibre.", "imagen": "limonada", "precio": 10000 },
         { "titulo": "Pomelada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de pomelo y almíbar de romero.", "precio": 10000 },
