@@ -2,6 +2,7 @@
   "titulo": "Menú Revel Bar",
   "logo": "logo-bar",
   "skin": "revelbar",
+  "main_skin": true,
   "sufijo": " - Bar",
   "items": [
     {
