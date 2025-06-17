@@ -69,9 +69,9 @@ if ($activeModuleConfig) {
             
             $moduleSkin = $moduleData['skin'] ?? $mainSkin;
             $moduleStylesheet = BASE_URL . "/test/asset/css/{$moduleSkin}/{$moduleType}.css";
-            if (isset($moduleData['main_skin']) && $moduleData['main_skin'] && !isset($activeEvent['cambios']['skin'])) {
-                $mainSkin = $moduleData['skin'] ?? $mainSkin;
-                }
+            if (isset($moduleData['main_skin']) && $moduleData['main_skin'] === true && empty($activeEvent['cambios']['skin'])) {
+    $mainSkin = $moduleData['skin'];
+}
             $content = View::render('modules/' . $moduleType, $moduleData);
 
         } else {
