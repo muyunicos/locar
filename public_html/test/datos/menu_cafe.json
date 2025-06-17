@@ -2,6 +2,7 @@
   "titulo": "Menú Revel Café",
   "logo": "logo-cafe",
   "skin": "revelcafe",
+  "main_skin": true,
   "sufijo": " - Café",
   "items": [
     {

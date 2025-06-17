@@ -30,7 +30,7 @@ function launchApp()
     $logoUrl = Utils::buildImageUrl($activeEvent['cambios']['logo'] ?? $manifest['logo']);
     $favicon = Utils::buildImageUrl($activeEvent['cambios']['favicon'] ?? $manifest['favicon']);
     $mainSkin = $activeEvent['cambios']['skin'] ?? $manifest['skin'];
-    $mainStylesheet = BASE_URL . "test/asset/css/{$mainSkin}/main.css";
+    
 
     if (isset($activeEvent['cambios']['sufijo'])) {
         $pageTitle .= $activeEvent['cambios']['sufijo'];
@@ -69,7 +69,9 @@ if ($activeModuleConfig) {
             
             $moduleSkin = $moduleData['skin'] ?? $mainSkin;
             $moduleStylesheet = BASE_URL . "/test/asset/css/{$moduleSkin}/{$moduleType}.css";
-
+            if (isset($moduleData['main_skin']) && $moduleData['main_skin'] && !isset($activeEvent['cambios']['skin'])) {
+                $mainSkin = $moduleData['skin'] ?? $mainSkin;
+                }
             $content = View::render('modules/' . $moduleType, $moduleData);
 
         } else {
@@ -78,7 +80,7 @@ if ($activeModuleConfig) {
     } else {
         $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleId}' no fue encontrado en el manifiesto.</div>";
     }
-
+    $mainStylesheet = BASE_URL . "test/asset/css/{$mainSkin}/main.css";
    echo View::render('layouts/main', [
         'page_title' => $pageTitle,
         'favicon' => $favicon,

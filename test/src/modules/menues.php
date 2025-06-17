@@ -44,7 +44,7 @@ function get_module_data(array $moduleConfig, array $context): array
         $discount = $context['module_modifications']['menu']['value'];
         foreach ($items as &$categoria) {
             foreach ($categoria['items'] as &$item) {
-                if (isset($item['es_cat']) && $item['es_subcategoria']) {
+                if (isset($item['es_cat']) && $item['es_cat']) {
                     foreach ($item['items'] as &$producto) {
                         if (isset($producto['precio'])) {
                             $originalPrice = (float)$producto['precio'];

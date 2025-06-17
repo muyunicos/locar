@@ -72,6 +72,7 @@
 
 .c-container .item-list .c-container .c-titulo {
     font-size: clamp(1.2rem, 5vw, 1.4rem);
+    text-align: left;
     font-weight: 600;
     border-bottom-color: var(--cafe-border-color);
     border-left: 3px solid var(--cafe-accent-color);
@@ -82,7 +83,6 @@
     align-items: flex-end;
     gap: 1rem;
 }
-
 
 .titulo-descripcion {
     font-family: var(--font-secondary);
