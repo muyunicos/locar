@@ -64,7 +64,6 @@ function launchApp()
 if ($activeModuleConfig) {
         $moduleType = $activeModuleConfig['tipo'];
         $logicPath = PRIVATE_PATH . '/src/modules/' . $moduleType . '.php';
-
         if (file_exists($logicPath)) {
             require_once $logicPath;
 
@@ -84,6 +83,13 @@ if ($activeModuleConfig) {
         $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleId}' no fue encontrado en el manifiesto.</div>";
     }
     $mainStylesheet = BASE_URL . PRUEBAS . "asset/css/{$mainSkin}/main.css";
+
+    $initialContextForJs = [
+        'profile_title' => $manifest['titulo'],
+        'default_skin' => $manifest['skin'],
+        'default_favicon' => $manifest['favicon'],
+    ];
+
    echo View::render('layouts/main', [
         'page_title' => $pageTitle,
         'favicon' => $favicon,

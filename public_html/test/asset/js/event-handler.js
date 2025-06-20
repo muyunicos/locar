@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
         constructor() {
             this.body = document.body;
             this.clientId = this.body.dataset.clientId;
-            // this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
+            this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
             
             this.baseUrl = this.body.dataset.baseUrl;
             this.prod = this.body.dataset.prod;
