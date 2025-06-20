@@ -1,17 +1,13 @@
 <?php
 
-define('BASE_URL', 'https://loc.ar/');
-define('PRIVATE_PATH', dirname(__DIR__));
-define('PUBLIC_PATH', dirname(__DIR__,2) . '/public_html/') ;
-define('PRUEBAS', 'test/');
-
+require_once __DIR__ . '/config.php';
 require_once PRIVATE_PATH . '/src/View.php';
 require_once PRIVATE_PATH . '/src/EventManager.php';
 require_once PRIVATE_PATH . '/src/Utils.php';
 
 function launchApp()
 {
-    $manifestPath = PUBLIC_PATH . CLIENT_ID . '/datos/manifest.json';
+    $manifestPath = CLIENT_PATH . '/datos/manifest.json';
     if (!file_exists($manifestPath)) {
         http_response_code(404);
         die('Error: Archivo de manifiesto no encontrado.');
@@ -70,7 +66,7 @@ if ($activeModuleConfig) {
             $moduleData = get_module_data($activeModuleConfig, $activeEventContext);
             
             $moduleSkin = $moduleData['skin'] ?? $mainSkin;
-            $moduleStylesheet = BASE_URL . PRUEBAS ."asset/css/{$moduleSkin}/{$moduleType}.css";
+            $moduleStylesheet = PUBLIC_URL ."/asset/css/{$moduleSkin}/{$moduleType}.css";
             if (isset($moduleData['main_skin']) && $moduleData['main_skin'] === true && empty($activeEvent['cambios']['skin'])) {
     $mainSkin = $moduleData['skin'];
 }
@@ -82,12 +78,12 @@ if ($activeModuleConfig) {
     } else {
         $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleId}' no fue encontrado en el manifiesto.</div>";
     }
-    $mainStylesheet = BASE_URL . PRUEBAS . "asset/css/{$mainSkin}/main.css";
+    $mainStylesheet = PUBLIC_URL . "/asset/css/{$mainSkin}/main.css";
 
     $initialContextForJs = [
         'profile_title' => $manifest['titulo'],
         'default_skin' => $manifest['skin'],
-        'default_favicon' => $manifest['favicon'],
+        'default_favicon' => $manifest['favicon']
     ];
 
    echo View::render('layouts/main', [
@@ -98,8 +94,8 @@ if ($activeModuleConfig) {
         'module_stylesheet' => $moduleStylesheet,
         'content' => $content,
         'client_id' => CLIENT_ID,
-        'base_url' => BASE_URL,
-        'prod' => PRUEBAS,
+        'client_url' => CLIENT_URL,
+        'dev' => DEV_BRANCH,
         'navigable_modules' => $navigableModules,
         'initial_context_json' => json_encode($initialContextForJs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)
     ]);
