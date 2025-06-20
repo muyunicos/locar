@@ -14,10 +14,7 @@ require_once defined("DEV_BRANCH") && DEV_BRANCH
     ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php"
     : dirname(__DIR__, 3) . "/core/src/Config.php";
 
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowed_origins = ['https://' . ($_GET['client'] ?? '') . '.loc.ar', 'https://loc.ar'];
-if (in_array($origin, $allowed_origins)) { header('Access-Control-Allow-Origin: ' . $origin); }
-
+header('Access-Control-Allow-Origin: ' . parse_url(CLIENT_URL)); }
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header(

@@ -10,19 +10,12 @@ if (isset($_GET["dev"]) && !defined("DEV_BRANCH")) {
     define("DEV_BRANCH", $_GET["dev"]);
 }
 
-require_once defined("DEV_BRANCH") && DEV_BRANCH
-    ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php"
-    : dirname(__DIR__, 3) . "/core/src/Config.php";
+require_once defined("DEV_BRANCH") && DEV_BRANCH ? dirname(__DIR__, 5) . "/core/" . DEV_BRANCH . "/src/Config.php" : dirname(__DIR__, 4) . "/core/src/config.php";
 
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowed_origins = ['https://' . ($_GET['client'] ?? '') . '.loc.ar', 'https://loc.ar'];
-if (in_array($origin, $allowed_origins)) { header('Access-Control-Allow-Origin: ' . $origin); }
-
+header('Access-Control-Allow-Origin: ' . parse_url(CLIENT_URL) };
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header(
-    "Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With"
-);
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 header("Content-Type: application/json");
 

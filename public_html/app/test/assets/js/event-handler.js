@@ -26,16 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                let apiUrl = `${this.publicUrl}/api/agenda.php?client=${this.clientId}`;
+                let apiUrl = '${this.publicUrl}/api/agenda.php?client=${this.clientId}';
                 if (this.devId) {
-                    apiUrl += `&dev=${this.devId}`;
+                    apiUrl += '&dev=${this.devId}';
                 }
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-                
                 const agendaData = await response.json();
                 this.scheduleEvents(agendaData);
-
             } catch (error) {
                 console.error('No se pudo obtener la agenda de eventos:', error);
             }
