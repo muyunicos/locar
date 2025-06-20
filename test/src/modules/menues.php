@@ -14,7 +14,7 @@ function process_images_recursively(array &$item)
 
 function get_module_data(array $moduleConfig, array $context): array
 {
-    $dataPath = __DIR__ . '/../../../public_html/' . CLIENT_ID . '/datos/' . $moduleConfig['url'];
+    $dataPath = PUBLIC_PATH . CLIENT_ID . '/datos/' . $moduleConfig['url'];
     
     if (!file_exists($dataPath)) {
         return [

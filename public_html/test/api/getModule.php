@@ -16,7 +16,8 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', CLIENT_ID) || !preg_match('/^[a-zA-Z0-9_-]
     die("<div class='app-error'>Error: ID de cliente o módulo inválido.</div>");
 }
 
-$manifestPath = __DIR__ . '/../' . CLIENT_ID . '/datos/manifest.json';
+// FIX: Corrected path to manifest.json
+$manifestPath = __DIR__ . '/../datos/manifest.json';
 if (!file_exists($manifestPath)) {
     http_response_code(404);
     die("<div class='app-error'>Error: Manifiesto no encontrado.</div>");
@@ -44,7 +45,8 @@ $logicPath = __DIR__ . '/../../test/src/modules/' . $moduleType . '.php';
 if (file_exists($logicPath)) {
     require_once $logicPath;
 
-    $eventManager = new EventManager($manifest['timed_events'] ?? []);
+    // FIX: Use 'eventos' key instead of 'timed_events'
+    $eventManager = new EventManager($manifest['eventos'] ?? []);
     $activeEventContext = $eventManager->getContext();
     $activeEvent = $activeEventContext['active_event'];
     $globalSkin = $activeEvent['then']['set_skin'] ?? $manifest['default_skin'];

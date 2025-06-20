@@ -13,7 +13,7 @@ class EventManager
 
    private function isDateInRange(array $event, DateTime $now): bool
     {
-        $dateRange = $event['when']['date_range'] ?? [];
+        $dateRange = $event['cuando']['date_range'] ?? [];
 
         if (empty($dateRange['start']) || empty($dateRange['end'])) {
             return true;
@@ -30,17 +30,16 @@ class EventManager
 
     private function isDayActive(array $event, DateTime $now): bool
     {
-        if (empty($event['when']['active_on_days'])) {
+        if (empty($event['cuando']['active_on_days'])) {
             return true;
         }
         $currentDay = $now->format('N');
-        return in_array($currentDay, $event['when']['active_on_days']);
+        return in_array($currentDay, $event['cuando']['active_on_days']);
     }
 
     private function isTimeActive(array $event, DateTime $now): bool
     {
-        // Buscamos la configuración dentro de when.time_range
-        $timeRange = $event['when']['time_range'] ?? [];
+        $timeRange = $event['cuando']['time_range'] ?? [];
 
         if (empty($timeRange['start']) || empty($timeRange['end'])) {
             return true;
@@ -66,7 +65,7 @@ class EventManager
 
     private function isEventActive(array $event, DateTime $now): bool
     {
-        if (!isset($event['when'])) {
+        if (!isset($event['cuando'])) {
             return false;
         }
         return $this->isDateInRange($event, $now) &&
@@ -90,7 +89,7 @@ class EventManager
         }
 
         usort($activeEvents, function ($a, $b) {
-            return ($b['priority'] ?? 0) <=> ($a['priority'] ?? 0);
+            return ($b['prioridad'] ?? 0) <=> ($a['prioridad'] ?? 0);
         });
 
         return ['active_event' => $activeEvents[0]];
@@ -107,18 +106,19 @@ class EventManager
             foreach ($this->events as $event) {
                 if ($this->isDateInRange($event, $day) && $this->isDayActive($event, $day)) {
                     
-                    if (empty($event['start_time']) || empty($event['end_time'])) {
+                    $timeRange = $event['cuando']['time_range'] ?? [];
+                    if (empty($timeRange['start']) || empty($timeRange['end'])) {
                         continue;
                     }
 
                     $eventStartDateTime = (clone $day)->setTime(
-                        (int)substr($event['start_time'], 0, 2),
-                        (int)substr($event['start_time'], 3, 2)
+                        (int)substr($timeRange['start'], 0, 2),
+                        (int)substr($timeRange['start'], 3, 2)
                     );
 
                     $eventEndDateTime = (clone $day)->setTime(
-                        (int)substr($event['end_time'], 0, 2),
-                        (int)substr($event['end_time'], 3, 2)
+                        (int)substr($timeRange['end'], 0, 2),
+                        (int)substr($timeRange['end'], 3, 2)
                     );
                     
                     if ($eventStartDateTime > $eventEndDateTime) {

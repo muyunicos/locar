@@ -4,7 +4,7 @@ class View {
     {
         extract($data);
         ob_start();
-        include __DIR__ . '/../templates/' . $templateName . '.html';
+        include PRIVATE_PATH . '/templates/' . $templateName . '.html';
         return ob_get_clean();
     }
 }

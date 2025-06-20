@@ -4,15 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
         constructor() {
             this.body = document.body;
             this.clientId = this.body.dataset.clientId;
-            this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
+            // this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
             
             this.baseUrl = this.body.dataset.baseUrl;
-
+            this.prod = this.body.dataset.prod;
             this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
             this.favicon = document.getElementById('favicon');
             
-            this.activeEvents = {}; // Un objeto para guardar los eventos actualmente activos
-            this.timers = [];       // Guardaremos las referencias a nuestros timers
+            this.activeEvents = {};
+            this.timers = [];
             this.currentSkin = this.initialContext.default_skin || 'default';
         }
 
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch(`${this.baseUrl}test/api/agenda.php?client=${this.clientId}`);
+                const response = await fetch(`${this.baseUrl}${this.prod}api/agenda.php?client=${this.clientId}&baseUrl=${baseUrl}`);
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 
                 const agendaData = await response.json();
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         destroy() {
             console.log('Limpiando todos los timers programados.');
             this.timers.forEach(timer => clearTimeout(timer));
-            this.timers = []; // Vaciar el array
+            this.timers = [];
         }
     }
 

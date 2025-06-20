@@ -6,11 +6,9 @@ class Utils
         if (empty($imageName)) {
             return null;
         }
-
         if (strpos($imageName, '.') === false) {
             $imageName .= '.webp';
         }
-
-        return rtrim(BASE_URL, '/') . '/' . CLIENT_ID . '/imagenes/' . $imageName;
+        return BASE_URL . CLIENT_ID . '/imagenes/' . $imageName;
     }
 }

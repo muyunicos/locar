@@ -2,17 +2,17 @@
 header("Access-Control-Allow-Origin: https://revel.loc.ar");
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../../test/src/EventManager.php';
+require_once __DIR__ . '../../../test/src/EventManager.php';
 
 $clientId = $_GET['client'] ?? '';
 
 if (!preg_match('/^[a-zA-Z0-9_-]+$/', $clientId)) {
-    http_response_code(400); // Bad Request
+    http_response_code(400);
     echo json_encode(['error' => 'ID de cliente inválido.']);
     exit;
 }
 
-$manifestPath = __DIR__ . '/../' . $clientId . '/datos/manifest.json';
+$manifestPath = __DIR__ . '/../../' . $clientId . '/datos/manifest.json';
 
 if (!file_exists($manifestPath)) {
     http_response_code(404); // Not Found
@@ -28,7 +28,8 @@ if (json_last_error() !== JSON_ERROR_NONE) {
 }
 
 try {
-    $eventManager = new EventManager($manifest['timed_events']);
+    // FIX: Use 'eventos' key instead of 'timed_events'
+    $eventManager = new EventManager($manifest['eventos'] ?? []);
 
     $timezone = new DateTimeZone('America/Argentina/Buenos_Aires');
     $now = new DateTime('now', $timezone);

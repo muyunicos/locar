@@ -8,6 +8,7 @@
   "modulo": 1,
   "eventos": [
     {
+      "id": 1,
       "nombre": "Navidad",
       "prioridad": 100,
       "cuando": {
@@ -20,6 +21,7 @@
       }
     },
     {
+      "id": 2,
       "nombre": "Noche",
       "prioridad": 10,
       "cuando": {

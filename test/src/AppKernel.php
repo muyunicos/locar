@@ -1,14 +1,17 @@
 <?php
 
 define('BASE_URL', 'https://loc.ar/');
+define('PRIVATE_PATH', dirname(__DIR__));
+define('PUBLIC_PATH', dirname(__DIR__,2) . '/public_html/') ;
+define('PRUEBAS', 'test/');
 
-require_once __DIR__ . '/View.php';
-require_once __DIR__ . '/EventManager.php';
-require_once __DIR__ . '/Utils.php';
+require_once PRIVATE_PATH . '/src/View.php';
+require_once PRIVATE_PATH . '/src/EventManager.php';
+require_once PRIVATE_PATH . '/src/Utils.php';
 
 function launchApp()
 {
-    $manifestPath = __DIR__ . '/../../public_html/' . CLIENT_ID . '/datos/manifest.json';
+    $manifestPath = PUBLIC_PATH . CLIENT_ID . '/datos/manifest.json';
     if (!file_exists($manifestPath)) {
         http_response_code(404);
         die('Error: Archivo de manifiesto no encontrado.');
@@ -60,7 +63,7 @@ function launchApp()
 
 if ($activeModuleConfig) {
         $moduleType = $activeModuleConfig['tipo'];
-        $logicPath = __DIR__ . '/modules/' . $moduleType . '.php';
+        $logicPath = PRIVATE_PATH . '/src/modules/' . $moduleType . '.php';
 
         if (file_exists($logicPath)) {
             require_once $logicPath;
@@ -68,7 +71,7 @@ if ($activeModuleConfig) {
             $moduleData = get_module_data($activeModuleConfig, $activeEventContext);
             
             $moduleSkin = $moduleData['skin'] ?? $mainSkin;
-            $moduleStylesheet = BASE_URL . "/test/asset/css/{$moduleSkin}/{$moduleType}.css";
+            $moduleStylesheet = BASE_URL . PRUEBAS ."asset/css/{$moduleSkin}/{$moduleType}.css";
             if (isset($moduleData['main_skin']) && $moduleData['main_skin'] === true && empty($activeEvent['cambios']['skin'])) {
     $mainSkin = $moduleData['skin'];
 }
@@ -80,7 +83,7 @@ if ($activeModuleConfig) {
     } else {
         $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleId}' no fue encontrado en el manifiesto.</div>";
     }
-    $mainStylesheet = BASE_URL . "test/asset/css/{$mainSkin}/main.css";
+    $mainStylesheet = BASE_URL . PRUEBAS . "asset/css/{$mainSkin}/main.css";
    echo View::render('layouts/main', [
         'page_title' => $pageTitle,
         'favicon' => $favicon,
@@ -90,6 +93,7 @@ if ($activeModuleConfig) {
         'content' => $content,
         'client_id' => CLIENT_ID,
         'base_url' => BASE_URL,
+        'prod' => PRUEBAS,
         'navigable_modules' => $navigableModules
     ]);
 }
