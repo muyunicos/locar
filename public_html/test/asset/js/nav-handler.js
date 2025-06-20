@@ -38,7 +38,7 @@
             
             try {
 
-                const response = await fetch(`${baseUrl}${prod}/api/getModule.php?client=${clientId}&id=${moduleId}`);
+                const response = await fetch(`${baseUrl}${prod}api/getModule.php?client=${clientId}&id=${moduleId}`);
                 
                 if (!response.ok) {
                     const errorText = await response.text();

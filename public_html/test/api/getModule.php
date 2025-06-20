@@ -45,7 +45,6 @@ $logicPath = __DIR__ . '/../../test/src/modules/' . $moduleType . '.php';
 if (file_exists($logicPath)) {
     require_once $logicPath;
 
-    // FIX: Use 'eventos' key instead of 'timed_events'
     $eventManager = new EventManager($manifest['eventos'] ?? []);
     $activeEventContext = $eventManager->getContext();
     $activeEvent = $activeEventContext['active_event'];
@@ -63,7 +62,29 @@ if (file_exists($logicPath)) {
 
     $htmlContent = View::render('modules/' . $moduleType, $moduleData);
 
-    header("Access-Control-Allow-Origin: https://revel.loc.ar");
+$allowed_domains = [
+    'loc.ar'
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+$origin_host = null;
+$is_allowed = false;
+
+if ($origin) {
+    $origin_host = parse_url($origin, PHP_URL_HOST);
+    foreach ($allowed_domains as $domain) {
+        if ($origin_host === $domain || str_ends_with($origin_host, '.' . $domain)) {
+            $is_allowed = true;
+            break;
+        }
+    }
+}
+
+if ($is_allowed) {
+    header("Access-Control-Allow-Origin: " . $origin);
+}
+
+
+
     header('Content-Type: application/json');
     echo json_encode([
         'html' => $htmlContent,
