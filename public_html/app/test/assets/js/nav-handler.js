@@ -6,6 +6,8 @@
         const devId = document.body.dataset.devId;
         const url = document.body.dataset.clientUrl;
         const clientId = document.body.dataset.clientId;
+        const initialContext = JSON.parse(document.body.dataset.initialContext || '{}');
+        const baseTitle = initialContext.profile_title || 'Revel';
         hamburgerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             navPanel.classList.toggle('open');
@@ -42,6 +44,7 @@
                 if (devId) {
                     apiUrl += `&dev=${devId}`;
                 }
+
                 const response = await fetch(apiUrl);;
                 
                 if (!response.ok) {
@@ -51,9 +54,18 @@
 
                 const data = await response.json();
                 const moduleStylesheet = document.getElementById('module-stylesheet');
+                if (data.hasOwnProperty('sufijo') && baseTitle) {
+                    document.title = baseTitle + (data.sufijo || '');
+                }
                 if (moduleStylesheet && data.hasOwnProperty('css_url')) {
                     moduleStylesheet.href = data.css_url || '';
                 }
+
+                const mainStylesheet = document.getElementById('main-stylesheet');
+                if (mainStylesheet && data.main_skin_override === true && data.main_css_url) {
+                    mainStylesheet.href = data.main_css_url;
+                }
+
                 appContainer.innerHTML = data.html;
             } catch (error) {
                 console.error('Error al cargar el módulo:', error);

@@ -6,6 +6,7 @@ require_once __DIR__ . "/Config.php";
 require_once PRIVATE_PATH . "/src/View.php";
 require_once PRIVATE_PATH . "/src/EventManager.php";
 require_once PRIVATE_PATH . "/src/Utils.php";
+require_once PRIVATE_PATH . "/src/ModuleLoader.php";
 
 function launchApp()
 {
@@ -36,9 +37,8 @@ function launchApp()
     );
     $mainSkin = $activeEvent["cambios"]["skin"] ?? $manifest["skin"];
 
-    if (isset($activeEvent["cambios"]["sufijo"])) {
-        $pageTitle .= $activeEvent["cambios"]["sufijo"];
-    }
+    
+
 
     $navigableModules = [];
     foreach ($manifest["modulos"] as $moduleConfig) {
@@ -52,44 +52,23 @@ function launchApp()
         }
     }
 
-    $content = "";
-    $activeModuleConfig = null;
+    $moduleLoader = new ModuleLoader($manifest, $activeEventContext);
     $activeModuleId = $activeEvent["cambios"]["modulo"] ?? $manifest["modulo"];
-    foreach ($manifest["modulos"] as $module) {
-        if ($module["id"] === $activeModuleId) {
-            $activeModuleConfig = $module;
-            break;
-        }
-    }
+    $moduleResult = $moduleLoader->loadById($activeModuleId);
 
-    if ($activeModuleConfig) {
-        $moduleType = $activeModuleConfig["tipo"];
-        $logicPath = PRIVATE_PATH . "/src/modules/" . $moduleType . ".php";
-        if (file_exists($logicPath)) {
-            require_once $logicPath;
-
-            $moduleData = get_module_data(
-                $activeModuleConfig,
-                $activeEventContext
-            );
-
-            $moduleSkin = $moduleData["skin"] ?? $mainSkin;
-            $moduleStylesheet =
-                PUBLIC_URL . "/assets/css/{$moduleSkin}/{$moduleType}.css";
-            if (
-                isset($moduleData["main_skin"]) &&
-                $moduleData["main_skin"] === true &&
-                empty($activeEvent["cambios"]["skin"])
-            ) {
-                $mainSkin = $moduleData["skin"];
-            }
-            $content = View::render("modules/" . $moduleType, $moduleData);
+    if (isset($activeEvent["cambios"]["sufijo"])) {
+            $pageTitle .= $activeEvent["cambios"]["sufijo"];
         } else {
-            $content = "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>";
+            $pageTitle .= $moduleResult['sufijo'];
         }
-    } else {
-        $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleId}' no fue encontrado en el manifiesto.</div>";
+
+    $content = $moduleResult['html'];
+    $moduleStylesheet = $moduleResult['css_url'];
+    
+    if ($moduleResult['main_skin_override'] && empty($activeEvent["cambios"]["skin"])) {
+        $mainSkin = $moduleResult['skin'];
     }
+
     $mainStylesheet = PUBLIC_URL . "/assets/css/{$mainSkin}/main.css";
 
     $initialContextForJs = [

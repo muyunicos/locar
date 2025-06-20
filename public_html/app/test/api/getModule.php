@@ -26,6 +26,7 @@ header("Content-Type: application/json");
 require_once PRIVATE_PATH . "/src/View.php";
 require_once PRIVATE_PATH . "/src/EventManager.php";
 require_once PRIVATE_PATH . "/src/Utils.php";
+require_once PRIVATE_PATH . "/src/ModuleLoader.php";
 
 $moduleId = $_GET["id"] ?? "";
 
@@ -38,9 +39,9 @@ if (
     exit();
 }
 
-$manifestPath = CLIENT_PATH . "/datos/manifest.json";
+$manifestPath = CLIENT_PATH . "/datos/manifest.json"; //
 
-if (!file_exists($manifestPath)) {
+if (!file_exists($manifestPath)) { //
     http_response_code(404);
     echo json_encode([
         "error" => "Error: Manifiesto no encontrado. Path: " . $manifestPath,
@@ -48,56 +49,30 @@ if (!file_exists($manifestPath)) {
     exit();
 }
 
-$manifest = json_decode(file_get_contents($manifestPath), true);
-$moduleConfig = null;
-foreach ($manifest["modulos"] as $module) {
-    if ((string) $module["id"] === $moduleId) {
-        $moduleConfig = $module;
-        break;
-    }
-}
+$manifest = json_decode(file_get_contents($manifestPath), true); //
 
-if (!$moduleConfig) {
+$eventManager = new EventManager($manifest["eventos"] ?? []); //
+$activeEventContext = $eventManager->getContext(); //
+
+$moduleLoader = new ModuleLoader($manifest, $activeEventContext);
+$moduleResult = $moduleLoader->loadById($moduleId);
+
+if ($moduleResult['error']) {
     http_response_code(404);
-    echo json_encode([
-        "error" => "Error: Módulo con ID '{$moduleId}' no encontrado.",
-    ]);
+    echo json_encode(["html" => $moduleResult['html'], "css_url" => null]);
     exit();
 }
 
-$moduleType = $moduleConfig["tipo"];
+$responseData = [
+    "html" => $moduleResult['html'],
+    "css_url" => $moduleResult['css_url'],
+    "main_skin_override" => $moduleResult['main_skin_override'],
+    "sufijo" => $moduleResult['sufijo']
+];
 
-$logicPath = PRIVATE_PATH . "/src/modules/" . $moduleType . ".php";
-
-if (file_exists($logicPath)) {
-    require_once $logicPath;
-
-    $eventManager = new EventManager($manifest["eventos"] ?? []);
-    $activeEventContext = $eventManager->getContext();
-
-    $moduleData = get_module_data($moduleConfig, $activeEventContext);
-
-    $activeEvent = $activeEventContext["active_event"];
-    $globalSkin = $activeEvent["cambios"]["skin"] ?? $manifest["skin"];
-    $moduleSkin = $moduleData["skin"] ?? $globalSkin;
-    $cssUrl = null;
-    $moduleCssPath = "assets/css/{$moduleSkin}/{$moduleType}.css";
-
-    if (file_exists(PUBLIC_PATH . $moduleCssPath)) {
-        $cssUrl = PUBLIC_URL . $moduleCssPath;
-    }
-
-    $htmlContent = View::render("modules/" . $moduleType, $moduleData);
-
-    echo json_encode([
-        "html" => $htmlContent,
-        "css_url" => $cssUrl,
-    ]);
-    
-} else {
-    http_response_code(500);
-    echo json_encode([
-        "error" => "Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.",
-    ]);
-    exit();
+if ($moduleResult['main_skin_override']) {
+    $mainCssUrl = PUBLIC_URL . "/assets/css/" . $moduleResult['skin'] . "/main.css";
+    $responseData['main_css_url'] = $mainCssUrl;
 }
+
+echo json_encode($responseData);
