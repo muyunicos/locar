@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.body = document.body;
             this.clientId = this.body.dataset.clientId;
             this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
-            this.baseUrl = this.body.dataset.baseUrl;
-            this.prod = this.body.dataset.prod;
+            this.publicUrl = this.body.dataset.publicUrl; 
+            this.devId = this.body.dataset.devId;
             this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
             this.favicon = document.getElementById('favicon');
             this.activeEvents = {};
@@ -20,13 +20,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            if (!this.baseUrl) {
+            if (!this.publicUrl) {
                 console.error('Scheduler Error: Base URL no encontrada en el body.');
                 return;
             }
 
             try {
-                const response = await fetch(`${this.baseUrl}${this.prod}api/agenda.php?client=${this.clientId}&baseUrl=${this.baseUrl}`);
+                let apiUrl = `${this.publicUrl}/api/agenda.php?client=${this.clientId}`;
+                if (this.devId) {
+                    apiUrl += `&dev=${this.devId}`;
+                }
+                const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 
                 const agendaData = await response.json();
@@ -113,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (this.favicon && faviconPath) {
                 if (faviconPath.startsWith('/')) {
-                    this.favicon.href = `${this.baseUrl}${faviconPath.substring(1)}`;
+                    this.favicon.href = `${this.publicUrl}${faviconPath.substring(1)}`;
                 } else {
                     this.favicon.href = faviconPath;
                 }

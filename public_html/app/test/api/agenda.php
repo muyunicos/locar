@@ -30,7 +30,7 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', CLIENT_ID)) {
     exit();
 }
 
-$manifestPath = __DIR__ . "/../../" . CLIENT_ID . "/datos/manifest.json";
+$manifestPath = CLIENT_PATH . "/datos/manifest.json";
 
 if (!file_exists($manifestPath)) {
     http_response_code(404);

@@ -2,8 +2,8 @@
         const navPanel = document.getElementById('nav-panel');
         const hamburgerBtn = document.getElementById('hamburger-button');
         const appContainer = document.getElementById('module-content-wrapper');
-        const clientId = document.body.dataset.clientId;
-        const baseUrl = document.body.dataset.baseUrl;
+        const publicUrl = document.body.dataset.publicUrl;
+        const devId = document.body.dataset.devId;
         const prod = document.body.dataset.prod;
         hamburgerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -37,8 +37,11 @@
             appContainer.innerHTML = `<h2>Cargando...</h2>`;
             
             try {
-
-                const response = await fetch(`${baseUrl}${prod}api/getModule.php?client=${clientId}&id=${moduleId}`);
+                let apiUrl = `${baseUrl}/api/getModule.php?client=${clientId}&id=${moduleId}`;
+                if (devId) {
+                    apiUrl += `&dev=${devId}`;
+                }
+                const response = const response = await fetch(apiUrl);;
                 
                 if (!response.ok) {
                     const errorText = await response.text();

@@ -105,7 +105,7 @@ function launchApp()
         "content" => $content,
         "client_id" => CLIENT_ID,
         "dev_id" => DEV_BRANCH,
-        "public_url" => PUBLIC_PATH,
+        "public_url" => PUBLIC_URL,
         "navigable_modules" => $navigableModules,
         "initial_context_json" => json_encode(
             $initialContextForJs,
