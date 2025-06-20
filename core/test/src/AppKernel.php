@@ -35,10 +35,8 @@ function launchApp()
     $favicon = Utils::buildImageUrl(
         $activeEvent["cambios"]["favicon"] ?? $manifest["favicon"]
     );
-    $mainSkin = $activeEvent["cambios"]["skin"] ?? $manifest["skin"];
-
     
-
+    $mainSkin = $activeEvent["cambios"]["skin"] ?? $manifest["skin"];
 
     $navigableModules = [];
     foreach ($manifest["modulos"] as $moduleConfig) {
