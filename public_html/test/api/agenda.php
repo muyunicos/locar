@@ -1,5 +1,36 @@
 <?php
-header("Access-Control-Allow-Origin: https://revel.loc.ar");
+$allowed_domains = [
+    'loc.ar'
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? null;
+$origin_host = null;
+$is_allowed = false;
+
+if ($origin) {
+
+    $origin_host = parse_url($origin, PHP_URL_HOST);
+    foreach ($allowed_domains as $domain) {
+        if ($origin_host === $domain || str_ends_with($origin_host, '.' . $domain)) {
+            $is_allowed = true;
+            break;
+        }
+    }
+}
+
+if ($is_allowed) {
+    header("Access-Control-Allow-Origin: " . $origin);
+    //header("Access-Control-Allow-Credentials: true");
+    //header("Access-Control-Max-Age: 86400"); 
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    if ($is_allowed) {
+        //header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        //header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+    }
+    exit(0);
+}
+
 header('Content-Type: application/json');
 
 require_once __DIR__ . '../../../test/src/EventManager.php';
