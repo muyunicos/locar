@@ -14,32 +14,32 @@
 <body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>' data-public-url="<?= htmlspecialchars($public_url) ?>" data-dev-id="<?= htmlspecialchars($dev_id) ?>" data-client-url="<?= htmlspecialchars($client_url) ?>">
     <div class="nav-panel" id="nav-panel">
         <ul>
-            <?php foreach ($navigable_modules as $navModule): ?>
-                <li>
-                    <?php if ($navModule['type'] === 'link'): ?>
-                        <a href="<?= htmlspecialchars($navModule['url']) ?>" class="nav-link is-external" target="_blank" rel="noopener noreferrer">
-                            <?= htmlspecialchars($navModule['title']) ?>
-                        </a>
-                    <?php else: ?>
-                        <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
-                            <?= htmlspecialchars($navModule['title']) ?>
-                        </a>
-                    <?php endif; ?>
-                </li>
-            <?php endforeach; ?>
+<?php foreach ($navigable_modules as $navModule): ?>
+            <li>
+<?php if ($navModule['type'] === 'link'): ?>
+                <a href="<?= htmlspecialchars($navModule['url']) ?>" class="nav-link is-external" target="_blank" rel="noopener noreferrer">
+<?= htmlspecialchars($navModule['title']) ?>
+                </a>
+<?php else: ?>
+                <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
+<?= htmlspecialchars($navModule['title']) ?>
+                </a>
+<?php endif; ?>
+            </li>
+<?php endforeach; ?>
         </ul>
     </div>
     <header class="nav-header">
-        <?php if (!empty($logo_url)): ?>
-            <img src="<?= htmlspecialchars($logo_url) ?>" alt="Logo" class="header-logo">
-        <?php else: ?>
-            <h1 id="page-main-title"><?= htmlspecialchars($page_title) ?></h1>
-        <?php endif; ?>
+<?php if (!empty($logo_url)): ?>
+        <img src="<?= htmlspecialchars($logo_url) ?>" alt="Logo" class="header-logo">
+<?php else: ?>
+        <h1 id="page-main-title"><?= htmlspecialchars($page_title) ?></h1>
+<?php endif; ?>
         <button class="hamburger-button" id="hamburger-button">&#9776;</button>
     </header>
     <div id="app-container">
         <main id="module-content-wrapper">
-            <?= $content ?>
+<?= $content ?>
         </main>
     </div>
     <script src="<?= htmlspecialchars($public_url) ?>/assets/js/event-handler.js"></script>
