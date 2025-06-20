@@ -4,6 +4,7 @@
         const appContainer = document.getElementById('module-content-wrapper');
         const publicUrl = document.body.dataset.publicUrl;
         const devId = document.body.dataset.devId;
+        const url = document.body.dataset.clientUrl;
         const clientId = document.body.dataset.clientId;
         hamburgerBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -37,7 +38,7 @@
             appContainer.innerHTML = `<h2>Cargando...</h2>`;
             
             try {
-                let apiUrl = `${publicUrl}/api/getModule.php?client=${clientId}&id=${moduleId}`;
+                let apiUrl = `${publicUrl}/api/getModule.php?client=${clientId}&id=${moduleId}&url=${url}`;
                 if (devId) {
                     apiUrl += `&dev=${devId}`;
                 }

@@ -1,5 +1,7 @@
 <?php
 
+define ('CLIENT_URL', str_starts_with($_SERVER['HTTP_HOST'], CLIENT_ID . '.') ? "https://" . $_SERVER['HTTP_HOST'] : "https://" . $_SERVER['HTTP_HOST'] . '/' . CLIENT_ID );
+
 require_once __DIR__ . "/Config.php";
 require_once PRIVATE_PATH . "/src/View.php";
 require_once PRIVATE_PATH . "/src/EventManager.php";
@@ -106,6 +108,7 @@ function launchApp()
         "client_id" => CLIENT_ID,
         "dev_id" => DEV_BRANCH,
         "public_url" => PUBLIC_URL,
+        "client_url" => CLIENT_URL,
         "navigable_modules" => $navigableModules,
         "initial_context_json" => json_encode(
             $initialContextForJs,

@@ -6,20 +6,21 @@ if (isset($_GET["client"]) && !defined("CLIENT_ID")) {
     define("CLIENT_ID", $_GET["client"]);
 }
 
+if (isset($_GET["url"]) && !defined("CLIENT_URL")) {
+    define("CLIENT_URL", $_GET["url"]);
+}
+
 if (isset($_GET["dev"]) && !defined("DEV_BRANCH")) {
     define("DEV_BRANCH", $_GET["dev"]);
 }
 
-require_once defined("DEV_BRANCH") && DEV_BRANCH
-    ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php"
-    : dirname(__DIR__, 3) . "/core/src/Config.php";
+require_once defined("DEV_BRANCH") && DEV_BRANCH ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php" : dirname(__DIR__, 3) . "/core/src/config.php";
 
-header('Access-Control-Allow-Origin: ' . parse_url(CLIENT_URL)); }
+header('Access-Control-Allow-Origin: ' . CLIENT_URL );
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header(
-    "Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With"
-);
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+
 header("Content-Type: application/json");
 
 require_once PRIVATE_PATH . "/src/View.php";
@@ -65,6 +66,7 @@ if (!$moduleConfig) {
 }
 
 $moduleType = $moduleConfig["tipo"];
+
 $logicPath = PRIVATE_PATH . "/src/modules/" . $moduleType . ".php";
 
 if (file_exists($logicPath)) {
@@ -91,6 +93,7 @@ if (file_exists($logicPath)) {
         "html" => $htmlContent,
         "css_url" => $cssUrl,
     ]);
+    
 } else {
     http_response_code(500);
     echo json_encode([

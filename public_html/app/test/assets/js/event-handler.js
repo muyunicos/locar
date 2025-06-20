@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.body = document.body;
             this.clientId = this.body.dataset.clientId;
             this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
-            this.publicUrl = this.body.dataset.publicUrl; 
+            this.publicUrl = this.body.dataset.publicUrl;
+            this.url = this.body.dataset.clientUrl;
             this.devId = this.body.dataset.devId;
             this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
             this.favicon = document.getElementById('favicon');
@@ -26,14 +27,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                let apiUrl = '${this.publicUrl}/api/agenda.php?client=${this.clientId}';
+                let apiUrl = `${this.publicUrl}/api/agenda.php?client=${this.clientId}&url=${this.url}`;
                 if (this.devId) {
-                    apiUrl += '&dev=${this.devId}';
+                    apiUrl += `&dev=${this.devId}`;
                 }
                 const response = await fetch(apiUrl);
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                
                 const agendaData = await response.json();
                 this.scheduleEvents(agendaData);
+
             } catch (error) {
                 console.error('No se pudo obtener la agenda de eventos:', error);
             }
