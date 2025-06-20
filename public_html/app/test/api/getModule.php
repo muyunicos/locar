@@ -79,7 +79,7 @@ if (file_exists($logicPath)) {
     $globalSkin = $activeEvent["cambios"]["skin"] ?? $manifest["skin"];
     $moduleSkin = $moduleData["skin"] ?? $globalSkin;
     $cssUrl = null;
-    $moduleCssPath = "asset/css/{$moduleSkin}/{$moduleType}.css";
+    $moduleCssPath = "assets/css/{$moduleSkin}/{$moduleType}.css";
 
     if (file_exists(PUBLIC_PATH . $moduleCssPath)) {
         $cssUrl = PUBLIC_URL . $moduleCssPath;

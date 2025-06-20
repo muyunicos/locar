@@ -20,6 +20,7 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header(
     "Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With"
 );
+
 header("Content-Type: application/json");
 
 require_once PRIVATE_PATH . "/src/EventManager.php";
@@ -58,6 +59,7 @@ try {
         "server_time_iso" => $now->format(DateTime::ISO8601),
         "events_agenda" => $agenda,
     ]);
+
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([

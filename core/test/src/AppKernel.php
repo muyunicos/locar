@@ -10,7 +10,7 @@ function launchApp()
     $manifestPath = CLIENT_PATH . "/datos/manifest.json";
     if (!file_exists($manifestPath)) {
         http_response_code(404);
-        die("Error: Archivo de manifiesto no encontrado.");
+        die("Error: Archivo de manifiesto no encontrado en $manifestPath .");
     }
 
     $manifest = json_decode(file_get_contents($manifestPath), true);
@@ -73,7 +73,7 @@ function launchApp()
 
             $moduleSkin = $moduleData["skin"] ?? $mainSkin;
             $moduleStylesheet =
-                PUBLIC_URL . "/asset/css/{$moduleSkin}/{$moduleType}.css";
+                PUBLIC_URL . "/assets/css/{$moduleSkin}/{$moduleType}.css";
             if (
                 isset($moduleData["main_skin"]) &&
                 $moduleData["main_skin"] === true &&
@@ -88,7 +88,7 @@ function launchApp()
     } else {
         $content = "<div class='app-error'>Error: El módulo por defecto '{$activeModuleId}' no fue encontrado en el manifiesto.</div>";
     }
-    $mainStylesheet = PUBLIC_URL . "/asset/css/{$mainSkin}/main.css";
+    $mainStylesheet = PUBLIC_URL . "/assets/css/{$mainSkin}/main.css";
 
     $initialContextForJs = [
         "profile_title" => $manifest["titulo"],
