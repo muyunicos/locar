@@ -5,12 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
             this.body = document.body;
             this.clientId = this.body.dataset.clientId;
             this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
-            
             this.baseUrl = this.body.dataset.baseUrl;
             this.prod = this.body.dataset.prod;
             this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
             this.favicon = document.getElementById('favicon');
-            
             this.activeEvents = {};
             this.timers = [];
             this.currentSkin = this.initialContext.default_skin || 'default';
@@ -28,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const response = await fetch(`${this.baseUrl}${this.prod}api/agenda.php?client=${this.clientId}&baseUrl=${baseUrl}`);
+                const response = await fetch(`${this.baseUrl}${this.prod}api/agenda.php?client=${this.clientId}&baseUrl=${this.baseUrl}`);
                 if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
                 
                 const agendaData = await response.json();

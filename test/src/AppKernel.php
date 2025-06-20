@@ -100,6 +100,7 @@ if ($activeModuleConfig) {
         'client_id' => CLIENT_ID,
         'base_url' => BASE_URL,
         'prod' => PRUEBAS,
-        'navigable_modules' => $navigableModules
+        'navigable_modules' => $navigableModules,
+        'initial_context_json' => json_encode($initialContextForJs, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT)
     ]);
 }
