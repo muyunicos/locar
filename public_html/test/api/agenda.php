@@ -19,21 +19,21 @@ if ($origin) {
 
 if ($is_allowed) {
     header("Access-Control-Allow-Origin: " . $origin);
-    //header("Access-Control-Allow-Credentials: true");
-    //header("Access-Control-Max-Age: 86400"); 
+    header("Access-Control-Allow-Credentials: true");
+    header("Access-Control-Max-Age: 86400"); 
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     if ($is_allowed) {
-        //header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-        //header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
     }
     exit(0);
 }
 
 header('Content-Type: application/json');
 
-require_once __DIR__ . '../../../test/src/EventManager.php';
+require_once __DIR__ . '/../../../test/src/EventManager.php';
 
 $clientId = $_GET['client'] ?? '';
 
@@ -46,20 +46,20 @@ if (!preg_match('/^[a-zA-Z0-9_-]+$/', $clientId)) {
 $manifestPath = __DIR__ . '/../../' . $clientId . '/datos/manifest.json';
 
 if (!file_exists($manifestPath)) {
-    http_response_code(404); // Not Found
+    http_response_code(404);
     echo json_encode(['error' => 'Manifiesto no encontrado para el cliente.']);
     exit;
 }
 
 $manifest = json_decode(file_get_contents($manifestPath), true);
 if (json_last_error() !== JSON_ERROR_NONE) {
-    http_response_code(500); // Internal Server Error
+    http_response_code(500); 
     echo json_encode(['error' => 'Error al leer el manifiesto.']);
     exit;
 }
 
 try {
-    // FIX: Use 'eventos' key instead of 'timed_events'
+
     $eventManager = new EventManager($manifest['eventos'] ?? []);
 
     $timezone = new DateTimeZone('America/Argentina/Buenos_Aires');
