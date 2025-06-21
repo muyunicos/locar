@@ -1,83 +1,87 @@
-    document.addEventListener('DOMContentLoaded', () => {
-        const navPanel = document.getElementById('nav-panel');
-        const hamburgerBtn = document.getElementById('hamburger-button');
-        const appContainer = document.getElementById('module-content-wrapper');
-        const publicUrl = document.body.dataset.publicUrl;
-        const devId = document.body.dataset.devId;
-        const url = document.body.dataset.clientUrl;
-        const clientId = document.body.dataset.clientId;
-        const initialContext = JSON.parse(document.body.dataset.initialContext || '{}');
-        const baseTitle = initialContext.profile_title || 'Revel';
-        hamburgerBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            navPanel.classList.toggle('open');
-        });
+document.addEventListener('DOMContentLoaded', () => {
+    const navPanel = document.getElementById('nav-panel');
+    const hamburgerBtn = document.getElementById('hamburger-button');
+    const appContainer = document.getElementById('module-content-wrapper');
+    const publicUrl = document.body.dataset.publicUrl;
+    const devId = document.body.dataset.devId;
+    const url = document.body.dataset.clientUrl;
+    const clientId = document.body.dataset.clientId;
+    const initialContext = JSON.parse(document.body.dataset.initialContext || '{}');
+    const baseTitle = initialContext.profile_title || 'Revel';
 
-        document.addEventListener('click', (e) => {
-            if (navPanel.classList.contains('open') && !navPanel.contains(e.target)) {
-                navPanel.classList.remove('open');
-            }
-        });
-
-        navPanel.addEventListener('click', async (e) => {
-            const link = e.target.closest('.nav-link');
-            if (!link) return;
-
-            if (link.classList.contains('is-external')) {
-                navPanel.classList.remove('open');
-                return;
-            }
-
-            e.preventDefault();
-            navPanel.classList.remove('open');
-            const moduleId = link.dataset.moduleId;
-            
-            if (!clientId || !moduleId) {
-                appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
-                return;
-            }
-
-            appContainer.innerHTML = `<h2>Cargando...</h2>`;
-            
-            try {
-                let apiUrl = `${publicUrl}/api/getModule.php?client=${clientId}&id=${moduleId}&url=${url}`;
-                if (devId) {
-                    apiUrl += `&dev=${devId}`;
-                }
-
-                const response = await fetch(apiUrl);;
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                const moduleStylesheet = document.getElementById('module-stylesheet');
-                if (data.hasOwnProperty('sufijo') && baseTitle) {
-                    document.title = baseTitle + (data.sufijo || '');
-                }
-                if (moduleStylesheet && data.hasOwnProperty('css_url')) {
-                    moduleStylesheet.href = data.css_url || '';
-                }
-
-                const mainStylesheet = document.getElementById('main-stylesheet');
-                if (mainStylesheet && data.main_skin_override === true && data.main_css_url) {
-                    mainStylesheet.href = data.main_css_url;
-                }
-
-                appContainer.innerHTML = data.html;
-                if (data.admin_js_url) {
-                    const existingScript = document.querySelector(`script[src="${data.admin_js_url}"]`);
-                    if (!existingScript) {
-                        const script = document.createElement('script');
-                        script.src = data.admin_js_url;
-                        document.body.appendChild(script);
-                    }
-                }
-            } catch (error) {
-                console.error('Error al cargar el módulo:', error);
-                appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;
-            }
-        });
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        navPanel.classList.toggle('open');
     });
+
+    document.addEventListener('click', (e) => {
+        if (navPanel.classList.contains('open') && !navPanel.contains(e.target)) {
+            navPanel.classList.remove('open');
+        }
+    });
+
+    navPanel.addEventListener('click', async (e) => {
+        const link = e.target.closest('.nav-link');
+        if (!link) return;
+
+        if (link.classList.contains('is-external')) {
+            navPanel.classList.remove('open');
+            return;
+        }
+
+        e.preventDefault();
+        navPanel.classList.remove('open');
+        const moduleId = link.dataset.moduleId;
+        
+        if (!clientId || !moduleId) {
+            appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
+            return;
+        }
+
+        appContainer.innerHTML = `<h2>Cargando...</h2>`;
+        
+        try {
+            let apiUrl = `${publicUrl}/api/getModule.php?client=${clientId}&id=${moduleId}&url=${url}`;
+            if (devId) {
+                apiUrl += `&dev=${devId}`;
+            }
+
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            // Actualiza título y CSS
+            const moduleStylesheet = document.getElementById('module-stylesheet');
+            if (data.hasOwnProperty('sufijo') && baseTitle) {
+                document.title = baseTitle + (data.sufijo || '');
+            }
+            if (moduleStylesheet && data.hasOwnProperty('css_url')) {
+                moduleStylesheet.href = data.css_url || '';
+            }
+            const mainStylesheet = document.getElementById('main-stylesheet');
+            if (mainStylesheet && data.main_skin_override === true && data.main_css_url) {
+                mainStylesheet.href = data.main_css_url;
+            }
+
+            // Inserta el nuevo contenido HTML
+            appContainer.innerHTML = data.html;
+
+            // --- INICIO DE LA CORRECCIÓN ---
+            // Después de insertar el HTML, llamamos a la función de inicialización del módulo de admin si existe.
+            if (data.module_type && window.adminModuleInitializers && typeof window.adminModuleInitializers[data.module_type] === 'function') {
+                console.log(`Re-initializing admin script for module type: ${data.module_type}`);
+                window.adminModuleInitializers[data.module_type]();
+            }
+            // --- FIN DE LA CORRECCIÓN ---
+
+        } catch (error) {
+            console.error('Error al cargar el módulo:', error);
+            appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;
+        }
+    });
+});

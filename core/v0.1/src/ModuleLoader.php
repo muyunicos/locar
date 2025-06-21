@@ -78,6 +78,7 @@ class ModuleLoader
             "skin" => $moduleSkin,
             "sufijo" => $moduleData["sufijo"] ?? null,
             "main_skin_override" => $moduleData["main_skin"] ?? false,
+            "module_type" => $moduleType,
             "error" => false
         ];
     }

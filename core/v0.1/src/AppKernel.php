@@ -40,7 +40,9 @@ function launchApp()
         "active_event_id" => null, "client_url" => CLIENT_URL, "navigable_modules" => [],
         "initial_context_json" => json_encode([]),
         "is_admin" => true,
-        "show_login_modal" => false
+        "show_login_modal" => false,
+        "scripts" => [],
+        "admin_scripts" => []
     ];
 
     if ($resetToken) {
@@ -114,6 +116,12 @@ function launchApp()
     $content = $moduleResult['html'];
     $moduleStylesheet = $moduleResult['css_url'];
     
+    $adminScripts = [];
+    if (!empty($moduleResult['admin_js_url'])) {
+        $adminScripts[] = $moduleResult['admin_js_url'];
+    }
+    $scripts = [];
+    
     if ($moduleResult['main_skin_override'] && empty($activeEvent["cambios"]["skin"])) {
         $mainSkin = $moduleResult['skin'];
     }
@@ -143,6 +151,8 @@ function launchApp()
             $initialContextForJs,
             JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
         ),
+        "scripts" => $scripts, 
+        "admin_scripts" => $adminScripts, 
         "is_admin" => $isAdmin,
         "show_login_modal" => $showLoginModal
     ]);

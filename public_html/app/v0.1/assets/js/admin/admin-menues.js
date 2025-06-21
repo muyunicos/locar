@@ -4,17 +4,18 @@
         isSaving: false,
     };
 
-    const dom = {
-        moduleContainer: document.querySelector('.module-container.module-menues'),
-        saveButton: document.querySelector('#admin-save-fab button'),
-        saveButtonContainer: document.getElementById('admin-save-fab'),
-    };
-
-    if (!dom.moduleContainer || !dom.saveButton) {
-        return;
-    }
+    const dom = {};
 
     function init() {
+        dom.moduleContainer = document.querySelector('.module-container.module-menues');
+        dom.saveButton = document.querySelector('#admin-save-fab button');
+        dom.saveButtonContainer = document.getElementById('admin-save-fab');
+
+        if (!dom.moduleContainer || !dom.saveButton) {
+            console.error("Admin Menues: No se encontraron los elementos necesarios del DOM. El script no se activará.");
+            return;
+        }
+        
         console.log("Admin script for 'menues' loaded and initialized.");
         setupEventListeners();
     }
@@ -134,15 +135,17 @@
 
         const menuData = serializeMenu();
         const dataSourceFile = dom.moduleContainer.dataset.sourceFile;
-
+        const publicUrl = document.body.dataset.publicUrl;
+        const clientId = document.body.dataset.clientId;
+        const apiUrl = `${publicUrl}/api/saveMenu.php`;
         try {
-            const response = await fetch('/app/test/api/saveMenu.php', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ menuData, dataSourceFile })
+                body: JSON.stringify({ menuData, dataSourceFile, client: clientId })
             });
 
             const result = await response.json();
@@ -151,18 +154,14 @@
                 throw new Error(result.message || 'Error desconocido del servidor.');
             }
 
-            // Éxito
             dom.saveButton.textContent = '✅';
             state.hasChanges = false;
-            // Opcional: recargar para ver los cambios "limpios" o simplemente resetear el estado
             setTimeout(() => {
                  dom.saveButtonContainer.classList.add('is-hidden');
                  dom.saveButton.textContent = '💾';
             }, 2000);
             
-            // Eliminamos los nodos marcados para borrar
             document.querySelectorAll('.is-admin-deleted').forEach(el => el.remove());
-
 
         } catch (error) {
             console.error('Error al guardar:', error);
@@ -225,5 +224,13 @@
         return originalData;
     }
 
-    init();
+
+    window.adminModuleInitializers = window.adminModuleInitializers || {};
+    window.adminModuleInitializers.menues = init;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();

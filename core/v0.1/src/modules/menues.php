@@ -36,7 +36,7 @@ function get_module_data(array $moduleConfig, array $context): array
             "footer_text" => "",
             "error" =>
                 "Error de sintaxis en el archivo JSON: " .
-                htmlspecialchars($moduleConfig["data_file"]),
+                htmlspecialchars($moduleConfig["url"]),
         ];
     }
 
@@ -82,7 +82,6 @@ function get_module_data(array $moduleConfig, array $context): array
         "menu_image_url" => Utils::buildImageUrl($data["logo"] ?? null),
         "sufijo" => $data["sufijo"] ?? null,
         "items" => $data["items"] ?? [],
-        
         "footer_text" => $data["footer"] ?? "",
         "error" => $data["error"] ?? null
     ];

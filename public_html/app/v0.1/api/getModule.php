@@ -28,6 +28,7 @@ require_once PRIVATE_PATH . "/src/EventManager.php";
 require_once PRIVATE_PATH . "/src/Utils.php";
 require_once PRIVATE_PATH . "/src/ModuleLoader.php";
 require_once PRIVATE_PATH . "/src/admin/AuthManager.php";
+
 $authManager = new AuthManager();
 $isAdmin = $authManager->isLoggedIn();
 
@@ -42,9 +43,9 @@ if (
     exit();
 }
 
-$manifestPath = CLIENT_PATH . "/datos/manifest.json"; //
+$manifestPath = CLIENT_PATH . "/datos/manifest.json";
 
-if (!file_exists($manifestPath)) { //
+if (!file_exists($manifestPath)) {
     http_response_code(404);
     echo json_encode([
         "error" => "Error: Manifiesto no encontrado. Path: " . $manifestPath,
@@ -52,10 +53,10 @@ if (!file_exists($manifestPath)) { //
     exit();
 }
 
-$manifest = json_decode(file_get_contents($manifestPath), true); //
+$manifest = json_decode(file_get_contents($manifestPath), true);
 
-$eventManager = new EventManager($manifest["eventos"] ?? []); //
-$activeEventContext = $eventManager->getContext(); //
+$eventManager = new EventManager($manifest["eventos"] ?? []);
+$activeEventContext = $eventManager->getContext();
 
 $moduleLoader = new ModuleLoader($manifest, $activeEventContext);
 $moduleResult = $moduleLoader->loadById($moduleId, $isAdmin);
@@ -70,12 +71,15 @@ $responseData = [
     "html" => $moduleResult['html'],
     "css_url" => $moduleResult['css_url'],
     "main_skin_override" => $moduleResult['main_skin_override'],
-    "sufijo" => $moduleResult['sufijo']
+    "sufijo" => $moduleResult['sufijo'],
+    "module_type" => $moduleResult['module_type'] ?? null,
+    "admin_js_url" => $moduleResult['admin_js_url'] ?? null,
 ];
 
 if ($moduleResult['main_skin_override']) {
     $mainCssUrl = PUBLIC_URL . "/assets/css/" . $moduleResult['skin'] . "/main.css";
     $responseData['main_css_url'] = $mainCssUrl;
 }
+
 
 echo json_encode($responseData);
