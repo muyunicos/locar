@@ -3,7 +3,7 @@
 class AuthManager
 {
     private const ADMIN_USERNAME = 'admin';
-    private const ADMIN_PASSWORD = 'password123'; 
+    private const CREDENTIALS_PATH = __DIR__ . '/credentials/';
 
     public function __construct()
     {
@@ -14,31 +14,49 @@ class AuthManager
 
     public function login(string $username, string $password): bool
     {
-        if ($username === self::ADMIN_USERNAME && $password === self::ADMIN_PASSWORD) {
-            $_SESSION['is_admin'] = true;
-            $_SESSION['admin_user'] = $username;
+        if ($username !== self::ADMIN_USERNAME) {
+            return false;
+        }
+
+        if (!defined('CLIENT_ID')) {
+            return false;
+        }
+        $credentialFile = self::CREDENTIALS_PATH . CLIENT_ID . '.pass';
+
+        if (!file_exists($credentialFile)) {
+            return false;
+        }
+
+        $storedHash = trim(file_get_contents($credentialFile));
+
+        if (password_verify($password, $storedHash)) {
+            if (!isset($_SESSION['admin_sessions'])) {
+                $_SESSION['admin_sessions'] = [];
+            }
+            $_SESSION['admin_sessions'][CLIENT_ID] = [
+                'is_logged_in' => true,
+                'user' => $username,
+                'login_time' => time()
+            ];
             return true;
         }
+
         return false;
     }
 
     public function logout(): void
     {
-        $_SESSION = [];
-        
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
-            );
+        if (defined('CLIENT_ID') && isset($_SESSION['admin_sessions'][CLIENT_ID])) {
+            unset($_SESSION['admin_sessions'][CLIENT_ID]);
         }
-
-        session_destroy();
     }
 
     public function isLoggedIn(): bool
     {
-        return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+        if (!defined('CLIENT_ID')) {
+            return false;
+        }
+        return isset($_SESSION['admin_sessions'][CLIENT_ID]['is_logged_in']) 
+               && $_SESSION['admin_sessions'][CLIENT_ID]['is_logged_in'] === true;
     }
 }

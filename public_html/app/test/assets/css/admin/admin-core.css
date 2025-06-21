@@ -1,5 +1,5 @@
 .admin-modal {
-    display: none; /* Oculto por defecto */
+    display: none;
     position: fixed;
     z-index: 2000;
     left: 0;
@@ -20,10 +20,8 @@
     box-shadow: 0 4px 25px rgba(0,0,0,0.2);
 }
 
-/* Estilos copiados del antiguo login.html para consistencia */
 .login-container { 
-    padding: 40px; 
-    width: 100%; 
+    padding: 40px;
     max-width: 320px; 
     text-align: center; 
 }

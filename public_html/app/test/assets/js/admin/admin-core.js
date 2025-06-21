@@ -13,17 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const username = loginForm.username.value;
             const password = loginForm.password.value;
             const publicUrl = body.dataset.publicUrl;
             const clientId = body.dataset.clientId;
             const devId = body.dataset.devId;
+            const clientUrl = body.dataset.clientUrl; 
 
             errorMessageElement.style.display = 'none';
             errorMessageElement.textContent = '';
-            
-            let apiUrl = `${publicUrl}/api/login.php?client=${clientId}`;
+
+            let apiUrl = `${publicUrl}/api/login.php?client=${clientId}&url=${encodeURIComponent(clientUrl)}`;
             if (devId) {
                 apiUrl += `&dev=${devId}`;
             }
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(apiUrl, {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -40,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (result.success) {
-                    window.location.href = '/';
+                    window.location.href = clientUrl;
                 } else {
                     errorMessageElement.textContent = result.message || 'Un error ha ocurrido.';
                     errorMessageElement.style.display = 'block';

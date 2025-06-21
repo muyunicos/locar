@@ -43,7 +43,7 @@
                 </li>
             <?php endforeach; ?>
             <?php if ($is_admin): ?>
-                <li><a href="<?= htmlspecialchars($public_url . '/api/logout.php?client=' . $client_id . '&dev=' . $dev_id) ?>" class="nav-link is-external">Cerrar Sesión</a></li>
+<li><a href="<?= htmlspecialchars($public_url . '/api/logout.php?client=' . $client_id . '&dev=' . $dev_id . '&redirect_url=' . urlencode($client_url)) ?>" class="nav-link is-external">Cerrar Sesión</a></li>
             <?php endif; ?>
         </ul>
     </div>

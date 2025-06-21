@@ -1,7 +1,6 @@
 <?php
 
-// Inicia la sesión al principio de todo.
-session_start();
+require_once __DIR__ . '/bootstrap.php';
 
 define ('CLIENT_URL', str_starts_with($_SERVER['HTTP_HOST'], CLIENT_ID . '.') ? "https://" . $_SERVER['HTTP_HOST'] : "https://" . $_SERVER['HTTP_HOST'] . '/' . CLIENT_ID );
 
@@ -10,7 +9,7 @@ require_once PRIVATE_PATH . "/src/View.php";
 require_once PRIVATE_PATH . "/src/EventManager.php";
 require_once PRIVATE_PATH . "/src/Utils.php";
 require_once PRIVATE_PATH . "/src/ModuleLoader.php";
-require_once PRIVATE_PATH . "/src/admin/AuthManager.php"; // (Nuevo) Incluimos el AuthManager
+require_once PRIVATE_PATH . "/src/admin/AuthManager.php";
 
 function launchApp()
 {
