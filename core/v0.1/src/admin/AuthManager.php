@@ -1,9 +1,8 @@
 <?php
-
+require_once CORE_PATH . '/src/DatabaseManager.php';
 class AuthManager
 {
-    private const ADMIN_USERNAME = 'admin';
-    private const CREDENTIALS_PATH = __DIR__ . '/credentials/';
+    private $db;
 
     public function __construct()
     {
@@ -12,36 +11,31 @@ class AuthManager
         }
     }
 
-    public function login(string $username, string $password): bool
-    {
-        if ($username !== self::ADMIN_USERNAME) {
-            return false;
-        }
+    public function login($email, $password) {
+        try {
+            $stmt = $this->db->prepare("SELECT password_hash FROM users WHERE email = :email AND client_id = :client_id");
+            
+            $stmt->execute([
+                ':email' => $email,
+                ':client_id' => CLIENT_ID
+            ]);
 
-        if (!defined('CLIENT_ID')) {
-            return false;
-        }
-        $credentialFile = self::CREDENTIALS_PATH . CLIENT_ID . '.pass';
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!file_exists($credentialFile)) {
-            return false;
-        }
-
-        $storedHash = trim(file_get_contents($credentialFile));
-
-        if (password_verify($password, $storedHash)) {
-            if (!isset($_SESSION['admin_sessions'])) {
-                $_SESSION['admin_sessions'] = [];
+            if ($user && password_verify($password, $user['password_hash'])) {
+                $_SESSION['admin_sessions'][CLIENT_ID] = [
+                    'logged_in' => true,
+                    'email' => $email,
+                    'login_time' => time()
+                ];
+                return true;
             }
-            $_SESSION['admin_sessions'][CLIENT_ID] = [
-                'is_logged_in' => true,
-                'user' => $username,
-                'login_time' => time()
-            ];
-            return true;
-        }
 
-        return false;
+            return false;
+
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
     public function logout(): void
@@ -56,7 +50,6 @@ class AuthManager
         if (!defined('CLIENT_ID')) {
             return false;
         }
-        return isset($_SESSION['admin_sessions'][CLIENT_ID]['is_logged_in']) 
-               && $_SESSION['admin_sessions'][CLIENT_ID]['is_logged_in'] === true;
+        return isset($_SESSION['admin_sessions'][CLIENT_ID]['logged_in']) && $_SESSION['admin_sessions'][CLIENT_ID]['logged_in'] === true;
     }
 }
