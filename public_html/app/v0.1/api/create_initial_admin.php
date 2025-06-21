@@ -1,5 +1,6 @@
 <?php
-require_once 'api_bootstrap.php';
+
+require_once require_once __DIR__ . '/api_bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     send_json_response(false, 'Método no permitido.', 405);

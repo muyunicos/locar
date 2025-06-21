@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const publicUrl = body.dataset.publicUrl;
     const clientUrl = body.dataset.clientUrl;
     const devId = body.dataset.devId;
+    const clientId = body.dataset.clientId;
 
     const handleAuthFormSubmit = (formElement, apiEndpoint, onSuccess) => {
         if (!formElement) return;
@@ -15,9 +16,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(formElement);
             
             let finalApiEndpoint = `${publicUrl}${apiEndpoint}`;
+            const params = new URLSearchParams();
+
             if (devId) {
-                finalApiEndpoint += `?dev=${devId}`;
+                params.append('dev', devId);
             }
+            if (clientId) {
+                params.append('client', clientId);
+            }
+
+            const queryString = params.toString();
+            if (queryString) {
+                finalApiEndpoint += `?${queryString}`;
+            }
+
 
             if (!submitButton.dataset.originalText) {
                 submitButton.dataset.originalText = submitButton.textContent;

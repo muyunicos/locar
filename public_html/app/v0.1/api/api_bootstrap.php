@@ -24,9 +24,12 @@ if (!$is_origin_allowed) {
 
 define("CLIENT_URL", $origin);
 
-
-$host_parts = explode('.', parse_url(CLIENT_URL, PHP_URL_HOST));
-define("CLIENT_ID", $host_parts[0]);
+if (isset($_REQUEST['client'])) {
+    define("CLIENT_ID", $_REQUEST['client']);
+} else {
+    $host_parts = explode('.', parse_url(CLIENT_URL, PHP_URL_HOST));
+    define("CLIENT_ID", $host_parts[0]);
+}
 
 define("DEV_BRANCH", $_REQUEST["dev"] ?? null);
 
@@ -45,7 +48,6 @@ header("Content-Type: application/json");
 
 require_once defined("DEV_BRANCH") && DEV_BRANCH ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php" : dirname(__DIR__, 3) . "/core/src/config.php";
 
-// Incluimos otros archivos del núcleo que sean necesarios en casi todas las APIs
 require_once PRIVATE_PATH . "/src/DatabaseManager.php";
 require_once PRIVATE_PATH . "/src/admin/AuthManager.php";
 

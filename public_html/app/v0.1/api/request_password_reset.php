@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__DIR__, 4) . '/core/v0.1/src/bootstrap.php';
+require_once dirname(__DIR__, 4) . '/bootstrap.php';
 
 header('Content-Type: application/json');
 
