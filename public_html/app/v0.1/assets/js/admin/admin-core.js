@@ -18,18 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
             let finalApiEndpoint = `${publicUrl}${apiEndpoint}`;
             const params = new URLSearchParams();
 
-            if (devId) {
-                params.append('dev', devId);
+            if (clientUrl) {
+                params.append('url', clientUrl);
             }
             if (clientId) {
                 params.append('client', clientId);
             }
+            if (devId) {
+                params.append('dev', devId);
+            }
 
             const queryString = params.toString();
+
             if (queryString) {
                 finalApiEndpoint += `?${queryString}`;
             }
-
 
             if (!submitButton.dataset.originalText) {
                 submitButton.dataset.originalText = submitButton.textContent;
@@ -44,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             fetch(finalApiEndpoint, {
                 method: 'POST',
+                credentials: 'include',
                 body: formData
             })
             .then(response => response.json())
@@ -90,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     handleAuthFormSubmit(loginForm, '/api/login.php', () => {
-        window.location.reload();
+        window.location.href = clientUrl;
     });
 
     handleAuthFormSubmit(requestResetForm, '/api/request_password_reset.php', () => {

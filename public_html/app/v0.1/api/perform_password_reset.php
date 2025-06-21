@@ -1,15 +1,6 @@
 <?php
 
-require_once dirname(__DIR__, 4) . '/core/v0.1/src/bootstrap.php';
-require_once PRIVATE_PATH . '/src/admin/AuthManager.php';
-
-header('Content-Type: application/json');
-
-function send_json_response($success, $message, $statusCode = 200) {
-    http_response_code($statusCode);
-    echo json_encode(['success' => $success, 'message' => $message]);
-    exit;
-}
+require_once 'api_bootstrap.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     send_json_response(false, 'Método no permitido.', 405);

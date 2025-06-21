@@ -44,7 +44,7 @@ function launchApp()
     ];
 
     if ($resetToken) {
-        $user = $authManager->validateResetToken($token);
+         $user = $authManager->validateResetToken($resetToken);
         if ($user) {
             $content = View::render("admin/reset-password-form", ['token' => $resetToken]);
             $pageTitle = $manifest["titulo"] . " - Restablecer Contraseña";

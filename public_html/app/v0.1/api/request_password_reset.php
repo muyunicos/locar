@@ -1,8 +1,6 @@
 <?php
 
-require_once dirname(__DIR__, 4) . '/bootstrap.php';
-
-header('Content-Type: application/json');
+require_once __DIR__ . '/api_bootstrap.php';
 
 function send_generic_response() {
     echo json_encode([
