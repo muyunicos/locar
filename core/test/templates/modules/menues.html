@@ -4,6 +4,7 @@ if (!function_exists("render_admin_controls")) {
     function render_admin_controls(bool $is_admin, bool $is_category)
     {
         if ($is_admin) {
+            // Este include es correcto, el JS buscará los controles dentro del contenedor.
             include(PRIVATE_PATH . '/templates/admin/menues/controls.html');
         }
     }
@@ -30,14 +31,19 @@ if (!function_exists("render_item")) {
             $has_image = !empty($item["imagen_url"]);
             $is_category = isset($item["es_cat"]) && $item["es_cat"];
 
+            // Pasamos el nombre del archivo de origen para usarlo al guardar
+            $data_source_attr = isset($item["data_source_file"]) ? 'data-source-file="' . htmlspecialchars($item["data_source_file"]) . '"' : '';
+
             if ($is_category) { ?>
                 <div class="c-container <?= isset($item["layout"]) ? htmlspecialchars($item["layout"]) : "" ?>" 
-         data-item-json='<?= htmlspecialchars(json_encode($item), ENT_QUOTES, 'UTF-8') ?>'>
+                    data-item-json='<?= htmlspecialchars(json_encode($item), ENT_QUOTES, 'UTF-8') ?>' 
+                    data-module-id="menues_category" <?= $data_source_attr ?>>
+                    
                     <h3 class="c-titulo">
                         <div class="c-titulo-content">
-                            <span><?= htmlspecialchars($item["titulo"]) ?></span>
+                            <span data-editable="true"><?= htmlspecialchars($item["titulo"]) ?></span>
                             <?php if (!empty($item["descripcion"])): ?>
-                                <small class="c-titulo-descripcion"><?= htmlspecialchars($item["descripcion"]) ?></small>
+                                <small class="c-titulo-descripcion" data-editable="true"><?= htmlspecialchars($item["descripcion"]) ?></small>
                             <?php endif; ?>
                         </div>
                         <?php if ($has_image): render_image($item["imagen_url"]); endif; ?>
@@ -59,9 +65,9 @@ if (!function_exists("render_item")) {
 
                     <div class="item-details">
                         <div class="item-info">
-                            <h3 class="item-titulo <?= $is_admin ? 'is-admin-editable' : '' ?>"><?= htmlspecialchars($item["titulo"]) ?></h3>
+                            <h3 class="item-titulo" data-editable="true"><?= htmlspecialchars($item["titulo"]) ?></h3>
                             <?php if (!empty($item["descripcion"])): ?>
-                                <p class="item-descripcion <?= $is_admin ? 'is-admin-editable' : '' ?>"><?= htmlspecialchars($item["descripcion"]) ?></p>
+                                <p class="item-descripcion" data-editable="true"><?= htmlspecialchars($item["descripcion"]) ?></p>
                             <?php endif; ?>
                         </div>
                         <div class="item-precio">
@@ -74,7 +80,7 @@ if (!function_exists("render_item")) {
                             <?php endif; ?>
                             <span class="precio-final">
                                 <span class="precio-simbolo">$</span>
-                                <span class="precio-valor <?= $is_admin ? 'is-admin-editable' : '' ?>"><?= htmlspecialchars(number_format($item["precio"], 0, ",", ".")) ?></span>
+                                <span class="precio-valor" data-editable="true"><?= htmlspecialchars(number_format($item["precio"], 0, ",", ".")) ?></span>
                                 <span class="precio-decimales">,-</span>
                             </span>
                         </div>
@@ -87,14 +93,14 @@ if (!function_exists("render_item")) {
 }
 ?>
 
-<div class="module-container module-menues">
+<div class="module-container module-menues" data-module-id="menues" data-source-file="<?= htmlspecialchars($dataSourceFile) ?>">
     
     <?php if (!empty($menu_image_url)): ?>
         <div class="menu-header-image-container">
             <?php render_image($menu_image_url, $menu_title); ?>
         </div>
     <?php else: ?>
-        <h2 class="menues-title"><?= htmlspecialchars($menu_title) ?></h2>
+        <h2 class="menues-title" data-editable="true"><?= htmlspecialchars($menu_title) ?></h2>
     <?php endif; ?>
 
     <?php if (isset($error) && !empty($error)): ?>
@@ -107,7 +113,7 @@ if (!function_exists("render_item")) {
 
     <?php if (!empty($footer_text)): ?>
         <footer class="menu-footer">
-            <p><?= htmlspecialchars($footer_text) ?></p>
+            <p data-editable="true"><?= htmlspecialchars($footer_text) ?></p>
         </footer>
     <?php endif; ?>
 </div>

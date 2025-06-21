@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 winningEvent = events[0];
             }
 
-            if (this.isInitialUpdate && winningEvent?.id == this.serverLoadedEventId) {
+            if (this.isInitialUpdate && winningEvent && winningEvent.id == this.serverLoadedEventId) {
                 console.log(`El estado del evento '${winningEvent.nombre}' ya fue cargado por el servidor. Omitiendo actualización inicial.`);
                 this.isInitialUpdate = false;
                 return;
