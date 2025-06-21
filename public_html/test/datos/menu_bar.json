@@ -119,6 +119,7 @@
     {
       "titulo": "Vinos y Espumantes",
       "descripcion": "Consulta nuestra carta de vinos por botella.",
+      "es_cat": true,
       "items": [
         { "titulo": "Copa de Vino", "descripcion": "Selección del día (Malbec, Cabernet Sauvignon, Chardonnay).", "precio": 6000 },
         { "titulo": "Copa de Espumante", "descripcion": "Extra Brut.", "precio": 9000 }
@@ -126,6 +127,7 @@
     },
     {
       "titulo": "Cervezas",
+      "es_cat": true,
       "items": [
         { "titulo": "Miller (Lata 330cc)", "descripcion": "", "precio": 5000 },
         { "titulo": "Heineken (Lata 473cc)", "descripcion": "", "precio": 6000 }
@@ -133,6 +135,7 @@
     },
     {
       "titulo": "Bebidas sin Alcohol",
+      "es_cat": true,
       "items": [
         { "titulo": "Limonada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de limón, menta y jengibre.", "precio": 10000 },
         { "titulo": "Pomelada (1 Lt.)", "descripcion": "Jarra de agua mineral con jugo natural de pomelo y almíbar de romero.", "precio": 10000 },

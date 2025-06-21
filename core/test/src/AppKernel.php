@@ -28,14 +28,14 @@ function launchApp()
     $eventManager = new EventManager($manifest["eventos"] ?? []);
     $activeEventContext = $eventManager->getContext();
     $activeEvent = $activeEventContext["active_event"];
-
+    $activeEventId = $activeEvent['id'] ?? null;
     $logoUrl = Utils::buildImageUrl(
         $activeEvent["cambios"]["logo"] ?? $manifest["logo"]
     );
     $favicon = Utils::buildImageUrl(
         $activeEvent["cambios"]["favicon"] ?? $manifest["favicon"]
     );
-    
+
     $mainSkin = $activeEvent["cambios"]["skin"] ?? $manifest["skin"];
 
     $navigableModules = [];
@@ -85,6 +85,7 @@ function launchApp()
         "client_id" => CLIENT_ID,
         "dev_id" => DEV_BRANCH,
         "public_url" => PUBLIC_URL,
+        "active_event_id" => $activeEventId,
         "client_url" => CLIENT_URL,
         "navigable_modules" => $navigableModules,
         "initial_context_json" => json_encode(

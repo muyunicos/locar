@@ -28,7 +28,7 @@
         "time_range": { "start": "20:00", "end": "07:00" }
       },
       "cambios": {
-        "module": 2
+        "modulo": 2
       }
     }
   ],

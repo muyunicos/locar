@@ -24,6 +24,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 header("Content-Type: application/json");
 
 require_once PRIVATE_PATH . "/src/EventManager.php";
+require_once PRIVATE_PATH . "/src/Utils.php";
 
 if (!preg_match('/^[a-zA-Z0-9_-]+$/', CLIENT_ID)) {
     http_response_code(400);
