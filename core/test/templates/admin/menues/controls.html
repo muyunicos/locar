@@ -1,0 +1,11 @@
+<div class="admin-controls">
+    <button class="admin-btn" title="Ocultar/Mostrar">👁️</button>
+    
+    <?php if ($is_category): // El botón '+' solo aparece en las categorías ?>
+    <button class="admin-btn" title="Añadir Ítem">+</button>
+    <?php endif; ?>
+
+    <button class="admin-btn" title="Reordenar">⇅</button>
+    <button class="admin-btn" title="Gestionar">⚙️</button>
+    <button class="admin-btn admin-btn-delete" title="Eliminar">🗑️</button>
+</div>

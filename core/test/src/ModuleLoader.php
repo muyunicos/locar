@@ -11,7 +11,7 @@ class ModuleLoader
         $this->activeEventContext = $activeEventContext;
     }
 
-    public function loadById(string $moduleId): array
+    public function loadById(string $moduleId, bool $isAdmin = false): array
     {
         $moduleConfig = null;
         foreach ($this->manifest["modulos"] as $module) {
@@ -25,6 +25,7 @@ class ModuleLoader
             return [
                 "html" => "<div class='app-error'>Error: El módulo con ID '{$moduleId}' no fue encontrado.</div>",
                 "css_url" => null,
+                "admin_js_url" => null,
                 "skin" => $this->manifest["skin"],
                 "main_skin_override" => false,
                 "error" => true
@@ -38,6 +39,7 @@ class ModuleLoader
             return [
                 "html" => "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>",
                 "css_url" => null,
+                "admin_js_url" => null,
                 "skin" => $this->manifest["skin"],
                 "main_skin_override" => false,
                 "error" => true
@@ -47,7 +49,8 @@ class ModuleLoader
         require_once $logicPath;
 
         $moduleData = get_module_data($moduleConfig, $this->activeEventContext);
-
+        $moduleData['is_admin'] = $isAdmin;
+        
         $activeEvent = $this->activeEventContext["active_event"];
         $globalSkin = $activeEvent["cambios"]["skin"] ?? $this->manifest["skin"];
         $moduleSkin = $moduleData["skin"] ?? $globalSkin;
@@ -57,12 +60,21 @@ class ModuleLoader
         if (file_exists(PUBLIC_PATH . $moduleCssPath)) {
             $cssUrl = PUBLIC_URL . $moduleCssPath;
         }
-        
+        $adminJsUrl = null;
+
+        if ($isAdmin) {
+            $adminJsPath = "/assets/js/admin/admin-{$moduleType}.js";
+            if (file_exists(PUBLIC_PATH . $adminJsPath)) {
+                $adminJsUrl = PUBLIC_URL . $adminJsPath;
+            }
+        }
+
         $htmlContent = View::render("modules/" . $moduleType, $moduleData);
 
         return [
             "html" => $htmlContent,
             "css_url" => $cssUrl,
+            "admin_js_url" => $adminJsUrl,
             "skin" => $moduleSkin,
             "sufijo" => $moduleData["sufijo"] ?? null,
             "main_skin_override" => $moduleData["main_skin"] ?? false,

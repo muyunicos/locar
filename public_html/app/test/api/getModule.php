@@ -27,6 +27,9 @@ require_once PRIVATE_PATH . "/src/View.php";
 require_once PRIVATE_PATH . "/src/EventManager.php";
 require_once PRIVATE_PATH . "/src/Utils.php";
 require_once PRIVATE_PATH . "/src/ModuleLoader.php";
+require_once PRIVATE_PATH . "/src/admin/AuthManager.php";
+$authManager = new AuthManager();
+$isAdmin = $authManager->isLoggedIn();
 
 $moduleId = $_GET["id"] ?? "";
 
@@ -55,7 +58,7 @@ $eventManager = new EventManager($manifest["eventos"] ?? []); //
 $activeEventContext = $eventManager->getContext(); //
 
 $moduleLoader = new ModuleLoader($manifest, $activeEventContext);
-$moduleResult = $moduleLoader->loadById($moduleId);
+$moduleResult = $moduleLoader->loadById($moduleId, $isAdmin);
 
 if ($moduleResult['error']) {
     http_response_code(404);

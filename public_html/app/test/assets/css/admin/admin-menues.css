@@ -1,0 +1,88 @@
+.item, .c-titulo {
+    position: relative;
+    border: 1px dashed transparent;
+}
+
+.item:hover, .c-titulo:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
+.admin-controls {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    display: flex;
+    gap: 5px;
+    background-color: #fff;
+    padding: 5px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    opacity: 0; /* Oculto por defecto */
+    transition: opacity 0.2s ease-in-out;
+    z-index: 10;
+}
+
+.item:hover .admin-controls,
+.c-titulo:hover .admin-controls {
+    opacity: 1;
+}
+
+.admin-btn {
+    background-color: #f4f4f5;
+    border: 1px solid #e4e4e7;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.admin-btn:hover {
+    background-color: #e4e4e7;
+}
+
+.admin-btn-delete:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border-color: #fca5a5;
+}
+
+/* Estilo para ítems ocultos */
+.is-admin-hidden {
+    opacity: 0.4;
+    border-style: solid;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(228, 228, 231, 0.5) 8px,
+      rgba(228, 228, 231, 0.5) 10px
+    );
+}
+.is-admin-hidden .admin-btn[title="Ocultar/Mostrar"] {
+    background-color: #fef08a; /* Amarillo para destacar que está oculto */
+}
+
+
+.is-admin-deleted {
+    display: none;
+}
+.is-admin-editable {
+    cursor: text;
+    transition: background-color 0.2s;
+}
+
+.is-admin-editable:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.is-editing {
+    background-color: #fff;
+    outline: 2px solid #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    border-radius: 4px;
+}

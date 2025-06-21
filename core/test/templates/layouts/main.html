@@ -10,6 +10,9 @@
     <?php if ($is_admin || $show_login_modal): ?>
         <link rel="stylesheet" href="<?= htmlspecialchars($public_url) ?>/assets/css/admin/admin-core.css" >
     <?php endif; ?>
+    <?php if ($is_admin): ?>
+        <link rel="stylesheet" href="<?= htmlspecialchars($public_url) ?>/assets/css/admin/admin-menues.css" >
+    <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Bona+Nova+SC:wght@400;700&display=swap" rel="stylesheet">
@@ -65,9 +68,14 @@
 
     <script src="<?= htmlspecialchars($public_url) ?>/assets/js/event-handler.js"></script>
     <script src="<?= htmlspecialchars($public_url) ?>/assets/js/nav-handler.js"></script>
-    
+    <?php if ($is_admin && !empty($moduleResult['admin_js_url'])): ?>
+        <script src="<?= htmlspecialchars($moduleResult['admin_js_url']) ?>"></script>
+    <?php endif; ?>
     <?php if ($is_admin || $show_login_modal): ?>
         <script src="<?= htmlspecialchars($public_url) ?>/assets/js/admin/admin-core.js"></script>
+    <?php endif; ?>
+    <?php if ($is_admin): ?>
+        <?php include(PRIVATE_PATH . '/templates/admin/menues/fab.html'); ?>
     <?php endif; ?>
 </body>
 </html>

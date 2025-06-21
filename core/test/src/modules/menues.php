@@ -82,6 +82,7 @@ function get_module_data(array $moduleConfig, array $context): array
         "menu_image_url" => Utils::buildImageUrl($data["logo"] ?? null),
         "sufijo" => $data["sufijo"] ?? null,
         "items" => $data["items"] ?? [],
+        
         "footer_text" => $data["footer"] ?? "",
         "error" => $data["error"] ?? null
     ];

@@ -67,6 +67,14 @@
                 }
 
                 appContainer.innerHTML = data.html;
+                if (data.admin_js_url) {
+                    const existingScript = document.querySelector(`script[src="${data.admin_js_url}"]`);
+                    if (!existingScript) {
+                        const script = document.createElement('script');
+                        script.src = data.admin_js_url;
+                        document.body.appendChild(script);
+                    }
+                }
             } catch (error) {
                 console.error('Error al cargar el módulo:', error);
                 appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;

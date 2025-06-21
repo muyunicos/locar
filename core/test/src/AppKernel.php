@@ -63,7 +63,7 @@ function launchApp()
 
     $moduleLoader = new ModuleLoader($manifest, $activeEventContext);
     $activeModuleId = $activeEvent["cambios"]["modulo"] ?? $manifest["modulo"];
-    $moduleResult = $moduleLoader->loadById($activeModuleId);
+    $moduleResult = $moduleLoader->loadById($activeModuleId, $isAdmin);
 
     if (isset($activeEvent["cambios"]["sufijo"])) {
             $pageTitle .= $activeEvent["cambios"]["sufijo"];
