@@ -7,42 +7,67 @@
     <link id="favicon" rel="icon" href="<?= htmlspecialchars($favicon) ?>" type="image/x-icon">
     <link rel="stylesheet" id="main-stylesheet" href="<?= htmlspecialchars($main_stylesheet ?? '') ?>" >
     <link rel="stylesheet" id="module-stylesheet" href="<?= htmlspecialchars($module_stylesheet ?? '') ?>" >
+    <?php if ($is_admin || $show_login_modal): ?>
+        <link rel="stylesheet" href="<?= htmlspecialchars($public_url) ?>/assets/css/admin/admin-core.css" >
+    <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Bona+Nova+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body data-client-id="<?= htmlspecialchars($client_id) ?>" data-initial-context='<?= $initial_context_json ?>' data-public-url="<?= htmlspecialchars($public_url) ?>" data-dev-id="<?= htmlspecialchars($dev_id) ?>" data-client-url="<?= htmlspecialchars($client_url) ?>" data-active-event-id="<?= htmlspecialchars($active_event_id ?? '') ?>" >
+<body 
+    data-client-id="<?= htmlspecialchars($client_id) ?>" 
+    data-initial-context='<?= $initial_context_json ?>' 
+    data-public-url="<?= htmlspecialchars($public_url) ?>" 
+    data-dev-id="<?= htmlspecialchars($dev_id) ?>" 
+    data-client-url="<?= htmlspecialchars($client_url) ?>" 
+    data-active-event-id="<?= htmlspecialchars($active_event_id ?? '') ?>"
+    data-show-login-modal="<?= $show_login_modal ? 'true' : 'false' ?>"
+>
+    <?php if ($show_login_modal): ?>
+        <?php include(PRIVATE_PATH . '/templates/admin/login-modal.html'); ?>
+    <?php endif; ?>
+
     <div class="nav-panel" id="nav-panel">
         <ul>
-<?php foreach ($navigable_modules as $navModule): ?>
-            <li>
-<?php if ($navModule['type'] === 'link'): ?>
-                <a href="<?= htmlspecialchars($navModule['url']) ?>" class="nav-link is-external" target="_blank" rel="noopener noreferrer">
-<?= htmlspecialchars($navModule['title']) ?>
-                </a>
-<?php else: ?>
-                <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
-<?= htmlspecialchars($navModule['title']) ?>
-                </a>
-<?php endif; ?>
-            </li>
-<?php endforeach; ?>
+            <?php foreach ($navigable_modules as $navModule): ?>
+                <li>
+                    <?php if ($navModule['type'] === 'link'): ?>
+                        <a href="<?= htmlspecialchars($navModule['url']) ?>" class="nav-link is-external" target="_blank" rel="noopener noreferrer">
+                            <?= htmlspecialchars($navModule['title']) ?>
+                        </a>
+                    <?php else: ?>
+                        <a href="#" class="nav-link" data-module-id="<?= htmlspecialchars($navModule['id']) ?>">
+                            <?= htmlspecialchars($navModule['title']) ?>
+                        </a>
+                    <?php endif; ?>
+                </li>
+            <?php endforeach; ?>
+            <?php if ($is_admin): ?>
+                <li><a href="<?= htmlspecialchars($public_url . '/api/logout.php?client=' . $client_id . '&dev=' . $dev_id) ?>" class="nav-link is-external">Cerrar Sesión</a></li>
+            <?php endif; ?>
         </ul>
     </div>
+
     <header class="nav-header">
-<?php if (!empty($logo_url)): ?>
-        <img src="<?= htmlspecialchars($logo_url) ?>" alt="Logo" class="header-logo">
-<?php else: ?>
-        <h1 id="page-main-title"><?= htmlspecialchars($page_title) ?></h1>
-<?php endif; ?>
+        <?php if (!empty($logo_url)): ?>
+            <img src="<?= htmlspecialchars($logo_url) ?>" alt="Logo" class="header-logo">
+        <?php else: ?>
+            <h1 id="page-main-title"><?= htmlspecialchars($page_title) ?></h1>
+        <?php endif; ?>
         <button class="hamburger-button" id="hamburger-button">&#9776;</button>
     </header>
+    
     <div id="app-container">
         <main id="module-content-wrapper">
-<?= $content ?>
+            <?= $content ?>
         </main>
     </div>
+
     <script src="<?= htmlspecialchars($public_url) ?>/assets/js/event-handler.js"></script>
     <script src="<?= htmlspecialchars($public_url) ?>/assets/js/nav-handler.js"></script>
+    
+    <?php if ($is_admin || $show_login_modal): ?>
+        <script src="<?= htmlspecialchars($public_url) ?>/assets/js/admin/admin-core.js"></script>
+    <?php endif; ?>
 </body>
 </html>

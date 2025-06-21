@@ -1,5 +1,8 @@
 <?php
 
+// Inicia la sesión al principio de todo.
+session_start();
+
 define ('CLIENT_URL', str_starts_with($_SERVER['HTTP_HOST'], CLIENT_ID . '.') ? "https://" . $_SERVER['HTTP_HOST'] : "https://" . $_SERVER['HTTP_HOST'] . '/' . CLIENT_ID );
 
 require_once __DIR__ . "/Config.php";
@@ -7,9 +10,18 @@ require_once PRIVATE_PATH . "/src/View.php";
 require_once PRIVATE_PATH . "/src/EventManager.php";
 require_once PRIVATE_PATH . "/src/Utils.php";
 require_once PRIVATE_PATH . "/src/ModuleLoader.php";
+require_once PRIVATE_PATH . "/src/admin/AuthManager.php"; // (Nuevo) Incluimos el AuthManager
 
 function launchApp()
 {
+    $authManager = new AuthManager();
+    $isAdmin = $authManager->isLoggedIn();
+    
+    $requestUri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+    $pathParts = explode('/', $requestUri);
+    $route = end($pathParts);
+    $showLoginModal = ($route === 'admin' && !$isAdmin);
+
     $manifestPath = CLIENT_PATH . "/datos/manifest.json";
     if (!file_exists($manifestPath)) {
         http_response_code(404);
@@ -92,5 +104,7 @@ function launchApp()
             $initialContextForJs,
             JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT
         ),
+        "is_admin" => $isAdmin,
+        "show_login_modal" => $showLoginModal
     ]);
 }
