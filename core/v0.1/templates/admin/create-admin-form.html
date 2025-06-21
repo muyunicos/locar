@@ -1,0 +1,25 @@
+<div class="auth-container">
+    <div class="auth-form-card">
+        <h2>Crear Administrador Principal</h2>
+        <p>
+            Es la primera vez que configurás la administración para tu sitio.
+            Por favor, crea una cuenta de administrador para continuar.
+        </p>
+        <form id="create-admin-form" novalidate>
+            <div class="form-group">
+                <label for="admin-email">Email del Administrador</label>
+                <input type="email" id="admin-email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="admin-password">Contraseña</label>
+                <input type="password" id="admin-password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="admin-password-confirm">Confirmar Contraseña</label>
+                <input type="password" id="admin-password-confirm" name="password_confirm" required>
+            </div>
+            <button type="submit" class="auth-button">Crear Cuenta</button>
+            <div id="form-message" class="form-message"></div>
+        </form>
+    </div>
+</div>

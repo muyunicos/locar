@@ -1,17 +1,38 @@
-<div id="login-modal" class="admin-modal">
-    <div class="modal-content">
-        <div class="login-container">
-            <h1>Acceso de Administrador</h1>
-            <form id="login-form">
-                <div>
-                    <input type="text" id="username" name="username" placeholder="Usuario" required>
-                </div>
-                <div>
-                    <input type="password" id="password" name="password" placeholder="Contraseña" required>
-                </div>
-                <button type="submit">Ingresar</button>
-            </form>
-            <p id="login-error-message" class="error-message" style="display: none;"></p>
-        </div>
+<div id="login-modal-backdrop" class="modal-backdrop" style="display: none;">
+    <div id="login-modal-card" class="modal-card">
+        
+        <form id="login-form" novalidate>
+            <span id="close-modal" class="close-button">&times;</span>
+            <h2>Iniciar Sesión</h2>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="auth-button">Ingresar</button>
+            <div id="login-message" class="form-message"></div>
+            <div class="form-footer">
+                <a href="#" id="forgot-password-link">¿Olvidaste tu contraseña?</a>
+            </div>
+        </form>
+
+        <form id="request-reset-form" novalidate style="display: none;">
+             <span id="close-modal-reset" class="close-button">&times;</span>
+            <h2>Restablecer Contraseña</h2>
+            <p class="form-instruction">Ingresa tu email y te enviaremos un enlace para restablecer tu contraseña.</p>
+            <div class="form-group">
+                <label for="reset-email">Email</label>
+                <input type="email" id="reset-email" name="email" required>
+            </div>
+            <button type="submit" class="auth-button">Enviar Enlace</button>
+            <div id="reset-message" class="form-message"></div>
+             <div class="form-footer">
+                <a href="#" id="back-to-login-link">Volver a inicio de sesión</a>
+            </div>
+        </form>
+
     </div>
 </div>

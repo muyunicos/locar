@@ -1,57 +1,119 @@
 document.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
-    const showLoginModal = body.dataset.showLoginModal === 'true';
+    const publicUrl = body.dataset.publicUrl;
+    const clientUrl = body.dataset.clientUrl;
+    const devId = body.dataset.devId;
 
-    const loginModal = document.getElementById('login-modal');
-    const loginForm = document.getElementById('login-form');
-    const errorMessageElement = document.getElementById('login-error-message');
+    const handleAuthFormSubmit = (formElement, apiEndpoint, onSuccess) => {
+        if (!formElement) return;
 
-    if (showLoginModal && loginModal) {
-        loginModal.style.display = 'flex';
-    }
+        formElement.addEventListener('submit', (event) => {
+            event.preventDefault();
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const username = loginForm.username.value;
-            const password = loginForm.password.value;
-            const publicUrl = body.dataset.publicUrl;
-            const clientId = body.dataset.clientId;
-            const devId = body.dataset.devId;
-            const clientUrl = body.dataset.clientUrl; 
-
-            errorMessageElement.style.display = 'none';
-            errorMessageElement.textContent = '';
-
-            let apiUrl = `${publicUrl}/api/login.php?client=${clientId}&url=${encodeURIComponent(clientUrl)}`;
+            const messageDiv = formElement.querySelector('.form-message');
+            const submitButton = formElement.querySelector('button[type="submit"]');
+            const formData = new FormData(formElement);
+            
+            let finalApiEndpoint = `${publicUrl}${apiEndpoint}`;
             if (devId) {
-                apiUrl += `&dev=${devId}`;
+                finalApiEndpoint += `?dev=${devId}`;
             }
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ username, password }),
-                });
+            if (!submitButton.dataset.originalText) {
+                submitButton.dataset.originalText = submitButton.textContent;
+            }
 
-                const result = await response.json();
+            submitButton.disabled = true;
+            submitButton.textContent = 'Procesando...';
+            if(messageDiv) {
+                messageDiv.textContent = '';
+                messageDiv.className = 'form-message';
+            }
 
-                if (result.success) {
-                    window.location.href = clientUrl;
-                } else {
-                    errorMessageElement.textContent = result.message || 'Un error ha ocurrido.';
-                    errorMessageElement.style.display = 'block';
+            fetch(finalApiEndpoint, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (messageDiv) {
+                    messageDiv.textContent = data.message;
+                    if (data.success) {
+                        messageDiv.classList.add('success');
+                        if (onSuccess) {
+                            onSuccess(data);
+                        }
+                    } else {
+                        messageDiv.classList.add('error');
+                    }
+                } else if (data.success && onSuccess) {
+                    onSuccess(data);
                 }
-            } catch (error) {
-                console.error('Error en el proceso de login:', error);
-                errorMessageElement.textContent = 'No se pudo conectar con el servidor.';
-                errorMessageElement.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error en la petición:', error);
+                if (messageDiv) {
+                    messageDiv.textContent = 'Ocurrió un error de conexión.';
+                    messageDiv.classList.add('error');
+                }
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = submitButton.dataset.originalText;
+            });
+        });
+    };
+    
+    const createAdminForm = document.getElementById('create-admin-form');
+    const resetPasswordForm = document.getElementById('reset-password-form');
+    const loginForm = document.getElementById('login-form');
+    const requestResetForm = document.getElementById('request-reset-form');
+
+    handleAuthFormSubmit(createAdminForm, '/api/create_initial_admin.php', () => {
+        setTimeout(() => { window.location.href = clientUrl + '/admin'; }, 2000);
+    });
+
+    handleAuthFormSubmit(resetPasswordForm, '/api/perform_password_reset.php', () => {
+        setTimeout(() => { window.location.href = clientUrl + '/admin'; }, 2000);
+    });
+
+    handleAuthFormSubmit(loginForm, '/api/login.php', () => {
+        window.location.reload();
+    });
+
+    handleAuthFormSubmit(requestResetForm, '/api/request_password_reset.php', () => {
+
+    });
+
+    const loginModalBackdrop = document.getElementById('login-modal-backdrop');
+    if (loginModalBackdrop) {
+        if (body.dataset.showLoginModal === 'true') {
+            loginModalBackdrop.style.display = 'flex';
+        }
+        
+        loginModalBackdrop.addEventListener('click', (e) => {
+            if (e.target.id === 'login-modal-backdrop' || e.target.classList.contains('close-button')) {
+                loginModalBackdrop.style.display = 'none';
             }
         });
+
+        const forgotPasswordLink = document.getElementById('forgot-password-link');
+        const backToLoginLink = document.getElementById('back-to-login-link');
+        
+        if(forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                loginForm.style.display = 'none';
+                requestResetForm.style.display = 'block';
+            });
+        }
+        
+        if(backToLoginLink) {
+            backToLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                requestResetForm.style.display = 'none';
+                loginForm.style.display = 'block';
+            });
+        }
     }
 });
