@@ -49,6 +49,7 @@ header("Content-Type: application/json");
 require_once defined("DEV_BRANCH") && DEV_BRANCH ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php" : dirname(__DIR__, 3) . "/core/src/config.php";
 
 require_once PRIVATE_PATH . "/src/DatabaseManager.php";
+require_once PRIVATE_PATH . "/src/bootstrap.php";
 require_once PRIVATE_PATH . "/src/admin/AuthManager.php";
 
 function send_json_response($success, $message, $statusCode = 200) {
