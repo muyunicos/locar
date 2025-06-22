@@ -79,7 +79,7 @@ function get_module_data(array $moduleConfig, array $context): array
         "menu_title" => $data["titulo"] ?? $moduleConfig["titulo"],
         "skin" => $data["skin"] ?? null,
         "main_skin" => $data["main_skin"] ?? null,
-        "menu_image_url" => Utils::buildImageUrl($data["logo"] ?? null),
+        "menu_image_url" => Utils::buildImageUrl($data["imagen"] ?? null),
         "sufijo" => $data["sufijo"] ?? null,
         "items" => $data["items"] ?? [],
         "footer_text" => $data["footer"] ?? "",
