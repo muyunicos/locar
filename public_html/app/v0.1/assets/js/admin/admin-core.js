@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const body = document.body;
-    const publicUrl = body.dataset.publicUrl;
-    const clientUrl = body.dataset.clientUrl;
-    const devId = body.dataset.devId;
-    const clientId = body.dataset.clientId;
+    const dataset = document.body.dataset;
+    const publicUrl = dataset.publicUrl;
+    const clientUrl = dataset.clientUrl;
+    const devId = dataset.devId;
+    const clientId = dataset.clientId;
 
     const handleAuthFormSubmit = (formElement, apiEndpoint, onSuccess) => {
         if (!formElement) return;
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loginModalBackdrop = document.getElementById('login-modal-backdrop');
     if (loginModalBackdrop) {
-        if (body.dataset.showLoginModal === 'true') {
+        if (dataset.showLoginModal === 'true') {
             loginModalBackdrop.style.display = 'flex';
         }
         

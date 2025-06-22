@@ -1,26 +1,19 @@
 <?php
 
-require_once 'api_bootstrap.php';
-
+require_once __DIR__ . '/api_bootstrap.php';
 global $input; 
 
 $authManager = new AuthManager();
 if (!$authManager->isLoggedIn()) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Acceso denegado.']);
-    exit;
+    send_json_response(false, 'Acceso denegado.', null, 403);
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
-    exit;
+    send_json_response(false, 'Método no permitido.', null, 405);
 }
 
 if (!isset($input['menuData']) || !isset($input['dataSourceFile'])) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Datos de entrada inválidos o incompletos.']);
-    exit;
+    send_json_response(false, 'Datos de entrada inválidos o incompletos.', null, 400);
 }
 
 $menuData = $input['menuData'];
@@ -29,10 +22,17 @@ $dataSourceFile = basename($input['dataSourceFile']);
 $basePath = realpath(DATA_PATH);
 $filePath = $basePath . '/' . $dataSourceFile;
 
-if (strpos(realpath($filePath), $basePath) !== 0 || !is_writable($basePath)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Archivo de destino no válido o sin permisos.']);
-    exit;
+
+if (!is_writable($basePath)) {
+    send_json_response(false, 'Error de permisos: El directorio de datos no es escribible.', null, 500);
+}
+
+if (file_exists($filePath) && strpos(realpath($filePath), $basePath) !== 0) {
+    send_json_response(false, 'Operación no permitida: la ruta del archivo es insegura.', null, 400);
+}
+
+if (dirname($filePath) !== $basePath) {
+    send_json_response(false, 'Operación no permitida: intento de escribir fuera del directorio de datos.', null, 400);
 }
 
 try {
@@ -40,25 +40,23 @@ try {
     if (!is_dir($backupDir)) {
         mkdir($backupDir, 0775, true);
     }
-    $backupFileName = pathinfo($filePath, PATHINFO_FILENAME) . '-' . date('YmdHis') . '.json';
-    $backupPath = $backupDir . '/' . $backupFileName;
     
-    if (file_exists($filePath) && !copy($filePath, $backupPath)) {
-        throw new Exception('No se pudo crear el archivo de respaldo.');
+    if (file_exists($filePath)) {
+        $backupFileName = pathinfo($filePath, PATHINFO_FILENAME) . '-' . date('YmdHis') . '.json';
+        $backupPath = $backupDir . '/' . $backupFileName;
+        if (!copy($filePath, $backupPath)) {
+            throw new Exception('No se pudo crear el archivo de respaldo.');
+        }
     }
 } catch (Exception $e) {
-    http_response_code(500);
     error_log('Error de backup: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Error crítico: no se pudo crear el respaldo. No se guardaron los cambios.']);
-    exit;
+    send_json_response(false, 'Error crítico: no se pudo crear el respaldo. No se guardaron los cambios.', null, 500);
 }
 
 $jsonData = json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 if (file_put_contents($filePath, $jsonData) === false) {
-    http_response_code(500);
     error_log('Error de escritura en: ' . $filePath);
-    echo json_encode(['success' => false, 'message' => 'Error al escribir en el archivo de datos.']);
-    exit;
+    send_json_response(false, 'Error al escribir en el archivo de datos.', null, 500);
 }
 
-echo json_encode(['success' => true, 'message' => 'Menú guardado correctamente.']);
+send_json_response(true, 'Menú guardado correctamente.');

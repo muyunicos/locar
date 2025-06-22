@@ -2,11 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const navPanel = document.getElementById('nav-panel');
     const hamburgerBtn = document.getElementById('hamburger-button');
     const appContainer = document.getElementById('module-content-wrapper');
-    const publicUrl = document.body.dataset.publicUrl;
-    const devId = document.body.dataset.devId;
-    const url = document.body.dataset.clientUrl;
-    const clientId = document.body.dataset.clientId;
-    const initialContext = JSON.parse(document.body.dataset.initialContext || '{}');
+    const dataset = document.body.dataset;
+    const publicUrl = dataset.publicUrl;
+    const clientUrl = dataset.clientUrl;
+    const devId = dataset.devId;
+    const clientId = dataset.clientId;
+    const initialContext = JSON.parse(dataset.initialContext || '{}');
     const baseTitle = initialContext.profile_title || 'Revel';
 
     hamburgerBtn.addEventListener('click', (e) => {
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         appContainer.innerHTML = `<h2>Cargando...</h2>`;
         
         try {
-            let apiUrl = `${publicUrl}/api/getModule.php?client=${clientId}&id=${moduleId}&url=${url}`;
+            let apiUrl = `${publicUrl}/api/getModule.php?client=${clientId}&id=${moduleId}&url=${clientUrl}`;
             if (devId) {
                 apiUrl += `&dev=${devId}`;
             }
@@ -55,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
-            // Actualiza título y CSS
             const moduleStylesheet = document.getElementById('module-stylesheet');
             if (data.hasOwnProperty('sufijo') && baseTitle) {
                 document.title = baseTitle + (data.sufijo || '');
@@ -68,16 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainStylesheet.href = data.main_css_url;
             }
 
-            // Inserta el nuevo contenido HTML
             appContainer.innerHTML = data.html;
 
-            // --- INICIO DE LA CORRECCIÓN ---
-            // Después de insertar el HTML, llamamos a la función de inicialización del módulo de admin si existe.
             if (data.module_type && window.adminModuleInitializers && typeof window.adminModuleInitializers[data.module_type] === 'function') {
                 console.log(`Re-initializing admin script for module type: ${data.module_type}`);
                 window.adminModuleInitializers[data.module_type]();
             }
-            // --- FIN DE LA CORRECCIÓN ---
 
         } catch (error) {
             console.error('Error al cargar el módulo:', error);

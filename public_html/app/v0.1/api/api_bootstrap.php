@@ -16,9 +16,9 @@ if (
     }
 }
 
-define("CLIENT_URL", $_REQUEST['url'] ?? null);
-define("CLIENT_ID", $_REQUEST['client'] ?? null);
-define("DEV_BRANCH", $_REQUEST["dev"] ?? null);
+define("CLIENT_URL", $request_data['url'] ?? null);
+define("CLIENT_ID", $request_data['client'] ?? null);
+define("DEV_BRANCH", $request_data["dev"] ?? 'v0.1');
 
 if (!CLIENT_ID) {
     http_response_code(400);

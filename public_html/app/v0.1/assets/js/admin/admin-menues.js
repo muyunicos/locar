@@ -135,8 +135,11 @@
 
         const menuData = serializeMenu();
         const dataSourceFile = dom.moduleContainer.dataset.sourceFile;
-        const publicUrl = document.body.dataset.publicUrl;
-        const clientId = document.body.dataset.clientId;
+        const dataset = document.body.dataset;
+        const publicUrl = dataset.publicUrl;
+        const clientUrl = dataset.clientUrl;
+        const devId = dataset.devId;
+        const clientId = dataset.clientId;
         const apiUrl = `${publicUrl}/api/saveMenu.php`;
         try {
             const response = await fetch(apiUrl, {
@@ -145,7 +148,7 @@
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ menuData, dataSourceFile, client: clientId })
+                body: JSON.stringify({ menuData, dataSourceFile, client: clientId, url: clientUrl})
             });
 
             const result = await response.json();
