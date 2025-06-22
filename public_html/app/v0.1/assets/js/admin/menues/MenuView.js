@@ -1,4 +1,3 @@
-
 let dom = {};
 
 let config = {
@@ -46,22 +45,13 @@ function _createCategoryElement(categoryData) {
         </div>
     `;
 }
-// REEMPLAZA ESTA FUNCIÓN DENTRO DE MenuView.js
 
-/**
- * Crea el HTML para un ítem de menú.
- * @param {object} itemData 
- * @returns {string} HTML del elemento.
- */
 function _createItemElement(itemData) {
     const hiddenClass = itemData.ocultar ? 'is-admin-hidden' : '';
     const imagePlaceholderClass = !itemData.imagen ? 'is-placeholder' : '';
-    
-    // CORRECCIÓN: Usamos clientUrl para las imágenes del menú, como indicaste.
     const imageUrl = itemData.imagen 
         ? (itemData.imagen.startsWith('http') ? itemData.imagen : `//${config.clientUrl}/imagenes/${itemData.imagen}`)
         : '';
-
     return `
         <div class="admin-menu-item ${hiddenClass}" data-id="${itemData.id}" data-type="item">
             <div class="item-header">
@@ -88,24 +78,18 @@ function _createItemElement(itemData) {
     `;
 }
 
-
 function init(initialConfig) {
     config = initialConfig;
-    dom.menuContainer = document.getElementById('admin-menu-items-container');
-    dom.saveButton = document.getElementById('fab-save-menu');
+    dom.menuContainer = document.getElementById('item-list-container');
+    dom.saveButton = document.getElementById('admin-save-fab');
     if (!dom.menuContainer || !dom.saveButton) {
         console.error("No se encontraron los contenedores principales del DOM.");
     }
 }
 
-/**
- * Renderiza el menú completo desde cero.
- * @param {object} menuData - El objeto de menú completo desde MenuState.
- */
 function render(menuData) {
     if (!dom.menuContainer) return;
     
-    // Renderiza la información del menú principal (título, logo)
     const menuTitleEl = document.querySelector('[data-menu-property="titulo"]');
     const menuLogoImgEl = document.querySelector('#menu-logo-img');
     const menuLogoContainer = document.querySelector('#menu-logo');
@@ -121,7 +105,6 @@ function render(menuData) {
         }
     }
 
-    // Renderiza la lista de ítems y categorías
     if (menuData.items && menuData.items.length > 0) {
         dom.menuContainer.innerHTML = menuData.items.map(_createItemElement).join('');
     } else {
@@ -129,21 +112,11 @@ function render(menuData) {
     }
 }
 
-/**
- * Muestra u oculta el botón flotante de guardado.
- * @param {boolean} show 
- */
 function setSaveChangesVisible(show) {
     if (!dom.saveButton) return;
     dom.saveButton.classList.toggle('visible', show);
 }
 
-/**
- * Actualiza una propiedad visual de un elemento sin re-renderizar todo.
- * @param {string} id 
- * @param {string} property 
- * @param {string} value 
- */
 function updateItemProperty(id, property, value) {
     const element = dom.menuContainer.querySelector(`[data-id="${id}"] [data-property="${property}"]`);
     if(element) {
@@ -151,17 +124,12 @@ function updateItemProperty(id, property, value) {
     }
 }
 
-/**
- * Alterna la clase de visibilidad de un elemento.
- * @param {string} id 
- */
 function toggleItemVisibility(id) {
     const element = dom.menuContainer.querySelector(`[data-id="${id}"]`);
     if (element) {
         element.classList.toggle('is-admin-hidden');
     }
 }
-
 
 export const MenuView = {
     init,
