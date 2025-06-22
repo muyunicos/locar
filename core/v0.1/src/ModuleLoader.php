@@ -49,6 +49,11 @@ class ModuleLoader
         require_once $logicPath;
 
         $moduleData = get_module_data($moduleConfig, $this->activeEventContext);
+        $viewData = $moduleData;
+        $viewData['module_data'] = $moduleData; 
+        $viewData['is_admin'] = $isAdmin;
+        $viewData['dataSourceFile'] = $moduleConfig['url']; 
+
         $moduleData['is_admin'] = $isAdmin;
         
         $activeEvent = $this->activeEventContext["active_event"];
@@ -69,7 +74,7 @@ class ModuleLoader
             }
         }
 
-        $htmlContent = View::render("modules/" . $moduleType, $moduleData);
+        $htmlContent = View::render("modules/" . $moduleType, $viewData);
 
         return [
             "html" => $htmlContent,
