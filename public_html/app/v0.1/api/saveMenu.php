@@ -12,12 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     send_json_response(false, 'Método no permitido.', null, 405);
 }
 
-if (!isset($input['menuData']) || !isset($input['dataSourceFile'])) {
+if (!isset($input['menuData']) || !isset($input['dataSource'])) {
     send_json_response(false, 'Datos de entrada inválidos o incompletos.', null, 400);
 }
 
 $menuData = $input['menuData'];
-$dataSourceFile = basename($input['dataSourceFile']);
+$dataSourceFile = basename($input['dataSource']);
 
 $basePath = realpath(DATA_PATH);
 $filePath = $basePath . '/' . $dataSourceFile;
@@ -59,4 +59,8 @@ if (file_put_contents($filePath, $jsonData) === false) {
     send_json_response(false, 'Error al escribir en el archivo de datos.', null, 500);
 }
 
-send_json_response(true, 'Menú guardado correctamente.');
+send_json_response(
+    true, 
+    'Menú guardado correctamente.', 
+    ['savedData' => $menuData]
+);
