@@ -1,88 +1,77 @@
-.item, .c-titulo {
+/* admin-menues.css - Modelo "Clic para Activar" */
+
+/* CAMBIO: Se elimina el padding-left. El wrapper ahora solo es un punto de referencia. */
+.admin-item-wrapper {
     position: relative;
-    border: 1px dashed transparent;
+    margin-bottom: 8px;
+    border-left: 3px solid transparent; /* Borde para indicar la selección */
+    transition: all 0.2s ease-in-out;
 }
 
-.item:hover, .c-titulo:hover {
-    border-color: rgba(59, 130, 246, 0.4);
+/* CAMBIO: Se añade un feedback visual para el ítem activo */
+.admin-item-wrapper.is-active-admin-item {
+    background-color: #f0f9ff; /* Un sutil fondo azul */
+    border-left-color: #3b82f6; /* Borde azul para destacar */
 }
 
+/* --- Controles de Administración --- */
 .admin-controls {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 1.5rem;
+    left: -10px; /* Posicionado ligeramente fuera para no superponerse tanto */
+    transform: translateY(-50%);
+    
     display: flex;
-    gap: 5px;
-    background-color: #fff;
-    padding: 5px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    opacity: 0; /* Oculto por defecto */
-    transition: opacity 0.2s ease-in-out;
-    z-index: 10;
-}
-
-.item:hover .admin-controls,
-.c-titulo:hover .admin-controls {
-    opacity: 1;
-}
-
-.admin-btn {
-    background-color: #f4f4f5;
-    border: 1px solid #e4e4e7;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s, color 0.2s;
+    gap: 8px;
+
+    /* CAMBIO: Los controles están siempre ocultos por defecto */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+    z-index: 20;
 }
 
-.admin-btn:hover {
-    background-color: #e4e4e7;
+/* CAMBIO: Los controles solo se muestran si el wrapper tiene la clase 'is-active-admin-item' */
+.admin-item-wrapper.is-active-admin-item > .admin-controls {
+    opacity: 1;
+    visibility: visible;
 }
 
-.admin-btn-delete:hover {
-    background-color: #fee2e2;
-    color: #ef4444;
-    border-color: #fca5a5;
-}
+/* El resto de los estilos para drag-handle, panel de acciones, etc. permanecen igual */
+.item-drag-handle { cursor: grab; color: #a1a1aa; font-size: 20px; padding: 5px; }
+.item-drag-handle:active { cursor: grabbing; }
+.item-actions-panel { position: relative; }
+.item-actions-panel .action-button { background: none; border: none; cursor: pointer; font-size: 18px; padding: 5px; }
+.item-actions-panel .options-popup { visibility: hidden; opacity: 0; transform: translateY(-50%) scale(0.95); transition: all 0.15s ease-out; position: absolute; left: 100%; top: 50%; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; padding: 5px; display: flex; flex-direction: column; gap: 4px; margin-left: 12px; }
+.item-actions-panel.is-open .options-popup { visibility: visible; opacity: 1; transform: translateY(-50%) scale(1); }
+.options-popup button { background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; cursor: pointer; font-size: 14px; padding: 6px 8px; display: flex; align-items: center; gap: 5px; transition: background-color 0.2s; white-space: nowrap; }
+.options-popup button:hover { background-color: #e4e4e7; }
+.options-popup button.danger:hover { background-color: #fee2e2; color: #ef4444; border-color: #fca5a5; }
 
-/* Estilo para ítems ocultos */
-.is-admin-hidden {
+/* --- Estilos para la vista previa del contenido --- */
+.item, .c-container { border: 1px solid transparent; }
+[contenteditable=true][data-placeholder]:empty:before { content: attr(data-placeholder); color: #a1a1aa; font-style: italic; pointer-events: none; }
+.item-imagen-wrapper.is-placeholder { background-color: #f4f4f5; display: flex; align-items: center; justify-content: center; border: 1px dashed #d4d4d8; }
+.item-imagen-wrapper.is-placeholder img { display: none; }
+.item-imagen-wrapper.is-placeholder .placeholder-text { display: block; color: #a1a1aa; font-size: 12px; }
+.item-imagen-wrapper .placeholder-text { display: none; }
+.is-admin-hidden { opacity: 0.5; background-image: repeating-linear-gradient( -45deg, transparent, transparent 8px, rgba(228, 228, 231, 0.5) 8px, rgba(228, 228, 231, 0.5) 10px ); }
+
+/* --- Estilos para Drag-and-Drop --- */
+
+/* Estilo para el elemento que se está arrastrando */
+.is-dragging {
     opacity: 0.4;
-    border-style: solid;
-    background-image: repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 8px,
-      rgba(228, 228, 231, 0.5) 8px,
-      rgba(228, 228, 231, 0.5) 10px
-    );
-}
-.is-admin-hidden .admin-btn[title="Ocultar/Mostrar"] {
-    background-color: #fef08a; /* Amarillo para destacar que está oculto */
+    background: #e0f2fe;
 }
 
-
-.is-admin-deleted {
-    display: none;
-}
-.is-admin-editable {
-    cursor: text;
-    transition: background-color 0.2s;
+/* Clases para el indicador de destino (dónde se va a soltar) */
+.drop-target-top {
+    border-top: 2px solid #0ea5e9 !important;
 }
 
-.is-admin-editable:hover {
-    background-color: rgba(59, 130, 246, 0.1);
-}
-
-.is-editing {
-    background-color: #fff;
-    outline: 2px solid #3b82f6;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
-    border-radius: 4px;
+.drop-target-bottom {
+    border-bottom: 2px solid #0ea5e9 !important;
 }

@@ -85,9 +85,9 @@ if (!function_exists("render_public_item")) {
      ?>
 >
     
-    <?php if (!empty($menu_image_url)): ?>
+    <?php if (!empty($imagen)): ?>
         <div class="menu-header-image-container">
-            <?php render_public_image($menu_image_url, $menu_title); ?>
+            <?php render_public_image($imagen, $menu_title); ?>
         </div>
     <?php else: ?>
         <h2 class="menues-title"><?= htmlspecialchars($menu_title) ?></h2>

@@ -16,6 +16,39 @@ function findItemRecursive(id, itemsArray, parent = null) {
     return null;
 }
 
+function reorderItem(draggedId, targetId, position) {
+    if (draggedId === targetId) return false;
+
+    // 1. Encontrar y extraer el elemento arrastrado de su lugar original.
+    const draggedResult = findItemRecursive(draggedId, menu.items);
+    if (!draggedResult) return false;
+    
+    const draggedParentArray = draggedResult.parent ? draggedResult.parent.items : menu.items;
+    const [draggedItem] = draggedParentArray.splice(draggedResult.index, 1);
+
+    // 2. Encontrar la ubicación del elemento de destino.
+    const targetResult = findItemRecursive(targetId, menu.items);
+    if (!targetResult) {
+        // Si no se encuentra el target, se devuelve el item a su lugar para no perderlo.
+        draggedParentArray.splice(draggedResult.index, 0, draggedItem);
+        return false;
+    }
+    
+    const targetParentArray = targetResult.parent ? targetResult.parent.items : menu.items;
+    
+    // Recalculamos el índice del target por si el splice anterior afectó al mismo array.
+    const targetIndex = targetParentArray.findIndex(item => item.id === targetId);
+
+    // 3. Insertar el elemento arrastrado en la nueva posición.
+    if (position === 'top') {
+        targetParentArray.splice(targetIndex, 0, draggedItem);
+    } else { // 'bottom'
+        targetParentArray.splice(targetIndex + 1, 0, draggedItem);
+    }
+
+    return true;
+}
+
 function load(initialMenuData) {
     menu = JSON.parse(JSON.stringify(initialMenuData));
     const ensureIds = (items) => {
@@ -104,5 +137,6 @@ function addItem(parentId, itemType) {
 
 export const MenuState = {
     load, getMenu, updateItemProperty, toggleItemVisibility,
-    deleteItem, duplicateItem, addItem
+    deleteItem, duplicateItem, addItem,
+    reorderItem
 };
