@@ -1,52 +1,66 @@
-
 let dom = {};
+
 let config = {
     publicUrl: '',
     clientUrl: ''
 };
 
+function init(initialConfig) {
+    config = initialConfig;
+    dom.menuContainer = document.getElementById('item-list-container');
+    dom.saveButton = document.getElementById('admin-save-fab');
+    if (!dom.menuContainer || !dom.saveButton) {
+        console.error("No se encontraron los contenedores principales del DOM.");
+    }
+}
+
+function buildImageUrl(imageName) {
+    if (!imageName) {
+        return '';
+    }
+    return `${config.clientUrl}/imagenes/${imageName}.webp`;
+}
+
 
 function _createCategoryElement(categoryData) {
     const hiddenClass = categoryData.ocultar ? 'is-admin-hidden' : '';
-    const layoutClass = categoryData.layout ? categoryData.layout : '';
-    const imagePlaceholderClass = !categoryData.imagen ? 'is-placeholder' : '';
-    const imageUrl = categoryData.imagen 
-        ? (categoryData.imagen.startsWith('http') ? categoryData.imagen : `//${config.clientUrl}/imagenes/${categoryData.imagen}.webp`)
-        : '';
+    // Recursivamente renderiza los ítems dentro de la categoría
     const itemsHtml = categoryData.items ? categoryData.items.map(item => 
         (item.es_cat ? _createCategoryElement(item) : _createItemElement(item))
     ).join('') : '';
+    
+    // La imagen de la categoría usa 'imagen' como propiedad en los datos JSON
+    const hasImage = !!categoryData.imagen;
+    const imageUrl = hasImage ? buildImageUrl(categoryData.imagen) : '';
+    const imagePlaceholderClass = !hasImage ? 'is-placeholder' : '';
 
     return `
-        <div class="admin-item-wrapper" data-id="${categoryData.id}" data-type="category">
-            <div class="admin-controls">
+        <div class="admin-menu-category ${hiddenClass}" data-id="${categoryData.id}" data-type="category">
+            <div class="item-header">
                 <div class="item-drag-handle">⠿</div>
+                
+                <div class="item-image-container ${imagePlaceholderClass}" data-action="change-image">
+                    ${hasImage ? `<img src="${imageUrl}" alt="${categoryData.titulo || 'Imagen de categoría'}">` : ''}
+                    <div class="placeholder-text">Sin Imagen</div>
+                </div>
+
+                <div class="item-content">
+                    <h3 contenteditable="true" data-property="titulo" data-placeholder="Título de categoría">${categoryData.titulo || ''}</h3>
+                    <p contenteditable="true" data-property="descripcion" data-placeholder="Descripción de categoría">${categoryData.descripcion || ''}</p>
+                </div>
                 <div class="item-actions-panel">
                     <button class="action-button" data-action="toggle-options">⚙️</button>
                     <div class="options-popup">
-                        <button data-action="toggle-hidden">👁️</button>
-                        <button data-action="duplicate">📄</button>
-                        <button data-action="add-item">➕ Ítem</button>
-                        <button data-action="add-category">➕ Cat.</button>
-                        <button data-action="delete" class="danger">🗑️</button>
+                        <button data-action="toggle-hidden">👁️ Ocultar/Mostrar</button>
+                        <button data-action="duplicate">📄 Duplicar</button>
+                        <button data-action="add-item">➕ Añadir Ítem</button>
+                        <button data-action="add-category">➕ Añadir Categoría</button>
+                        <button data-action="delete" class="danger">🗑️ Eliminar</button>
                     </div>
                 </div>
             </div>
-
-            <div class="c-container ${layoutClass} ${hiddenClass}">
-                <h3 class="c-titulo">
-                    <div class="c-titulo-content">
-                        <span contenteditable="true" data-property="titulo" data-placeholder="Título de categoría">${categoryData.titulo || ''}</span>
-                        <small class="c-titulo-descripcion" contenteditable="true" data-property="descripcion" data-placeholder="Descripción">${categoryData.descripcion || ''}</small>
-                    </div>
-                    <div class="item-imagen-wrapper ${imagePlaceholderClass}" data-action="change-image">
-                        <img src="${imageUrl}" alt="${categoryData.titulo || 'Imagen de categoría'}">
-                        <div class="placeholder-text">Sin Imagen</div>
-                    </div>
-                </h3>
-                <div class="item-list">
-                    ${itemsHtml}
-                </div>
+            <div class="category-items-container">
+                ${itemsHtml}
             </div>
         </div>
     `;
@@ -54,66 +68,78 @@ function _createCategoryElement(categoryData) {
 
 function _createItemElement(itemData) {
     const hiddenClass = itemData.ocultar ? 'is-admin-hidden' : '';
-    const imagePlaceholderClass = !itemData.imagen ? 'is-placeholder' : '';
-    const imageUrl = itemData.imagen 
-        ? (itemData.imagen.startsWith('http') ? itemData.imagen : `//${config.clientUrl}/imagenes/${itemData.imagen}`)
-        : '';
+    const hasImage = !!itemData.imagen;
+    const imageUrl = hasImage ? buildImageUrl(itemData.imagen) : '';
+    const imagePlaceholderClass = !hasImage ? 'is-placeholder' : '';
 
     return `
-        <div class="admin-item-wrapper" data-id="${itemData.id}" data-type="item">
-            <div class="admin-controls">
+        <div class="admin-menu-item ${hiddenClass}" data-id="${itemData.id}" data-type="item">
+            <div class="item-header">
                 <div class="item-drag-handle">⠿</div>
+                <div class="item-image-container ${imagePlaceholderClass}" data-action="change-image">
+                    ${hasImage ? `<img src="${imageUrl}" alt="${itemData.titulo || 'Imagen de item'}">` : ''}
+                    <div class="placeholder-text">Sin Imagen</div>
+                </div>
+                <div class="item-content">
+                    <h4 contenteditable="true" data-property="titulo" data-placeholder="Nombre del plato">${itemData.titulo || ''}</h4>
+                    <p contenteditable="true" data-property="descripcion" data-placeholder="Descripción del plato">${itemData.descripcion || ''}</p>
+                </div>
+                <div class="item-price" contenteditable="true" data-property="precio" data-placeholder="$0.00">${itemData.precio || ''}</div>
                 <div class="item-actions-panel">
                     <button class="action-button" data-action="toggle-options">⚙️</button>
                     <div class="options-popup">
-                        <button data-action="toggle-hidden">👁️</button>
-                        <button data-action="duplicate">📄</button>
-                        <button data-action="delete" class="danger">🗑️</button>
+                        <button data-action="toggle-hidden">👁️ Ocultar/Mostrar</button>
+                        <button data-action="duplicate">📄 Duplicar</button>
+                        <button data-action="delete" class="danger">🗑️ Eliminar</button>
                     </div>
-                </div>
-            </div>
-            
-            <div class="item ${hiddenClass}">
-                <div class="item-imagen-wrapper ${imagePlaceholderClass}" data-action="change-image">
-                    <img src="${imageUrl}" alt="${itemData.titulo || 'Imagen de item'}">
-                    <div class="placeholder-text">Sin Imagen</div>
-                </div>
-                <div class="item-details">
-                    <div class="item-info">
-                        <h3 class="item-titulo" contenteditable="true" data-property="titulo" data-placeholder="Nombre del plato">${itemData.titulo || ''}</h3>
-                        <p class="item-descripcion" contenteditable="true" data-property="descripcion" data-placeholder="Descripción del plato">${itemData.descripcion || ''}</p>
-                    </div>
-                    <div class="item-precio" contenteditable="true" data-property="precio" data-placeholder="$0.00">${itemData.precio || ''}</div>
                 </div>
             </div>
         </div>
     `;
 }
 
-function init(initialConfig) {
-    config = initialConfig;
-    dom.menuContainer = document.getElementById('item-list-container');
-    dom.saveButton = document.getElementById('fab-save-menu');
-
-    if (!dom.menuContainer || !dom.saveButton) {
-        console.error("No se encontraron los contenedores principales del DOM. Verifica los IDs 'item-list-container' y 'fab-save-menu'.");
-        return;
-    }
-    dom.menuContainer.classList.add('admin-view');
-}
-
 function render(menuData) {
     if (!dom.menuContainer) return;
-    const menuTitleEl = document.querySelector('[data-menu-property="titulo"]');
-    if (menuTitleEl) menuTitleEl.textContent = menuData.titulo;
-    // (Aquí iría la lógica para el logo/header del menú principal si es editable)
+    
+    // Actualizar el título principal del menú
+    const menuTitleEl = document.querySelector('.menues-title');
+    if (menuTitleEl) {
+        menuTitleEl.textContent = menuData.titulo;
+    }
+
+    // Actualizar la imagen principal del menú
+    const menuHeaderImageContainer = document.querySelector('.menu-header-image-container');
+    if (menuHeaderImageContainer) {
+        let menuImageEl = menuHeaderImageContainer.querySelector('img');
+        const hasImage = !!menuData.imagen; // La propiedad es 'imagen' en el JSON de menú
+
+        if (hasImage) {
+            const imageUrl = buildImageUrl(menuData.imagen);
+            if (!menuImageEl) { // Si no existe la imagen, crearla
+                menuImageEl = document.createElement('img');
+                menuHeaderImageContainer.innerHTML = ''; // Limpiar el contenido existente (ej. título)
+                menuHeaderImageContainer.appendChild(menuImageEl);
+            }
+            menuImageEl.src = imageUrl;
+            menuImageEl.alt = menuData.titulo || 'Imagen del menú';
+            menuHeaderImageContainer.style.display = 'block'; // Asegurar que el contenedor sea visible
+        } else {
+            // Si no hay imagen, ocultar el contenedor de la imagen y mostrar el título
+            if (menuImageEl) {
+                menuImageEl.remove(); // Eliminar la imagen si existe
+            }
+            menuHeaderImageContainer.style.display = 'none'; // Ocultar el contenedor de la imagen
+        }
+    }
+
 
     if (menuData.items && menuData.items.length > 0) {
-        dom.menuContainer.innerHTML = menuData.items.map(item =>
-            (item.es_cat ? _createCategoryElement(item) : _createItemElement(item))
-        ).join('');
+        // Mapea los ítems de nivel superior, que pueden ser categorías o ítems
+        dom.menuContainer.innerHTML = menuData.items.map(item => {
+            return item.es_cat ? _createCategoryElement(item) : _createItemElement(item);
+        }).join('');
     } else {
-        dom.menuContainer.innerHTML = '<p class="empty-menu-notice">El menú está vacío. Puedes empezar añadiendo un ítem o categoría.</p>';
+        dom.menuContainer.innerHTML = '<p class="empty-menu-notice">El menú está vacío. Puedes empezar añadiendo un ítem o una categoría.</p>';
     }
 }
 
@@ -122,13 +148,17 @@ function setSaveChangesVisible(show) {
     dom.saveButton.classList.toggle('visible', show);
 }
 
+function updateItemProperty(id, property, value) {
+    const element = dom.menuContainer.querySelector(`[data-id="${id}"] [data-property="${property}"]`);
+    if(element) {
+        element.textContent = value;
+    }
+}
+
 function toggleItemVisibility(id) {
-    const wrapper = document.querySelector(`.admin-item-wrapper[data-id="${id}"]`);
-    if (wrapper) {
-        const contentElement = wrapper.querySelector('.item, .c-container');
-        if (contentElement) {
-            contentElement.classList.toggle('is-admin-hidden');
-        }
+    const element = dom.menuContainer.querySelector(`[data-id="${id}"]`);
+    if (element) {
+        element.classList.toggle('is-admin-hidden');
     }
 }
 
@@ -136,5 +166,6 @@ export const MenuView = {
     init,
     render,
     setSaveChangesVisible,
+    updateItemProperty,
     toggleItemVisibility
 };
