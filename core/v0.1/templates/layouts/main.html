@@ -70,7 +70,7 @@
     <script src="<?= htmlspecialchars($public_url) ?>/assets/js/nav-handler.js"></script>
     <?php if (isset($admin_scripts) && is_array($admin_scripts) && !empty($admin_scripts)): ?>
         <?php foreach ($admin_scripts as $script): ?>
-            <script src="<?= htmlspecialchars($script) ?>"></script>
+            <script type="module" src="<?= htmlspecialchars($script) ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
     <?php if ($is_admin || $show_login_modal): ?>

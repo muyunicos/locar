@@ -1,7 +1,6 @@
 {
   "titulo": "Menú Revel Bar",
-  "logo": "logo-bar",
-  "skin": "revelbar",
+  "imagen": "revelbar",
   "main_skin": true,
   "sufijo": " - Bar",
   "id": 76478,
