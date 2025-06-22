@@ -1,58 +1,45 @@
-/**
- * admin-menues.js (Controlador Principal)
- * * Orquesta la página de administración de menús.
- * - Inicializa los módulos de Vista, Estado y API.
- * - Maneja los eventos del usuario.
- * - Conecta la Vista con el Estado.
- */
-
-// Importamos los módulos que hemos creado.
 import { MenuState } from './menues/MenuState.js';
 import { MenuView } from './menues/MenuView.js';
 import { MenuApiService } from './menues/MenuApiService.js';
 
-// Usamos un IIFE asíncrono que se ejecuta cuando el DOM está listo.
 (async () => {
-    // Variable para rastrear si hay cambios sin guardar.
     let hasUnsavedChanges = false;
+    let appConfig = {};
 
-    /**
-     * Función principal de inicialización.
-     */
     function init() {
-        // 1. Leer la configuración desde los atributos data-* del body.
-        const body = document.body;
-        const config = {
-            clientId: body.dataset.clientId,
-            publicUrl: body.dataset.publicUrl,
-            clientUrl: body.dataset.clientUrl,
-            initialContext: JSON.parse(body.dataset.initialContext || '{}')
+        const dataset = document.body.dataset;
+        const menuContainer = document.getElementById('menu-container');
+
+        if (!menuContainer) {
+            console.error("El contenedor principal del módulo #menu-container no fue encontrado.");
+            return;
+        }
+
+        appConfig = {
+            clientId: dataset.clientId,
+            publicUrl: dataset.publicUrl,
+            clientUrl: dataset.clientUrl,
+            devId: dataset.devId,
+            initialContext: JSON.parse(menuContainer.dataset.initialJson || '{}'),
+            dataSourceFile: menuContainer.dataset.sourceFile
         };
         
-        // 2. Inicializar los módulos con la configuración leída.
-        MenuApiService.init({ apiBaseUrl: config.publicUrl });
-        MenuView.init({ publicUrl: config.publicUrl, clientUrl: config.clientUrl });
-        MenuState.load(config.initialContext.menuData); // Asumimos que la data inicial está en initialContext.menuData
+        MenuApiService.init({ apiBaseUrl: appConfig.publicUrl });
+        MenuView.init({ publicUrl: appConfig.publicUrl, clientUrl: appConfig.clientUrl });
+        MenuState.load(appConfig.initialContext.menuData || appConfig.initialContext);
 
-        // 3. Renderizar la vista inicial con los datos del estado.
         MenuView.render(MenuState.getMenu());
-
-        // 4. Configurar todos los manejadores de eventos.
         setupEventListeners();
-
         console.log('Controlador de Menús inicializado.');
     }
 
-    /**
-     * Configura todos los listeners de eventos de la página.
-     */
     function setupEventListeners() {
-        const menuContainer = document.getElementById('admin-menu-items-container');
+        const menuItemsContainer = document.getElementById('admin-menu-items-container');
         const saveButton = document.getElementById('fab-save-menu');
 
-        if (menuContainer) {
-            menuContainer.addEventListener('click', handleDelegatedClick);
-            menuContainer.addEventListener('blur', handleTextEdit, true); // Usar captura para eventos 'blur'
+        if (menuItemsContainer) {
+            menuItemsContainer.addEventListener('click', handleDelegatedClick);
+            menuItemsContainer.addEventListener('blur', handleTextEdit, true);
         }
         
         if (saveButton) {
@@ -62,14 +49,11 @@ import { MenuApiService } from './menues/MenuApiService.js';
         window.addEventListener('beforeunload', (e) => {
             if (hasUnsavedChanges) {
                 e.preventDefault();
-                e.returnValue = ''; // Requerido por algunos navegadores.
+                e.returnValue = '';
             }
         });
     }
 
-    /**
-     * Marca que hay cambios y muestra el botón de guardar.
-     */
     function setChangesMade() {
         if (!hasUnsavedChanges) {
             hasUnsavedChanges = true;
@@ -77,10 +61,38 @@ import { MenuApiService } from './menues/MenuApiService.js';
         }
     }
 
-    /**
-     * Manejador centralizado para clicks en ítems y categorías.
-     * @param {Event} e 
-     */
+    async function handleSaveMenu() {
+        const saveButton = document.getElementById('fab-save-menu');
+        saveButton.classList.add('is-loading');
+        
+        try {
+            const menuData = MenuState.getMenu();
+            const payload = {
+                menuData: menuData,
+                dataSource: appConfig.dataSourceFile,
+                client: appConfig.clientId,
+                url: appConfig.clientUrl,
+                dev: appConfig.devId
+            };
+
+            const response = await MenuApiService.saveMenu(payload);
+            
+            if (response.success) {
+                hasUnsavedChanges = false;
+                MenuView.setSaveChangesVisible(false);
+                alert('¡Menú guardado con éxito!');
+            } else {
+                throw new Error(response.message || 'El servidor devolvió un error.');
+            }
+
+        } catch (error) {
+            console.error('Fallo al guardar el menú:', error);
+            alert(`Error al guardar: ${error.message}`);
+        } finally {
+            saveButton.classList.remove('is-loading');
+        }
+    }
+
     function handleDelegatedClick(e) {
         const actionTarget = e.target.closest('[data-action]');
         if (!actionTarget) return;
@@ -89,8 +101,6 @@ import { MenuApiService } from './menues/MenuApiService.js';
         const itemElement = e.target.closest('[data-id]');
         const id = itemElement?.dataset.id;
         
-        if (!id && action !== 'add-category' && action !== 'add-item') return; // Algunas acciones pueden no tener ID
-
         let needsRender = false;
 
         switch (action) {
@@ -102,19 +112,29 @@ import { MenuApiService } from './menues/MenuApiService.js';
                 break;
             
             case 'toggle-hidden':
-                const item = MenuState.getMenu().items.find(i => i.id === id); // Simplificado, necesita la búsqueda recursiva del state
-                // Una versión mejorada implicaría que MenuState.toggle... devuelva el nuevo estado.
-                MenuState.updateItemProperty(id, 'ocultar', !item.ocultar);
-                MenuView.toggleItemVisibility(id); // Actualización eficiente sin re-renderizar todo
+                MenuState.toggleItemVisibility(id);
+                MenuView.toggleItemVisibility(id);
                 setChangesMade();
+                return;
+
+            case 'duplicate':
+                MenuState.duplicateItem(id);
+                needsRender = true;
                 break;
 
-            // ... aquí irían los casos para 'duplicate', 'add-item', etc.
+            case 'add-item':
+                MenuState.addItem(id, 'item');
+                needsRender = true;
+                break;
+
+            case 'add-category':
+                MenuState.addItem(id, 'category');
+                needsRender = true;
+                break;
             
             case 'toggle-options':
-                const panel = itemElement.querySelector('.item-actions-panel');
-                panel.classList.toggle('is-open');
-                break;
+                itemElement?.querySelector('.item-actions-panel')?.classList.toggle('is-open');
+                return;
         }
 
         if (needsRender) {
@@ -123,10 +143,6 @@ import { MenuApiService } from './menues/MenuApiService.js';
         }
     }
 
-    /**
-     * Maneja la edición de texto en campos contenteditable.
-     * @param {FocusEvent} e 
-     */
     function handleTextEdit(e) {
         const target = e.target;
         if (!target.isContentEditable) return;
@@ -143,41 +159,5 @@ import { MenuApiService } from './menues/MenuApiService.js';
         setChangesMade();
     }
 
-    /**
-     * Maneja el guardado del menú.
-     */
-    async function handleSaveMenu() {
-        const saveButton = document.getElementById('fab-save-menu');
-        saveButton.classList.add('is-loading');
-        
-        try {
-            const currentMenuData = MenuState.getMenu();
-            const clientName = document.body.dataset.clientId;
-
-            // TODO: Aquí deberíamos aplicar la transformación de nombres de claves si es necesario
-            // (ej: 'titulo' -> 'menu_title') antes de enviar a la API.
-
-            const response = await MenuApiService.saveMenu(currentMenuData, clientName);
-            
-            if (response.success) {
-                hasUnsavedChanges = false;
-                MenuView.setSaveChangesVisible(false);
-                // Opcional: mostrar una notificación de éxito.
-                alert('¡Menú guardado con éxito!');
-            } else {
-                throw new Error(response.message || 'El servidor devolvió un error.');
-            }
-
-        } catch (error) {
-            console.error('Fallo al guardar el menú:', error);
-            // Opcional: mostrar una notificación de error al usuario.
-            alert(`Error al guardar: ${error.message}`);
-        } finally {
-            saveButton.classList.remove('is-loading');
-        }
-    }
-
-    // Iniciar la aplicación cuando el DOM esté completamente cargado.
     document.addEventListener('DOMContentLoaded', init);
-
 })();

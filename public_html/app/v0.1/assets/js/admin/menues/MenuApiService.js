@@ -1,33 +1,18 @@
-/**
- * MenuApiService.js
- * * Módulo encargado de toda la comunicación con la API del backend.
- * * Debe ser inicializado con la configuración del cliente.
- */
 
-// Configuración privada del módulo.
+
 let config = {
     apiBaseUrl: ''
 };
 
-/**
- * Inicializa el servicio de API con las URLs necesarias.
- * Esta función DEBE ser llamada al inicio de la aplicación.
- * @param {object} initialConfig - Objeto con { apiBaseUrl: '...' }
- */
 function init(initialConfig) {
     config.apiBaseUrl = initialConfig.apiBaseUrl;
 }
 
-/**
- * Guarda el estado actual del menú en el servidor.
- * @param {object} menuData - El objeto completo del menú a guardar.
- * @returns {Promise<object>} - La respuesta del servidor.
- */
-async function saveMenu(menuData) {
+async function saveMenu(payload) {
     if (!config.apiBaseUrl) {
         throw new Error('MenuApiService no ha sido inicializado. Llama a init() primero.');
     }
-    const url = `${config.apiBaseUrl}/saveMenu.php`;
+    const url = `${config.apiBaseUrl}/api/saveMenu.php`;
 
     try {
         const response = await fetch(url, {
@@ -36,7 +21,7 @@ async function saveMenu(menuData) {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(menuData)
+            body: JSON.stringify(payload) 
         });
 
         if (!response.ok) {

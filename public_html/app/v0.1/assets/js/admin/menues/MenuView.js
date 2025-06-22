@@ -1,7 +1,9 @@
 
 let dom = {};
+
 let config = {
-    publicUrl: ''
+    publicUrl: '',
+    clientUrl: ''
 };
 
 function _createCategoryElement(categoryData) {
@@ -9,14 +11,10 @@ function _createCategoryElement(categoryData) {
     const itemsHtml = categoryData.items ? categoryData.items.map(item => 
         (item.es_cat ? _createCategoryElement(item) : _createItemElement(item))
     ).join('') : '';
-    
-    // --- LÓGICA DE IMAGEN AÑADIDA AQUÍ ---
     const imagePlaceholderClass = !categoryData.imagen ? 'is-placeholder' : '';
     const imageUrl = categoryData.imagen 
         ? (categoryData.imagen.startsWith('http') ? categoryData.imagen : `//${config.clientUrl}/imagenes/${categoryData.imagen}`)
         : '';
-    // --- FIN LÓGICA DE IMAGEN ---
-
     return `
         <div class="admin-menu-category ${hiddenClass}" data-id="${categoryData.id}" data-type="category">
             <div class="item-header">
