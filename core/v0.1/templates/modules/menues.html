@@ -17,7 +17,7 @@ if (!function_exists("render_public_item")) {
         if (empty($items_array)) return;
 
         foreach ($items_array as $item) {
-            if (isset($item["hidden"]) && $item["hidden"]) continue;
+            if (isset($item["ocultar"]) && $item["ocultar"]) continue;
             
             $has_image = !empty($item["imagen_url"]);
             $is_category = isset($item["es_cat"]) && $item["es_cat"];
@@ -96,7 +96,7 @@ if (!function_exists("render_public_item")) {
     <?php if (isset($error) && !empty($error)): ?>
         <p class="app-error"><?= htmlspecialchars($error) ?></p>
     <?php else: ?>
-        <div class="item-list">
+        <div id="item-list-container" class="item-list">
             <?php
                 render_public_item($items); 
             ?>

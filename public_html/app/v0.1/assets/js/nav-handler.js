@@ -1,15 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // --- CACHÉ DE ELEMENTOS DEL DOM Y VARIABLES ---
     const navPanel = document.getElementById('nav-panel');
     const hamburgerBtn = document.getElementById('hamburger-button');
-    const appContainer = document.getElementById('module-content-wrapper');
-    const dataset = document.body.dataset;
-    const publicUrl = dataset.publicUrl;
-    const clientUrl = dataset.clientUrl;
-    const devId = dataset.devId;
-    const clientId = dataset.clientId;
-    const initialContext = JSON.parse(dataset.initialContext || '{}');
-    const baseTitle = initialContext.profile_title || 'Revel';
+    const mainContentWrapper = document.getElementById('module-content-wrapper'); 
+    
+    const { publicUrl, clientUrl, devId, clientId, initialContext } = document.body.dataset;
+    const { profile_title: baseTitle } = JSON.parse(initialContext || '{}');
 
+    if (!hamburgerBtn || !navPanel || !mainContentWrapper) {
+        console.error('Error crítico: Faltan elementos esenciales del DOM (nav-panel, hamburger-button, o module-content-wrapper).');
+        return;
+    }
+
+    // --- MANEJADORES DE EVENTOS DE LA NAVEGACIÓN ---
     hamburgerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         navPanel.classList.toggle('open');
@@ -21,31 +24,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    navPanel.addEventListener('click', async (e) => {
+    navPanel.addEventListener('click', (e) => {
         const link = e.target.closest('.nav-link');
-        if (!link) return;
+        if (link) {
+            handleNavLinkClick(e, link);
+        }
+    });
 
-        if (link.classList.contains('is-external')) {
+    // --- LÓGICA DE CARGA DE MÓDULOS ---
+    async function handleNavLinkClick(e, linkElement) {
+        if (linkElement.classList.contains('is-external')) {
             navPanel.classList.remove('open');
             return;
         }
-
         e.preventDefault();
         navPanel.classList.remove('open');
-        const moduleId = link.dataset.moduleId;
-        
+        const moduleId = linkElement.dataset.moduleId;
+        await loadModule(moduleId);
+    }
+
+    async function loadModule(moduleId) {
         if (!clientId || !moduleId) {
-            appContainer.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
+            mainContentWrapper.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
             return;
         }
 
-        appContainer.innerHTML = `<h2>Cargando...</h2>`;
-        
+        mainContentWrapper.innerHTML = `<h2>Cargando...</h2>`;
+        document.body.classList.add('is-loading-module');
+
         try {
-            let apiUrl = `${publicUrl}/api/getModule.php?client=${clientId}&id=${moduleId}&url=${clientUrl}`;
+            const params = new URLSearchParams({
+                client: clientId,
+                id: moduleId,
+                url: clientUrl
+            });
             if (devId) {
-                apiUrl += `&dev=${devId}`;
+                params.append('dev', devId);
             }
+            const apiUrl = `${publicUrl}/api/getModule.php?${params.toString()}`;
 
             const response = await fetch(apiUrl);
             
@@ -54,30 +70,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
             }
 
-            const data = await response.json();
+            // ======================================================================
+            // CORRECCIÓN CLAVE: Volvemos a la lógica original de manejo de datos.
+            // La API devuelve el objeto del módulo directamente, no uno encapsulado.
+            // ======================================================================
+            const moduleData = await response.json();
 
-            const moduleStylesheet = document.getElementById('module-stylesheet');
-            if (data.hasOwnProperty('sufijo') && baseTitle) {
-                document.title = baseTitle + (data.sufijo || '');
-            }
-            if (moduleStylesheet && data.hasOwnProperty('css_url')) {
-                moduleStylesheet.href = data.css_url || '';
-            }
-            const mainStylesheet = document.getElementById('main-stylesheet');
-            if (mainStylesheet && data.main_skin_override === true && data.main_css_url) {
-                mainStylesheet.href = data.main_css_url;
-            }
+            // Ya no se necesita esta comprobación porque la API no la soporta.
+            // if (!moduleData.success) {
+            //     throw new Error(moduleData.message || 'La API devolvió un error no especificado.');
+            // }
 
-            appContainer.innerHTML = data.html;
-
-            if (data.module_type && window.adminModuleInitializers && typeof window.adminModuleInitializers[data.module_type] === 'function') {
-                console.log(`Re-initializing admin script for module type: ${data.module_type}`);
-                window.adminModuleInitializers[data.module_type]();
-            }
+            updatePageContent(moduleData);
 
         } catch (error) {
             console.error('Error al cargar el módulo:', error);
-            appContainer.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;
+            mainContentWrapper.innerHTML = `<div class='app-error'>No se pudo cargar el módulo.<br><small>${error.message}</small></div>`;
+        } finally {
+            document.body.classList.remove('is-loading-module');
         }
-    });
+    }
+
+    function updatePageContent(moduleData) {
+        if (moduleData.hasOwnProperty('sufijo') && baseTitle) {
+            document.title = baseTitle + (moduleData.sufijo || '');
+        }
+
+        const moduleStylesheet = document.getElementById('module-stylesheet');
+        if (moduleStylesheet && moduleData.hasOwnProperty('css_url')) {
+            moduleStylesheet.href = moduleData.css_url || '';
+        }
+        
+        const mainStylesheet = document.getElementById('main-stylesheet');
+        if (mainStylesheet && moduleData.main_skin_override === true && moduleData.main_css_url) {
+            mainStylesheet.href = moduleData.main_css_url;
+        }
+
+        mainContentWrapper.innerHTML = moduleData.html;
+
+        const moduleType = moduleData.tipo;
+        if (moduleType && window.adminModuleInitializers && typeof window.adminModuleInitializers[moduleType] === 'function') {
+            console.log(`Ejecutando inicializador de admin para el módulo: ${moduleType}`);
+            window.adminModuleInitializers[moduleType]();
+        }
+    }
 });

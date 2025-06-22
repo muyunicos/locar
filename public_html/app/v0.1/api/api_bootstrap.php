@@ -3,6 +3,28 @@
 ini_set("display_errors", 1);
 error_reporting(E_ALL);
 
+// ======================================================================
+// INICIO DE LA CONFIGURACIÓN DE CORS
+// ======================================================================
+
+
+if (isset($_SERVER['HTTP_ORIGIN'])) {
+    header('Access-Control-Allow-Origin: ' . $_SERVER['HTTP_ORIGIN']);
+    header('Access-Control-Allow-Credentials: true');
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+    http_response_code(200);
+    exit; 
+}
+
+// ======================================================================
+// FIN DE LA CONFIGURACIÓN DE CORS
+// ======================================================================
+
+
 $request_data = $_REQUEST;
 
 if (
@@ -18,7 +40,7 @@ if (
 
 define("CLIENT_URL", $request_data['url'] ?? null);
 define("CLIENT_ID", $request_data['client'] ?? null);
-define("DEV_BRANCH", $request_data["dev"] ?? 'v0.1');
+define("DEV_BRANCH", $request_data['dev'] ?? 'v0.1');
 
 if (!CLIENT_ID) {
     http_response_code(400);
@@ -26,23 +48,14 @@ if (!CLIENT_ID) {
     exit;
 }
 
-header('Access-Control-Allow-Origin: ' . CLIENT_URL);
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
+// La cabecera Access-Control-Allow-Origin ya se ha enviado arriba.
+// Las siguientes son necesarias para la petición real (no la de sondeo).
 header("Content-Type: application/json");
 
-require_once defined("DEV_BRANCH") && DEV_BRANCH ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php" : dirname(__DIR__, 3) . "/core/src/config.php";
-
+// Esta lógica de require no cambia.
+require_once defined("DEV_BRANCH") && DEV_BRANCH ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php" : dirname(__DIR__, 3) . "/core/src/Config.php";
 require_once PRIVATE_PATH . "/src/bootstrap.php";
 require_once PRIVATE_PATH . "/src/admin/AuthManager.php";
-
 require_once PRIVATE_PATH . "/src/DatabaseManager.php";
 
 function send_json_response($success, $message, $data = null, $statusCode = 200) {
@@ -54,5 +67,6 @@ function send_json_response($success, $message, $data = null, $statusCode = 200)
     echo json_encode($response);
     exit;
 }
+
 global $input;
 $input = $request_data;
