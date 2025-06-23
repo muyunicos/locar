@@ -109,3 +109,14 @@ if (!function_exists("render_public_item")) {
         </footer>
     <?php endif; ?>
 </div>
+<?php if ($is_admin): ?>
+<?php include(PRIVATE_PATH . '/templates/admin/menues/fab.html'); ?>
+<div id="admin-floating-controls" class="admin-controls-panel">
+    <div class="item-drag-handle" title="Arrastrar para reordenar">⠿</div>
+    <div class="item-actions-panel">
+        <button class="action-button" data-action="toggle-options">⚙️</button>
+        <div class="options-popup">
+            </div>
+    </div>
+</div>
+<?php endif; ?>
