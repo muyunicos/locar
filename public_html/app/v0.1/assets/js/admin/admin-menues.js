@@ -203,15 +203,6 @@ import { MenuApiService } from './menues/MenuApiService.js';
 
         setTimeout(() => activeItem.classList.add('is-dragging'), 0);
     }
-    
-    // ... (El resto de funciones siguen igual, las he omitido por brevedad pero deben estar en tu archivo) ...
-    function handleDragOver(e) { /*...*/ }
-    function handleDrop(e) { /*...*/ }
-    function handleDragEnd(e) { /*...*/ }
-    function handleTextEdit(e) { /*...*/ }
-    async function handleSaveMenu() { /*...*/ }
-    function setChangesMade() { /*...*/ }
-
 
     function handleDragOver(e) {
         e.preventDefault();
