@@ -16,39 +16,50 @@ function findItemRecursive(id, itemsArray, parent = null) {
     return null;
 }
 
-function reorderItem(draggedId, targetId, position) {
-    if (draggedId === targetId) return false;
+// REEMPLAZA LA FUNCIÓN reorderItem EN MenuState.js
 
-    // 1. Encontrar y extraer el elemento arrastrado de su lugar original.
+/**
+ * Reordena un ítem en la estructura de datos usando un índice y padre explícitos.
+ * @param {string} draggedId - El ID del ítem que se arrastra.
+ * @param {string|null} newParentId - El ID de la categoría padre, o null para la raíz.
+ * @param {number} newIndex - El nuevo índice del ítem en la lista del padre.
+ * @returns {boolean} - true si tuvo éxito.
+ */
+function reorderItem(draggedId, newParentId, newIndex) {
     const draggedResult = findItemRecursive(draggedId, menu.items);
     if (!draggedResult) return false;
-    
+
+    const originalParentId = draggedResult.parent ? draggedResult.parent.id : null;
+    const originalIndex = draggedResult.index;
+
+    // Extraer el elemento arrastrado.
     const draggedParentArray = draggedResult.parent ? draggedResult.parent.items : menu.items;
-    const [draggedItem] = draggedParentArray.splice(draggedResult.index, 1);
+    const [draggedItem] = draggedParentArray.splice(originalIndex, 1);
 
-    // 2. Encontrar la ubicación del elemento de destino.
-    const targetResult = findItemRecursive(targetId, menu.items);
-    if (!targetResult) {
-        // Si no se encuentra el target, se devuelve el item a su lugar para no perderlo.
-        draggedParentArray.splice(draggedResult.index, 0, draggedItem);
-        return false;
-    }
-    
-    const targetParentArray = targetResult.parent ? targetResult.parent.items : menu.items;
-    
-    // Recalculamos el índice del target por si el splice anterior afectó al mismo array.
-    const targetIndex = targetParentArray.findIndex(item => item.id === targetId);
-
-    // 3. Insertar el elemento arrastrado en la nueva posición.
-    if (position === 'top') {
-        targetParentArray.splice(targetIndex, 0, draggedItem);
-    } else { // 'bottom'
-        targetParentArray.splice(targetIndex + 1, 0, draggedItem);
+    // Encontrar el array de destino.
+    let newParentArray;
+    if (newParentId === null) {
+        newParentArray = menu.items;
+    } else {
+        const parentResult = findItemRecursive(newParentId, menu.items);
+        if (parentResult && parentResult.item.es_cat) {
+            newParentArray = parentResult.item.items;
+        } else {
+            // Error: no se encontró el padre. Devolvemos el ítem a su lugar.
+            draggedParentArray.splice(originalIndex, 0, draggedItem);
+            return false;
+        }
     }
 
+    // CORRECCIÓN CLAVE: Ajustar el índice si el elemento se mueve hacia abajo en el mismo array.
+    if (originalParentId === newParentId && originalIndex < newIndex) {
+        newIndex--;
+    }
+    
+    // Insertar el elemento en su nueva ubicación.
+    newParentArray.splice(newIndex, 0, draggedItem);
     return true;
 }
-
 function load(initialMenuData) {
     menu = JSON.parse(JSON.stringify(initialMenuData));
     const ensureIds = (items) => {

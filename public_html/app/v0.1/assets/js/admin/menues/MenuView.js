@@ -44,9 +44,9 @@ function _createCategoryElement(categoryData) {
     ).join('') : '';
 
     return `
-        <div class="admin-item-wrapper" draggable="true" data-id="${categoryData.id}" data-type="category">
+        <div class="admin-item-wrapper" data-id="${categoryData.id}" data-type="category">
             <div class="admin-controls">
-                <div class="item-drag-handle">⠿</div>
+                <div class="item-drag-handle" draggable="true">⠿</div>
                 <div class="item-actions-panel">
                     <button class="action-button" data-action="toggle-options">⚙️</button>
                     <div class="options-popup">
@@ -94,7 +94,7 @@ function _createItemElement(itemData) {
     return `
     <div class="admin-item-wrapper" data-id="${itemData.id}" data-type="item" draggable="true">
             <div class="admin-controls">
-                <div class="item-drag-handle">⠿</div>
+                <div class="item-drag-handle" draggable="true">⠿</div>
                 <div class="item-actions-panel">
                     <button class="action-button" data-action="toggle-options">⚙️</button>
                     <div class="options-popup">

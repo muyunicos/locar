@@ -3,42 +3,35 @@ import { MenuView } from './menues/MenuView.js';
 import { MenuApiService } from './menues/MenuApiService.js';
 
 (async () => {
-    // ... (las variables de estado no cambian)
     let hasUnsavedChanges = false;
     let appConfig = {};
     let openActionPanel = null;
     let activeItemWrapper = null;
+    let draggedElement = null;
+    let placeholder = null;
 
     function init() {
-        // ... (la función init no cambia)
         const body = document.body;
         const menuContainer = document.getElementById('menu-container');
-        if (!menuContainer) { console.error("El contenedor principal del módulo #menu-container no fue encontrado."); return; }
+        if (!menuContainer) { console.error("El contenedor del módulo #menu-container no fue encontrado."); return; }
         appConfig = { clientId: body.dataset.clientId, publicUrl: body.dataset.publicUrl, clientUrl: body.dataset.clientUrl, devId: body.dataset.devId, initialContext: JSON.parse(menuContainer.dataset.initialJson || '{}'), dataSourceFile: menuContainer.dataset.sourceFile };
         MenuApiService.init({ apiBaseUrl: appConfig.publicUrl });
         MenuView.init({ publicUrl: appConfig.publicUrl, clientUrl: appConfig.clientUrl });
         MenuState.load(appConfig.initialContext.menuData || appConfig.initialContext);
         MenuView.render(MenuState.getMenu());
         setupEventListeners();
-        console.log('Controlador de Menús inicializado con modelo "Click-to-Activate" y Drag&Drop.');
+        console.log('Controlador de Menús inicializado con Drag&Drop v5 (Estable).');
     }
 
     function setupEventListeners() {
         const menuItemsContainer = document.getElementById('item-list-container');
         if (!menuItemsContainer) return;
-
-        // Eventos de Clic y Edición
         menuItemsContainer.addEventListener('click', handleContainerClick);
         menuItemsContainer.addEventListener('blur', handleTextEdit, true);
-
-        // --- NUEVO: Eventos para Drag and Drop ---
         menuItemsContainer.addEventListener('dragstart', handleDragStart);
+        menuItemsContainer.addEventListener('dragend', handleDragEnd);
         menuItemsContainer.addEventListener('dragover', handleDragOver);
-        menuItemsContainer.addEventListener('dragleave', handleDragLeave);
         menuItemsContainer.addEventListener('drop', handleDrop);
-        menuItemsContainer.addEventListener('dragend', handleDragEnd); // Para limpiar
-
-        // ... (el resto de listeners no cambian)
         const saveButton = document.getElementById('fab-save-menu');
         if (saveButton) saveButton.addEventListener('click', handleSaveMenu);
         document.addEventListener('click', (e) => {
@@ -50,94 +43,112 @@ import { MenuApiService } from './menues/MenuApiService.js';
         });
     }
 
-    // --- NUEVAS FUNCIONES PARA MANEJAR DRAG & DROP ---
+    // --- LÓGICA DE DRAG & DROP v5 (ESTABLE) ---
 
     function handleDragStart(e) {
-        const wrapper = e.target.closest('.admin-item-wrapper');
-        if (!wrapper) return;
-        // Guardamos el ID del elemento arrastrado
-        e.dataTransfer.setData('text/plain', wrapper.dataset.id);
+        if (!e.target.matches('.item-drag-handle')) {
+            e.preventDefault();
+            return;
+        }
+        draggedElement = e.target.closest('.admin-item-wrapper');
+        e.dataTransfer.setData('text/plain', draggedElement.dataset.id);
         e.dataTransfer.effectAllowed = 'move';
-        // Añadimos un pequeño delay para que el navegador "capture" la imagen del elemento antes de aplicar el estilo.
+        
+        // CORRECCIÓN 1: Seleccionar la imagen fantasma correcta.
+        const isCategory = draggedElement.dataset.type === 'category';
+        const dragImage = isCategory 
+            ? draggedElement.querySelector('.c-titulo') 
+            : draggedElement.querySelector('.item');
+        e.dataTransfer.setDragImage(dragImage, 20, 20);
+
+        // Crear placeholder.
+        placeholder = document.createElement('div');
+        placeholder.className = 'drop-placeholder';
+        // La altura se calcula una sola vez para evitar problemas de layout.
+        placeholder.style.height = `${draggedElement.offsetHeight}px`;
+
+        // Usar opacity en lugar de display:none para evitar el "salto" de layout.
         setTimeout(() => {
-            wrapper.classList.add('is-dragging');
+            draggedElement.classList.add('is-drag-source');
+            if (isCategory) {
+                draggedElement.classList.add('is-collapsed-drag');
+            }
         }, 0);
     }
 
     function handleDragOver(e) {
-        e.preventDefault(); // ¡Esencial para que el evento 'drop' funcione!
+        e.preventDefault();
+        
         const targetWrapper = e.target.closest('.admin-item-wrapper');
-        if (!targetWrapper) return;
-
-        // Limpiamos indicadores anteriores
-        clearDropTargets();
-
-        // Calculamos si el cursor está en la mitad superior o inferior del elemento
-        const rect = targetWrapper.getBoundingClientRect();
-        const midpoint = rect.top + (rect.height / 2);
-
-        if (e.clientY < midpoint) {
-            targetWrapper.classList.add('drop-target-top');
-        } else {
-            targetWrapper.classList.add('drop-target-bottom');
+        
+        // No hacer nada si estamos sobre el placeholder o fuera de un wrapper válido.
+        if (e.target.matches('.drop-placeholder') || !targetWrapper || targetWrapper === draggedElement) {
+            return;
         }
-    }
 
-    function handleDragLeave(e) {
-        const targetWrapper = e.target.closest('.admin-item-wrapper');
-        if (targetWrapper) {
-            targetWrapper.classList.remove('drop-target-top', 'drop-target-bottom');
+        const rect = targetWrapper.getBoundingClientRect();
+        const midpoint = rect.top + rect.height / 2;
+        const after = e.clientY >= midpoint;
+
+        // Anti-parpadeo: Solo movemos el placeholder si es estrictamente necesario.
+        if (after) {
+            if (targetWrapper.nextSibling !== placeholder) {
+                targetWrapper.parentNode.insertBefore(placeholder, targetWrapper.nextSibling);
+            }
+        } else {
+            if (targetWrapper.previousSibling !== placeholder) {
+                targetWrapper.parentNode.insertBefore(placeholder, targetWrapper);
+            }
         }
     }
 
     function handleDrop(e) {
         e.preventDefault();
-        const draggedId = e.dataTransfer.getData('text/plain');
-        const targetWrapper = e.target.closest('.admin-item-wrapper');
-
-        if (!targetWrapper || !draggedId) {
-            clearDropTargets();
-            return;
+        // CORRECCIÓN 3: Asegurarse de que el drop es válido y la lógica es robusta.
+        if (!placeholder || !placeholder.parentNode) {
+            return; // El drop no ocurrió en un lugar válido donde se pudo poner el placeholder.
         }
 
-        const position = targetWrapper.classList.contains('drop-target-top') ? 'top' : 'bottom';
-        const targetId = targetWrapper.dataset.id;
-        
-        clearDropTargets();
+        const draggedId = e.dataTransfer.getData('text/plain');
+        if (!draggedId) return;
 
-        // Llamamos al cerebro para que haga la lógica de reordenar
-        const success = MenuState.reorderItem(draggedId, targetId, position);
+        // --- Lógica de Destino Fiable ---
+        const parentElement = placeholder.parentNode;
+        const parentWrapper = parentElement.closest('.admin-item-wrapper');
+        const newParentId = parentWrapper ? parentWrapper.dataset.id : null;
+        
+        // El índice final es la posición del placeholder en la lista de elementos del DOM.
+        const newIndex = Array.from(parentElement.children).indexOf(placeholder);
+
+        const success = MenuState.reorderItem(draggedId, newParentId, newIndex);
         
         if (success) {
-            // Si la lógica funcionó, actualizamos la vista y marcamos cambios
-            MenuView.render(MenuState.getMenu());
             setChangesMade();
         }
     }
     
     function handleDragEnd(e) {
-        // Limpieza final por si el drop ocurre fuera de un target válido
-        const draggedElement = document.querySelector('.is-dragging');
+        // Limpieza final, siempre se ejecuta.
         if (draggedElement) {
-            draggedElement.classList.remove('is-dragging');
+            draggedElement.classList.remove('is-drag-source', 'is-collapsed-drag');
         }
-        clearDropTargets();
+        if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.removeChild(placeholder);
+        }
+        draggedElement = null;
+        placeholder = null;
+
+        // El renderizado final asegura la consistencia visual.
+        MenuView.render(MenuState.getMenu());
     }
     
-    function clearDropTargets() {
-        document.querySelectorAll('.drop-target-top, .drop-target-bottom').forEach(el => {
-            el.classList.remove('drop-target-top', 'drop-target-bottom');
-        });
-    }
-
-    // ... (El resto de funciones: handleContainerClick, handleItemAction, handleItemSelection, etc. no cambian)
+    // --- El resto de funciones no tienen cambios ---
     function handleContainerClick(e) { const actionTarget = e.target.closest('[data-action]'); if (actionTarget) { handleItemAction(e, actionTarget); } else { handleItemSelection(e); } }
     function handleItemAction(e, actionTarget) { const action = actionTarget.dataset.action; const wrapperElement = e.target.closest('.admin-item-wrapper'); const id = wrapperElement?.dataset.id; if (action === 'toggle-options') { const panel = actionTarget.closest('.item-actions-panel'); if (openActionPanel && openActionPanel !== panel) { openActionPanel.classList.remove('is-open'); } panel.classList.toggle('is-open'); openActionPanel = panel.classList.contains('is-open') ? panel : null; e.stopPropagation(); return; } let needsRender = false; switch (action) { case 'delete': if (confirm('¿Estás seguro de que quieres eliminar este elemento?')) { MenuState.deleteItem(id); needsRender = true; } break; case 'duplicate': MenuState.duplicateItem(id); needsRender = true; break; case 'add-item': MenuState.addItem(id, 'item'); needsRender = true; break; case 'add-category': MenuState.addItem(id, 'category'); needsRender = true; break; case 'toggle-hidden': MenuState.toggleItemVisibility(id); MenuView.toggleItemVisibility(id); setChangesMade(); return; } if (needsRender) { MenuView.render(MenuState.getMenu()); setChangesMade(); } }
     function handleItemSelection(e) { const clickedWrapper = e.target.closest('.admin-item-wrapper'); if (!clickedWrapper) { if (activeItemWrapper) { activeItemWrapper.classList.remove('is-active-admin-item'); activeItemWrapper = null; } return; }; if (clickedWrapper === activeItemWrapper) { return; } if (activeItemWrapper) { activeItemWrapper.classList.remove('is-active-admin-item'); } clickedWrapper.classList.add('is-active-admin-item'); activeItemWrapper = clickedWrapper; }
     function setChangesMade() { if (!hasUnsavedChanges) { hasUnsavedChanges = true; MenuView.setSaveChangesVisible(true); } }
     async function handleSaveMenu() { const saveButton = document.getElementById('fab-save-menu'); saveButton.classList.add('is-loading'); try { const payload = { menuData: MenuState.getMenu(), dataSource: appConfig.dataSourceFile, client: appConfig.clientId, url: appConfig.clientUrl, dev: appConfig.devId }; const response = await MenuApiService.saveMenu(payload); if (response.success) { hasUnsavedChanges = false; MenuView.setSaveChangesVisible(false); alert('¡Menú guardado con éxito!'); } else { throw new Error(response.message || 'El servidor devolvió un error.'); } } catch (error) { console.error('Fallo al guardar el menú:', error); alert(`Error al guardar: ${error.message}`); } finally { saveButton.classList.remove('is-loading'); } }
     function handleTextEdit(e) { const target = e.target; if (!target.isContentEditable) return; const wrapperElement = target.closest('.admin-item-wrapper'); const property = target.dataset.property; if (!wrapperElement || !property) return; const id = wrapperElement.dataset.id; const newValue = target.textContent; MenuState.updateItemProperty(id, property, newValue); setChangesMade(); }
-
 
     document.addEventListener('DOMContentLoaded', init);
 })();

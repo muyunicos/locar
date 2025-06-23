@@ -1,47 +1,77 @@
-/* admin-menues.css - Modelo "Clic para Activar" */
+/* admin-menues.css - Fase 1: Drag&Drop Profesional */
 
-/* CAMBIO: Se elimina el padding-left. El wrapper ahora solo es un punto de referencia. */
 .admin-item-wrapper {
     position: relative;
     margin-bottom: 8px;
-    border-left: 3px solid transparent; /* Borde para indicar la selección */
+    border-left: 3px solid transparent;
     transition: all 0.2s ease-in-out;
 }
-
-/* CAMBIO: Se añade un feedback visual para el ítem activo */
 .admin-item-wrapper.is-active-admin-item {
-    background-color: #f0f9ff; /* Un sutil fondo azul */
-    border-left-color: #3b82f6; /* Borde azul para destacar */
+    background-color: #f0f9ff;
+    border-left-color: #3b82f6;
 }
 
 /* --- Controles de Administración --- */
 .admin-controls {
     position: absolute;
     top: 1.5rem;
-    left: -10px; /* Posicionado ligeramente fuera para no superponerse tanto */
+    left: -10px;
     transform: translateY(-50%);
-    
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
-
-    /* CAMBIO: Los controles están siempre ocultos por defecto */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
     z-index: 20;
 }
-
-/* CAMBIO: Los controles solo se muestran si el wrapper tiene la clase 'is-active-admin-item' */
 .admin-item-wrapper.is-active-admin-item > .admin-controls {
     opacity: 1;
     visibility: visible;
 }
 
-/* El resto de los estilos para drag-handle, panel de acciones, etc. permanecen igual */
-.item-drag-handle { cursor: grab; color: #a1a1aa; font-size: 20px; padding: 5px; }
-.item-drag-handle:active { cursor: grabbing; }
+/* --- Estilos para Drag-and-Drop Mejorado --- */
+
+.item-drag-handle {
+    cursor: grab;
+    color: #a1a1aa;
+    font-size: 20px;
+    padding: 5px;
+}
+.item-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Clase para el elemento original que está siendo arrastrado. Se oculta por completo. */
+.is-drag-source {
+    opacity: 0.4 !important;
+}
+
+/* Clase para colapsar la lista de ítems de una categoría mientras se arrastra */
+.is-collapsed-drag > .c-container > .item-list {
+    display: none;
+}
+
+/* Estilo para el "Platzhalter" o espacio fantasma */
+.drop-placeholder {
+    background-color: rgba(59, 130, 246, 0.05);
+    border: 1px dashed rgba(59, 130, 246, 0.4);
+    border-radius: 8px;
+    margin: 4px 0;
+    /* La altura se establece con JavaScript */
+}
+
+.drop-placeholder {
+    background-color: rgba(59, 130, 246, 0.05);
+    border: 1px dashed rgba(59, 130, 246, 0.4);
+    border-radius: 8px;
+    margin: 4px 0;
+    /* La altura se establece con JavaScript */
+    pointer-events: none; /* <-- AÑADIR ESTA LÍNEA para evitar el parpadeo */
+}
+
+/* ... (El resto de los estilos no cambian) ... */
 .item-actions-panel { position: relative; }
 .item-actions-panel .action-button { background: none; border: none; cursor: pointer; font-size: 18px; padding: 5px; }
 .item-actions-panel .options-popup { visibility: hidden; opacity: 0; transform: translateY(-50%) scale(0.95); transition: all 0.15s ease-out; position: absolute; left: 100%; top: 50%; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; padding: 5px; display: flex; flex-direction: column; gap: 4px; margin-left: 12px; }
@@ -49,8 +79,6 @@
 .options-popup button { background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; cursor: pointer; font-size: 14px; padding: 6px 8px; display: flex; align-items: center; gap: 5px; transition: background-color 0.2s; white-space: nowrap; }
 .options-popup button:hover { background-color: #e4e4e7; }
 .options-popup button.danger:hover { background-color: #fee2e2; color: #ef4444; border-color: #fca5a5; }
-
-/* --- Estilos para la vista previa del contenido --- */
 .item, .c-container { border: 1px solid transparent; }
 [contenteditable=true][data-placeholder]:empty:before { content: attr(data-placeholder); color: #a1a1aa; font-style: italic; pointer-events: none; }
 .item-imagen-wrapper.is-placeholder { background-color: #f4f4f5; display: flex; align-items: center; justify-content: center; border: 1px dashed #d4d4d8; }
@@ -58,20 +86,3 @@
 .item-imagen-wrapper.is-placeholder .placeholder-text { display: block; color: #a1a1aa; font-size: 12px; }
 .item-imagen-wrapper .placeholder-text { display: none; }
 .is-admin-hidden { opacity: 0.5; background-image: repeating-linear-gradient( -45deg, transparent, transparent 8px, rgba(228, 228, 231, 0.5) 8px, rgba(228, 228, 231, 0.5) 10px ); }
-
-/* --- Estilos para Drag-and-Drop --- */
-
-/* Estilo para el elemento que se está arrastrando */
-.is-dragging {
-    opacity: 0.4;
-    background: #e0f2fe;
-}
-
-/* Clases para el indicador de destino (dónde se va a soltar) */
-.drop-target-top {
-    border-top: 2px solid #0ea5e9 !important;
-}
-
-.drop-target-bottom {
-    border-bottom: 2px solid #0ea5e9 !important;
-}
