@@ -1,187 +1,103 @@
-/**
- * MenuView.js
- * * Se encarga de renderizar el menú en el DOM y de manejar las interacciones visuales
- * que no implican una modificación directa del estado, como la creación de elementos.
- * La modificación del estado se delega a través de eventos que admin-menues.js escucha.
- */
-const MenuView = {
-    // Contenedor principal donde se renderizará el menú.
-    container: null,
-    // Callback para notificar cuando la vista ha sido renderizada.
-    onRender: null,
+const MenuView = (function() {
+    let container = null;
+    let menuContainer = null;
+    let config = {};
 
-    /**
-     * Inicializa la vista, obteniendo la referencia al contenedor del menú.
-     * @param {string} containerId - El ID del elemento contenedor del menú.
-     * @param {function} onRenderCallback - Callback a ejecutar después de renderizar.
-     */
-    init(containerId, onRenderCallback) {
-        this.container = document.getElementById(containerId);
-        this.onRender = onRenderCallback;
-        if (!this.container) {
-            console.error(`Error: Contenededor con id "${containerId}" no encontrado.`);
+    function init(mainContainer) {
+        menuContainer = mainContainer;
+        container = menuContainer.querySelector('#item-list-container');
+        config = window.locarConfig || {};
+    }
+
+    function render(menuData) {
+        if (!container || !menuContainer) return;
+
+        const titleElement = menuContainer.querySelector('.menues-title');
+        if (titleElement) {
+            titleElement.textContent = menuData.titulo || '';
+            titleElement.setAttribute('contenteditable', 'true');
+            titleElement.dataset.editableMenuProperty = 'titulo';
         }
-    },
-
-    /**
-     * Renderiza el menú completo a partir de los datos proporcionados.
-     * Limpia el contenedor y construye la lista de ítems y categorías.
-     * @param {object} menuData - El objeto completo del menú con su configuración e ítems.
-     */
-    render(menuData) {
-        if (!this.container) return;
-
-        // Limpiamos la vista anterior antes de volver a renderizar.
-        this.container.innerHTML = '';
-
-        // Creamos un fragmento de documento para mejorar el rendimiento.
-        const fragment = document.createDocumentFragment();
-
-        // Iteramos sobre los ítems de nivel superior y los renderizamos.
-        menuData.items.forEach(item => {
-            const element = item.es_cat
-                ? this._createCategoryElement(item, menuData.config)
-                : this._createItemElement(item, menuData.config);
-            fragment.appendChild(element);
+        
+        container.innerHTML = '';
+        const items = menuData.items || [];
+        items.forEach(itemData => {
+            const element = itemData.type === 'category' ? _createCategoryElement(itemData) : _createItemElement(itemData);
+            if(element) container.appendChild(element);
         });
+    }
 
-        this.container.appendChild(fragment);
+    function _createItemElement(itemData) {
+        const itemElement = document.createElement('div');
+        itemElement.className = `item ${itemData.hidden ? 'is-hidden' : ''}`;
+        itemElement.dataset.id = itemData.id;
+        itemElement.dataset.type = 'item';
+        itemElement.setAttribute('draggable', 'true');
 
-        // Notificamos que el renderizado ha finalizado.
-        if (this.onRender) {
-            this.onRender();
-        }
-    },
+        const imageUrl = itemData.imagen ? (itemData.imagen.startsWith('http') ? itemData.imagen : `${config.clientUrl}/imagenes/${itemData.imagen}.webp`) : '';
+        const hasImage = !!imageUrl;
 
-    /**
-     * Crea el elemento DOM para una categoría.
-     * @param {object} category - El objeto de la categoría.
-     * @param {object} config - La configuración del menú.
-     * @returns {HTMLElement} El elemento de la categoría.
-     * @private
-     */
-    _createCategoryElement(category, config) {
+        itemElement.innerHTML = `
+            <div class="item-content ${hasImage ? 'has-image' : ''}">
+                ${hasImage ? `<img src="${imageUrl}" alt="${itemData.titulo || ''}" class="item-image">` : ''}
+                <div class="item-text">
+                    <div class="item-header">
+                        <span class="item-title" contenteditable="true" data-editable-property="titulo">${itemData.titulo || ''}</span>
+                        <span class="item-price" contenteditable="true" data-editable-property="precio">${itemData.precio || ''}</span>
+                    </div>
+                    <p class="item-description" contenteditable="true" data-editable-property="descripcion">${itemData.descripcion || ''}</p>
+                </div>
+            </div>
+            <div class="item-drag-handle" title="Arrastrar para reordenar">
+                <i class="fas fa-grip-vertical"></i>
+            </div>
+        `;
+        return itemElement;
+    }
+
+    function _createCategoryElement(itemData) {
         const categoryElement = document.createElement('div');
-        categoryElement.className = `item-list-category layout-${config.layout || 'default'}`;
-        categoryElement.dataset.id = category.id;
-        if (category.ocultar) {
-            categoryElement.classList.add('item-hidden');
-        }
-
-        const categoryTitle = document.createElement('h2');
-        categoryTitle.className = 'category-title';
-        categoryTitle.textContent = category.titulo;
-        categoryTitle.contentEditable = true;
-        categoryTitle.dataset.editableProperty = 'titulo';
+        categoryElement.className = `c-container ${itemData.hidden ? 'is-hidden' : ''}`;
+        categoryElement.dataset.id = itemData.id;
+        categoryElement.dataset.type = 'category';
+        categoryElement.setAttribute('draggable', 'true');
         
-        // Contenedor para alinear título y controles
-        const titleContainer = document.createElement('div');
-        titleContainer.className = 'category-title-container';
-        
-        titleContainer.appendChild(this._createDragHandle());
-        titleContainer.appendChild(categoryTitle);
-        titleContainer.appendChild(this._createAdminControls(category.id));
+        const sublist = document.createElement('div');
+        sublist.className = 'item-list';
 
-        categoryElement.appendChild(titleContainer);
-
-        // Contenedor para los ítems dentro de la categoría
-        const itemsContainer = document.createElement('div');
-        itemsContainer.className = 'item-list';
-        itemsContainer.dataset.parentId = category.id; // Para el drag and drop
-
-        if (category.items && category.items.length > 0) {
-            category.items.forEach(item => {
-                const itemElement = item.es_cat
-                    ? this._createCategoryElement(item, config) // Soporte para categorías anidadas
-                    : this._createItemElement(item, config);
-                itemsContainer.appendChild(itemElement);
+        if (itemData.items) {
+            itemData.items.forEach(subItemData => {
+                const subElement = subItemData.type === 'category' ? _createCategoryElement(subItemData) : _createItemElement(subItemData);
+                if(subElement) sublist.appendChild(subElement);
             });
         }
         
-        categoryElement.appendChild(itemsContainer);
+        const imageUrl = itemData.imagen ? (itemData.imagen.startsWith('http') ? itemData.imagen : `${config.clientUrl}/imagenes/${itemData.imagen}.webp`) : '';
+        const hasImage = !!imageUrl;
+
+        categoryElement.innerHTML = `
+            <div class="category-header">
+                <div class="item-content ${hasImage ? 'has-image' : ''}">
+                    ${hasImage ? `<img src="${imageUrl}" alt="${itemData.titulo || ''}" class="item-image">` : ''}
+                    <div class="item-text">
+                        <span class="item-title" contenteditable="true" data-editable-property="titulo">${itemData.titulo || ''}</span>
+                        <p class="item-description" contenteditable="true" data-editable-property="descripcion">${itemData.descripcion || ''}</p>
+                    </div>
+                </div>
+                <div class="item-drag-handle" title="Arrastrar para reordenar">
+                    <i class="fas fa-grip-vertical"></i>
+                </div>
+            </div>
+        `;
+        categoryElement.appendChild(sublist);
 
         return categoryElement;
-    },
-
-    /**
-     * Crea el elemento DOM para un ítem individual del menú.
-     * @param {object} item - El objeto del ítem.
-     * @param {object} config - La configuración del menú.
-     * @returns {HTMLElement} El elemento del ítem.
-     * @private
-     */
-    _createItemElement(item, config) {
-        const itemElement = document.createElement('div');
-        itemElement.className = `item layout-${config.layout || 'default'}`;
-        itemElement.dataset.id = item.id;
-
-        if (item.ocultar) {
-            itemElement.classList.add('item-hidden');
-        }
-
-        // Estructura interna del ítem, replicando menues.html
-        let innerHTML = '';
-
-        if (item.imagen_url) {
-            innerHTML += `<div class="item-image"><img src="${item.imagen_url}" alt="${item.titulo}"></div>`;
-        }
-
-        innerHTML += `
-            <div class="item-details">
-                <div class="item-info">
-                    <h3 class="item-title" contenteditable="true" data-editable-property="titulo">${item.titulo}</h3>
-                    <p class="item-description" contenteditable="true" data-editable-property="descripcion">${item.descripcion || ''}</p>
-                </div>
-                <div class="item-precio">
-                    <span contenteditable="true" data-editable-property="precio">${item.precio}</span>
-                </div>
-            </div>`;
-        
-        itemElement.innerHTML = innerHTML;
-
-        // Añadimos los controles administrativos al principio del elemento
-        const adminControlsContainer = document.createElement('div');
-        adminControlsContainer.className = 'admin-controls-container';
-        adminControlsContainer.appendChild(this._createDragHandle());
-        adminControlsContainer.appendChild(this._createAdminControls(item.id));
-        
-        // Insertamos el contenedor de controles y el contenido del ítem
-        const detailsContainer = itemElement.querySelector('.item-details');
-        detailsContainer.prepend(adminControlsContainer);
-
-        return itemElement;
-    },
-
-    /**
-     * Crea el 'handle' (icono para arrastrar) para el drag and drop.
-     * @returns {HTMLElement} El elemento del handle.
-     * @private
-     */
-    _createDragHandle() {
-        const handle = document.createElement('div');
-        handle.className = 'drag-handle';
-        handle.innerHTML = '&#9776;'; // Icono de hamburguesa
-        handle.title = 'Arrastrar para reordenar';
-        return handle;
-    },
-    
-    /**
-     * Crea los botones de control para un ítem (duplicar, ocultar, borrar).
-     * @param {string} itemId - El ID del ítem.
-     * @returns {HTMLElement} El contenedor de los botones de control.
-     * @private
-     */
-    _createAdminControls(itemId) {
-        const controls = document.createElement('div');
-        controls.className = 'item-controls';
-
-        controls.innerHTML = `
-            <button class="control-btn duplicate-item" data-id="${itemId}" title="Duplicar">&#128420;</button>
-            <button class="control-btn toggle-visibility" data-id="${itemId}" title="Ocultar/Mostrar">&#128065;</button>
-            <button class="control-btn delete-item" data-id="${itemId}" title="Eliminar">&#128465;</button>
-        `;
-        return controls;
     }
-};
+
+    return {
+        init,
+        render
+    };
+})();
 
 export default MenuView;
