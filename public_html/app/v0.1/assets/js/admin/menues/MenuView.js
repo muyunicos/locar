@@ -4,12 +4,23 @@ let config = { publicUrl: '', clientUrl: '' };
 function init(initialConfig) {
     config = initialConfig;
     dom.menuContainer = document.getElementById('item-list-container');
-    dom.saveButton = document.getElementById('admin-save-fab');
-    if (!dom.menuContainer || !dom.saveButton) {
-        console.error("FATAL: No se encontraron #item-list-container o #admin-save-fab.");
+    dom.saveButtonFab = config.saveButtonFab;
+    if (!dom.menuContainer || !dom.saveButtonFab) {
+        console.error("FATAL: No se encontraron #item-list-container o admin-save-fab.");
         return;
     }
+    dom.saveButtonFab.classList.add('is-hidden');
     dom.menuContainer.classList.add('admin-view');
+}
+
+function setSaveChangesVisible(isVisible) {
+    if (dom.saveButtonFab) {
+        if (isVisible) {
+            dom.saveButtonFab.classList.remove('is-hidden');
+        } else {
+            dom.saveButtonFab.classList.add('is-hidden');
+        }
+    }
 }
 
 function formatPrice(price) {
@@ -39,8 +50,7 @@ function _createCategoryElement(categoryData) {
     `;
 
     return `
-        <div class="c-container ${layoutClass} ${hiddenClass}" data-id="${categoryData.id}" data-type="category">
-            
+        <div class="c-container ${layoutClass} ${hiddenClass}" data-id="${categoryData.id}" data-type="category" draggable="true">
             <h3 class="c-titulo">
                 <div class="c-titulo-content">
                     <span contenteditable="true" data-property="titulo" data-placeholder="Título de categoría">${categoryData.titulo || ''}</span>
@@ -48,10 +58,10 @@ function _createCategoryElement(categoryData) {
                 </div>
                 ${imageHtml}
             </h3>
-
             <div class="item-list">
                 ${itemsHtml}
             </div>
+            <div class="item-drag-handle" title="Arrastrar para reordenar">⠿</div>
         </div>
     `;
 }
@@ -64,7 +74,7 @@ function _createItemElement(itemData) {
     const priceDisplayHtml = formattedPrice ? `<span class="precio-final"><span class="precio-simbolo">$</span><span class="precio-valor">${formattedPrice}</span><span class="precio-decimales">,-</span></span>` : '';
 
     return `
-        <div class="item ${hiddenClass}" data-id="${itemData.id}" data-type="item">
+        <div class="item ${hiddenClass}" data-id="${itemData.id}" data-type="item" draggable="true">
             <div class="item-imagen-wrapper ${imagePlaceholderClass}" data-action="change-image">
                 <img src="${imageUrl}" alt="${itemData.titulo || 'Imagen de item'}">
                 <div class="placeholder-text">Sin Imagen</div>
@@ -78,6 +88,7 @@ function _createItemElement(itemData) {
                     ${priceDisplayHtml}
                 </div>
             </div>
+            <div class="item-drag-handle" title="Arrastrar para reordenar">⠿</div>
         </div>
     `;
 }
@@ -95,5 +106,6 @@ function render(menuData) {
 
 export const MenuView = { 
     init, 
-    render 
+    render,
+    setSaveChangesVisible
 };

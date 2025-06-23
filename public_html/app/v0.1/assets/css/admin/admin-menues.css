@@ -1,10 +1,11 @@
-/* admin-menues.css - v9 - Arquitectura de Controles Flotantes */
+/* admin-menues.css - v11 - Estilos para Drag & Drop y Controles de Admin */
 
 /* Resaltado del ítem activo. Ahora se aplica sobre .item y .c-container */
 .item.is-active-admin-item,
 .c-container.is-active-admin-item {
     background-color: #f0f9ff;
     border-color: #3b82f6 !important; /* Usamos !important para sobreescribir otros bordes */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Añade un sutil resplandor azul */
 }
 
 /* --- PANEL DE CONTROLES FLOTANTE --- */
@@ -17,7 +18,7 @@
     padding: 5px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 50;
+    z-index: 50; /* Asegura que esté por encima del contenido del menú */
     
     /* Por defecto está oculto y fuera de la pantalla */
     visibility: hidden;
@@ -32,14 +33,45 @@
     transform: scale(1);
 }
 
+/* Oculta cualquier drag handle si, por error, sigue en el panel flotante */
+#admin-floating-controls .item-drag-handle { /* */
+    display: none; 
+}
+
+
+/* --- ESTILOS PARA LA MANIJA DE ARRASTRE DENTRO DE LOS ÍTEMS --- */
+/* Asegura que el contenedor del ítem sea el contexto de posicionamiento */
+.item,
+.c-container {
+    position: relative; /* */
+    /* Asegúrate de que haya suficiente padding-right para que la manija no cubra el precio/imagen */
+    padding-right: 40px; /* Ajusta según el tamaño de tu manija + margen */
+}
+
 .item-drag-handle {
-    cursor: grab;
-    color: #a1a1aa;
+    position: absolute; /* */
+    top: 50%;
+    right: 10px; /* Posiciona a la derecha, ajusta según sea necesario */
+    transform: translateY(-50%); /* Centra verticalmente */
+    cursor: grab; /* Indica que es arrastrable */
+    color: #a1a1aa; /* Color del icono */
     font-size: 20px;
     padding: 5px;
+    z-index: 5; /* Asegura que esté sobre el contenido del ítem pero debajo de los controles flotantes */
+    display: flex; /* Para centrar el contenido (el símbolo ⠿) */
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* Ancho para el área de clic */
+    height: 30px; /* Alto para el área de clic */
+    transition: color 0.2s ease; /* Suave transición al hacer hover */
 }
+
+.item-drag-handle:hover {
+    color: #3b82f6; /* Cambia de color al pasar el ratón */
+}
+
 .item-drag-handle:active {
-    cursor: grabbing;
+    cursor: grabbing; /* Cambia el cursor cuando se está arrastrando */
 }
 
 
@@ -47,14 +79,18 @@
 .item.is-dragging,
 .c-container.is-dragging {
     opacity: 0.4;
+    border-style: dashed !important; /* Haz que el borde del elemento arrastrado sea discontinuo */
+    background-color: #f8fafc; /* Ligeramente más claro para indicar que se está moviendo */
 }
 
 .drop-placeholder {
-    background-color: rgba(59, 130, 246, 0.05);
-    border: 1px dashed rgba(59, 130, 246, 0.4);
+    background-color: rgba(59, 130, 246, 0.05); /* Color de fondo sutil para el placeholder */
+    border: 1px dashed rgba(59, 130, 246, 0.4); /* Borde discontinuo azul */
     border-radius: 8px;
-    margin: 4px 0;
-    pointer-events: none;
+    margin: 4px 0; /* Margen para simular el espacio del ítem */
+    pointer-events: none; /* Asegura que no interfiera con los eventos de drop */
+    opacity: 1;
+    transition: height 0.2s ease-out; /* Transición para un efecto más suave al aparecer */
 }
 
 /* El resto de estilos para popups, placeholders de imagen, etc., no cambian */
@@ -65,6 +101,22 @@
 .options-popup button { background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; cursor: pointer; font-size: 14px; padding: 6px 8px; display: flex; align-items: center; gap: 5px; transition: background-color 0.2s; white-space: nowrap; }
 .options-popup button:hover { background-color: #e4e4e7; }
 .options-popup button.danger:hover { background-color: #fee2e2; color: #ef4444; border-color: #fca5a5; }
+/* Estilos para campos editables y placeholders de imagen */
 [contenteditable=true][data-placeholder]:empty:before { content: attr(data-placeholder); color: #a1a1aa; font-style: italic; pointer-events: none; }
 .item-imagen-wrapper.is-placeholder { background-color: #f4f4f5; display: flex; align-items: center; justify-content: center; border: 1px dashed #d4d4d8; }
-.is-admin-hidden { opacity: 0.5; }
+/* Estilo para ítems ocultos */
+.is-admin-hidden { 
+    opacity: 0.5; 
+    /* Opcional: añadir una indicación visual más fuerte, como un borde gris */
+    border: 1px dashed #ccc !important; 
+    pointer-events: none; /* Deshabilita la interacción si está oculto */
+}
+
+/* Ajustes para el layout general del menú para acomodar los controles flotantes si fuera necesario */
+/* Esto puede requerir ajustes específicos para cada skin (default, revelcafe, revelbar) */
+/* Por ejemplo, podrías necesitar un margen lateral en #app-container o #item-list-container */
+/* para asegurar que el panel flotante siempre tenga espacio a la izquierda del item */
+#app-container {
+    /* Ajusta este valor si los controles se superponen al contenido cuando están a la izquierda */
+    /* Por ejemplo, margin: 14vh auto; podría cambiarse a margin: 14vh 20px 14vh 80px; */
+}
