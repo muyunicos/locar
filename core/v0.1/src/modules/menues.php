@@ -1,4 +1,8 @@
 <?php
+if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
+    header('Location: /');
+    exit;
+}
 
 function process_images_recursively(array &$item)
 {
@@ -12,18 +16,14 @@ function process_images_recursively(array &$item)
     }
 }
 
-function get_module_data(array $moduleConfig, array $context): array
+function get_module_data(array $moduleConfig, array $context, bool $isAdmin = false): array
 {
     $dataPath = CLIENT_PATH . "/datos/" . $moduleConfig["url"];
 
     if (!file_exists($dataPath)) {
         return [
-            "menu_title" => $moduleConfig["titulo"],
-            "items" => [],
-            "footer_text" => "",
-            "error" =>
-                "Archivo de datos no encontrado: " .
-                htmlspecialchars($moduleConfig["url"]),
+            "menu_title" => $moduleConfig["titulo"], "items" => [], "footer_text" => "",
+            "error" => "Archivo de datos no encontrado: " . htmlspecialchars($moduleConfig["url"]),
         ];
     }
 
@@ -31,17 +31,15 @@ function get_module_data(array $moduleConfig, array $context): array
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         return [
-            "menu_title" => $moduleConfig["titulo"],
-            "items" => [],
-            "footer_text" => "",
-            "error" =>
-                "Error de sintaxis en el archivo JSON: " .
-                htmlspecialchars($moduleConfig["url"]),
+            "menu_title" => $moduleConfig["titulo"], "items" => [], "footer_text" => "",
+            "error" => "Error de sintaxis en el archivo JSON: " . htmlspecialchars($moduleConfig["url"]),
         ];
     }
-
-    process_images_recursively($data);
-
+    
+    if (!$isAdmin) {
+        process_images_recursively($data);
+    }
+    
     $items = $data["items"] ?? [];
 
     if (
@@ -55,9 +53,7 @@ function get_module_data(array $moduleConfig, array $context): array
                     foreach ($item["items"] as &$producto) {
                         if (isset($producto["precio"])) {
                             $originalPrice = (float) $producto["precio"];
-                            $newPrice =
-                                $originalPrice -
-                                ($originalPrice * $discount) / 100;
+                            $newPrice = $originalPrice - ($originalPrice * $discount) / 100;
                             $producto["original_price"] = $originalPrice;
                             $producto["precio"] = round($newPrice, 2);
                         }
@@ -65,8 +61,7 @@ function get_module_data(array $moduleConfig, array $context): array
                 } else {
                     if (isset($item["precio"])) {
                         $originalPrice = (float) $item["precio"];
-                        $newPrice =
-                            $originalPrice - ($originalPrice * $discount) / 100;
+                        $newPrice = $originalPrice - ($originalPrice * $discount) / 100;
                         $item["original_price"] = $originalPrice;
                         $item["precio"] = round($newPrice, 2);
                     }
@@ -81,7 +76,7 @@ function get_module_data(array $moduleConfig, array $context): array
         "main_skin" => $data["main_skin"] ?? null,
         "imagen" => Utils::buildImageUrl($data["imagen"] ?? null),
         "sufijo" => $data["sufijo"] ?? null,
-        "items" => $data["items"] ?? [],
+        "items" => $items,
         "footer_text" => $data["footer"] ?? "",
         "error" => $data["error"] ?? null
     ];

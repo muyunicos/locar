@@ -1,142 +1,119 @@
-let _menuState = null;
-let _menuView = null;
-let _mainContainer = null;
-let _deactivateCurrentItemCallback = null;
+import MenuState from './MenuState.js';
+import MenuView from './MenuView.js';
 
-let placeholder = null;
-let draggedId = null;
-let isDragging = false;
+const DragDropManager = (function() {
+    let draggedElement = null;
+    let placeholder = null;
+    let draggedId = null;
+    let _onDragEndCallback = null;
 
-function init(dependencies) {
-    _menuState = dependencies.menuState;
-    _menuView = dependencies.menuView;
-    _mainContainer = dependencies.mainContainer;
-    _deactivateCurrentItemCallback = dependencies.deactivateCurrentItemCallback;
+    function init({ onDragEnd }) {
+        _onDragEndCallback = onDragEnd;
+        const container = document.getElementById('item-list-container');
+        if (!container) return;
 
-    if (!_mainContainer) {
-        console.error("FATAL: DragDropManager necesita #item-list-container para inicializarse.");
-        return;
+        container.addEventListener('dragstart', handleDragStart);
+        container.addEventListener('dragover', handleDragOver);
+        container.addEventListener('dragleave', handleDragLeave);
+        container.addEventListener('drop', handleDrop);
+        container.addEventListener('dragend', handleDragEnd);
+
+        placeholder = document.createElement('div');
+        placeholder.className = 'placeholder';
     }
 
-    _mainContainer.addEventListener('dragstart', handleDragStart);
-    document.addEventListener('dragend', handleDragEnd);
-    document.addEventListener('dragover', handleDragOver);
-    document.addEventListener('drop', handleDrop);
+    function handleDragStart(e) {
+        const dragHandle = e.target.closest('.item-drag-handle');
+        if (!dragHandle) {
+            e.preventDefault();
+            return;
+        }
 
-    console.log('[LOG] DragDropManager inicializado y listeners de D&D registrados.');
-}
+        draggedElement = e.target.closest('.item, .c-container');
+        
+        draggedId = draggedElement.dataset.id;
 
-function handleDragStart(e) {
-    const dragHandle = e.target.closest('.item-drag-handle');
-    const draggedElement = e.target.closest('.item, .c-container');
-    if (!_deactivateCurrentItemCallback || draggedElement !== _deactivateCurrentItemCallback.getActiveItem() || !dragHandle) {
-        console.log('[LOG] DragDropManager: dragstart ignorado. No hay ítem activo, el drag no es del ítem activo, o no es desde su manija.');
-        e.preventDefault(); 
-        return; 
-    }
-    
-    isDragging = true; 
-    draggedId = draggedElement.dataset.id;
-    e.dataTransfer.setData('text/plain', draggedId); 
-    e.dataTransfer.effectAllowed = 'move'; 
-    
-    placeholder = document.createElement('div'); 
-    placeholder.className = 'drop-placeholder'; 
-    placeholder.style.height = `${draggedElement.offsetHeight}px`; 
-
-    setTimeout(() => draggedElement.classList.add('is-dragging'), 0);
-    console.log(`[LOG] DragDropManager: dragstart INICIADO para el ID: ${draggedId}`); 
-}
-
-function handleDragOver(e) {
-    e.preventDefault();
-    const target = e.target.closest('.item-list, .c-container[data-type="category"], .item, .c-container'); 
-
-    if (!target || draggedId === null) return; 
-
-    const activeItemFromMain = _deactivateCurrentItemCallback.getActiveItem();
-    if (!activeItemFromMain) return;
-
-    if (target.classList.contains('item-list')) {
-        if (target.children.length === 0 || target.contains(placeholder)) { 
-            if (!target.contains(placeholder)) { 
-                target.appendChild(placeholder); 
+        setTimeout(() => {
+            if (draggedElement) {
+                draggedElement.classList.add('is-dragging');
             }
-        } else {
-            const children = Array.from(target.children).filter(child => child !== activeItemFromMain && child !== placeholder); 
-            let foundSpot = false;
-            for (let i = 0; i < children.length; i++) { 
-                const child = children[i]; 
-                const rect = child.getBoundingClientRect();
-                if (e.clientY < rect.top + rect.height / 2) { 
-                    target.insertBefore(placeholder, child); 
-                    foundSpot = true; 
-                    break; 
+        }, 0);
+        
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+
+        const targetElement = e.target.closest('.item, .c-container');
+        const targetList = e.target.closest('.item-list');
+
+        if (!targetList) return;
+
+        if (targetElement && targetElement !== placeholder) {
+            const rect = targetElement.getBoundingClientRect();
+            const isCategory = targetElement.classList.contains('c-container');
+            const draggedIsCategory = draggedElement.classList.contains('c-container');
+
+            if (isCategory && !draggedIsCategory) {
+                const innerList = targetElement.querySelector('.item-list');
+                if (innerList && innerList.children.length === 0) {
+                     innerList.appendChild(placeholder);
+                     return;
                 }
             }
-            if (!foundSpot && !target.contains(placeholder)) { 
-                target.appendChild(placeholder); 
+            
+            const midpoint = rect.top + rect.height / 2;
+            if (e.clientY < midpoint) {
+                targetElement.parentNode.insertBefore(placeholder, targetElement);
+            } else {
+                targetElement.parentNode.insertBefore(placeholder, targetElement.nextSibling);
             }
-        }
-    } else if (target.classList.contains('item') || target.classList.contains('c-container')) { 
-        const rect = target.getBoundingClientRect(); 
-        const after = e.clientY >= (rect.top + rect.height / 2); 
-
-        if (target.dataset.id === draggedId) return; 
-
-        if (target.classList.contains('c-container') && target.dataset.type === 'category') { 
-            const categoryList = target.querySelector('.item-list');
-            if (activeItemFromMain.dataset.type === 'category' && e.clientY > rect.top + rect.height * 0.25 && e.clientY < rect.top + rect.height * 0.75) { 
-                if (categoryList && !categoryList.contains(placeholder)) { 
-                    categoryList.prepend(placeholder); 
-                }
-            } else { 
-                target.parentNode.insertBefore(placeholder, after ? target.nextSibling : target); 
-            }
-        } else {
-            target.parentNode.insertBefore(placeholder, after ? target.nextSibling : target); 
+        } else if (!targetElement) {
+            targetList.appendChild(placeholder);
         }
     }
-}
 
-function handleDrop(e) {
-    e.preventDefault(); 
-    if (!placeholder || !placeholder.parentNode || draggedId === null) {
-        console.warn('[WARN] DragDropManager: Drop ignorado. Placeholder, padre o ID arrastrado nulo.');
-        return; 
+    function handleDragLeave(e) {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            placeholder.remove();
+        }
     }
-    
-    const parentList = placeholder.parentNode; 
-    const parentCategoryElement = parentList.closest('.c-container[data-type="category"]'); 
-    const newParentId = parentCategoryElement ? parentCategoryElement.dataset.id : null; 
-    
-    let finalIndex = Array.from(parentList.children).indexOf(placeholder); 
 
-    const success = _menuState.reorderItem(draggedId, newParentId, finalIndex); 
-    if(success) { 
-        _menuView.setSaveChangesVisible(true);
-        console.log(`[LOG] DragDropManager: Ítem ID ${draggedId} reordenado con éxito.`);
-    } else { 
-        console.warn('[WARN] DragDropManager: No se pudo reordenar el ítem en el estado.'); 
+    function handleDrop(e) {
+        e.preventDefault();
+        if (!placeholder.parentNode) return;
+
+        const parentList = placeholder.parentNode;
+        const parentCategoryElement = parentList.closest('.c-container[data-type="category"]');
+        const newParentId = parentCategoryElement ? parentCategoryElement.dataset.id : null;
+
+        const children = Array.from(parentList.children).filter(child => !child.classList.contains('is-dragging'));
+        const newIndex = children.indexOf(placeholder);
+
+        MenuState.reorderItem(draggedId, newParentId, newIndex);
+
+        placeholder.remove();
+        if (draggedElement) {
+            draggedElement.classList.remove('is-dragging');
+        }
+
+        if (_onDragEndCallback) {
+            _onDragEndCallback();
+        }
     }
-}
 
-function handleDragEnd(e) {
-    const activeItemFromMain = _deactivateCurrentItemCallback.getActiveItem();
-    if(activeItemFromMain) activeItemFromMain.classList.remove('is-dragging'); 
-    if (placeholder && placeholder.parentNode) { 
-        placeholder.parentNode.removeChild(placeholder); 
+    function handleDragEnd(e) {
+        placeholder.remove();
+        if (draggedElement) {
+            draggedElement.classList.remove('is-dragging');
+        }
     }
-    draggedId = null; 
-    placeholder = null; 
-    isDragging = false; 
 
-    _menuView.render(_menuState.getMenu()); 
+    return {
+        init
+    };
+})();
 
-    console.log('[LOG] DragDropManager: Arrastre finalizado.');
-}
-
-export const DragDropManager = { 
-    init, 
-    isDragging: () => isDragging
-};
+export default DragDropManager;

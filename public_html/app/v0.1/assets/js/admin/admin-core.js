@@ -1,135 +1,86 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const navPanel = document.getElementById('nav-panel');
+    const contentWrapper = document.getElementById('module-content-wrapper');
+    const hamburgerButton = document.getElementById('hamburger-button');
     const dataset = document.body.dataset;
     const publicUrl = dataset.publicUrl;
-    const clientUrl = dataset.clientUrl;
     const devId = dataset.devId;
     const clientId = dataset.clientId;
 
-    const handleAuthFormSubmit = (formElement, apiEndpoint, onSuccess) => {
-        if (!formElement) return;
+    if (!navPanel || !contentWrapper || !hamburgerButton) {
+        console.error('Elementos de navegación principales no encontrados.');
+        return;
+    }
 
-        formElement.addEventListener('submit', (event) => {
-            event.preventDefault();
+    hamburgerButton.addEventListener('click', () => {
+        navPanel.classList.toggle('open');
+    });
 
-            const messageDiv = formElement.querySelector('.form-message');
-            const submitButton = formElement.querySelector('button[type="submit"]');
-            const formData = new FormData(formElement);
-            
-            let finalApiEndpoint = `${publicUrl}${apiEndpoint}`;
-            const params = new URLSearchParams();
+    navPanel.addEventListener('click', handleNavLinkClick);
 
-            if (clientUrl) {
-                params.append('url', clientUrl);
-            }
-            if (clientId) {
-                params.append('client', clientId);
-            }
-            if (devId) {
-                params.append('dev', devId);
-            }
-
-            const queryString = params.toString();
-
-            if (queryString) {
-                finalApiEndpoint += `?${queryString}`;
-            }
-
-            if (!submitButton.dataset.originalText) {
-                submitButton.dataset.originalText = submitButton.textContent;
-            }
-
-            submitButton.disabled = true;
-            submitButton.textContent = 'Procesando...';
-            if(messageDiv) {
-                messageDiv.textContent = '';
-                messageDiv.className = 'form-message';
-            }
-
-            fetch(finalApiEndpoint, {
-                method: 'POST',
-                credentials: 'include',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (messageDiv) {
-                    messageDiv.textContent = data.message;
-                    if (data.success) {
-                        messageDiv.classList.add('success');
-                        if (onSuccess) {
-                            onSuccess(data);
-                        }
-                    } else {
-                        messageDiv.classList.add('error');
-                    }
-                } else if (data.success && onSuccess) {
-                    onSuccess(data);
-                }
-            })
-            .catch(error => {
-                console.error('Error en la petición:', error);
-                if (messageDiv) {
-                    messageDiv.textContent = 'Ocurrió un error de conexión.';
-                    messageDiv.classList.add('error');
-                }
-            })
-            .finally(() => {
-                submitButton.disabled = false;
-                submitButton.textContent = submitButton.dataset.originalText;
-            });
-        });
-    };
+    const initialModuleId = contentWrapper.querySelector('[data-module-id]')?.dataset.moduleId;
+    if (initialModuleId) {
+        updateActiveLink(initialModuleId);
+    }
     
-    const createAdminForm = document.getElementById('create-admin-form');
-    const resetPasswordForm = document.getElementById('reset-password-form');
-    const loginForm = document.getElementById('login-form');
-    const requestResetForm = document.getElementById('request-reset-form');
-
-    handleAuthFormSubmit(createAdminForm, '/api/create_initial_admin.php', () => {
-        setTimeout(() => { window.location.href = clientUrl + '/admin'; }, 2000);
-    });
-
-    handleAuthFormSubmit(resetPasswordForm, '/api/perform_password_reset.php', () => {
-        setTimeout(() => { window.location.href = clientUrl + '/admin'; }, 2000);
-    });
-
-    handleAuthFormSubmit(loginForm, '/api/login.php', () => {
-        window.location.href = clientUrl;
-    });
-
-    handleAuthFormSubmit(requestResetForm, '/api/request_password_reset.php', () => {
-
-    });
-
-    const loginModalBackdrop = document.getElementById('login-modal-backdrop');
-    if (loginModalBackdrop) {
-        if (dataset.showLoginModal === 'true') {
-            loginModalBackdrop.style.display = 'flex';
-        }
+    function handleNavLinkClick(e) {
+        const link = e.target.closest('.nav-link');
+        if (!link || link.classList.contains('is-external')) return;
         
-        loginModalBackdrop.addEventListener('click', (e) => {
-            if (e.target.id === 'login-modal-backdrop' || e.target.classList.contains('close-button')) {
-                loginModalBackdrop.style.display = 'none';
+        e.preventDefault();
+        const moduleId = link.dataset.moduleId;
+        
+        if (moduleId) {
+            loadModule(moduleId);
+            navPanel.classList.remove('open');
+        }
+    }
+
+    function updateActiveLink(moduleId) {
+        navPanel.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.dataset.moduleId === moduleId) {
+                link.classList.add('active');
             }
         });
+    }
 
-        const forgotPasswordLink = document.getElementById('forgot-password-link');
-        const backToLoginLink = document.getElementById('back-to-login-link');
-        
-        if(forgotPasswordLink) {
-            forgotPasswordLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginForm.style.display = 'none';
-                requestResetForm.style.display = 'block';
-            });
-        }
-        
-        if(backToLoginLink) {
-            backToLoginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                requestResetForm.style.display = 'none';
-                loginForm.style.display = 'block';
-            });
+    async function loadModule(moduleId) {
+        contentWrapper.classList.add('loading');
+
+        try {
+            const response = await fetch(`${publicUrl}/api/getModule.php?id=${moduleId}&client=${clientId}&dev=${devId}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error de red: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+
+            if (result.error) {
+                throw new Error(result.html);
+            } else {
+                contentWrapper.innerHTML = result.html;
+                
+                const moduleStylesheet = document.getElementById('module-stylesheet');
+                if (moduleStylesheet) {
+                    moduleStylesheet.href = result.css_url || '';
+                }
+                
+                const moduleType = result.module_type;
+                const newModuleElement = contentWrapper.querySelector('.module-container');
+                
+                if (moduleType && newModuleElement && window.adminModuleInitializers && window.adminModuleInitializers[moduleType]) {
+                    window.adminModuleInitializers[moduleType](newModuleElement);
+                }
+                
+                updateActiveLink(moduleId);
+            }
+        } catch (error) {
+            console.error('Error al cargar el módulo:', error);
+            contentWrapper.innerHTML = `<p class="app-error">Error al cargar el módulo. Por favor, intente de nuevo.</p>`;
+        } finally {
+            contentWrapper.classList.remove('loading');
         }
     }
 });

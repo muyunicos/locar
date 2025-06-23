@@ -1,153 +1,147 @@
-let menu = null;
+const MenuState = (function() {
+    let menu = {};
+    let hasChanges = false;
 
-const generateUniqueId = () => '_' + Math.random().toString(36).substr(2, 9);
-
-function findItemRecursive(id, itemsArray, parent = null) {
-    for (let i = 0; i < itemsArray.length; i++) {
-        const item = itemsArray[i];
-        if (item.id === id) {
-            return { item, parent, index: i };
-        }
-        if (item.items && item.items.length > 0) {
-            const found = findItemRecursive(id, item.items, item);
-            if (found) return found;
-        }
-    }
-    return null;
-}
-
-// REEMPLAZA LA FUNCIÓN reorderItem EN MenuState.js
-
-/**
- * Reordena un ítem en la estructura de datos usando un índice y padre explícitos.
- * @param {string} draggedId - El ID del ítem que se arrastra.
- * @param {string|null} newParentId - El ID de la categoría padre, o null para la raíz.
- * @param {number} newIndex - El nuevo índice del ítem en la lista del padre.
- * @returns {boolean} - true si tuvo éxito.
- */
-function reorderItem(draggedId, newParentId, newIndex) {
-    const draggedResult = findItemRecursive(draggedId, menu.items);
-    if (!draggedResult) return false;
-
-    const originalParentId = draggedResult.parent ? draggedResult.parent.id : null;
-    const originalIndex = draggedResult.index;
-
-    // Extraer el elemento arrastrado.
-    const draggedParentArray = draggedResult.parent ? draggedResult.parent.items : menu.items;
-    const [draggedItem] = draggedParentArray.splice(originalIndex, 1);
-
-    // Encontrar el array de destino.
-    let newParentArray;
-    if (newParentId === null) {
-        newParentArray = menu.items;
-    } else {
-        const parentResult = findItemRecursive(newParentId, menu.items);
-        if (parentResult && parentResult.item.es_cat) {
-            newParentArray = parentResult.item.items;
-        } else {
-            // Error: no se encontró el padre. Devolvemos el ítem a su lugar.
-            draggedParentArray.splice(originalIndex, 0, draggedItem);
-            return false;
-        }
+    function load(initialMenuData) {
+        menu = JSON.parse(JSON.stringify(initialMenuData));
+        hasChanges = false;
     }
 
-    // CORRECCIÓN CLAVE: Ajustar el índice si el elemento se mueve hacia abajo en el mismo array.
-    if (originalParentId === newParentId && originalIndex < newIndex) {
-        newIndex--;
+    function getMenu() {
+        return menu;
+    }
+
+    function findItemRecursive(id, currentItems = menu.items, parent = null) {
+        for (let i = 0; i < currentItems.length; i++) {
+            const item = currentItems[i];
+            if (item.id === id) {
+                return { item, parent, index: i };
+            }
+            if (item.items && item.items.length > 0) {
+                const found = findItemRecursive(id, item.items, item);
+                if (found) {
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
+    function updateItemProperty(id, property, value) {
+        const found = findItemRecursive(id);
+        if (found) {
+            found.item[property] = value;
+            hasChanges = true;
+        }
     }
     
-    // Insertar el elemento en su nueva ubicación.
-    newParentArray.splice(newIndex, 0, draggedItem);
-    return true;
-}
-function load(initialMenuData) {
-    menu = JSON.parse(JSON.stringify(initialMenuData));
-    const ensureIds = (items) => {
-        if (!items) return;
-        items.forEach(item => {
-            if (!item.id) item.id = generateUniqueId();
-            if (item.items) ensureIds(item.items);
-        });
-    };
-    ensureIds(menu.items);
-}
-
-function getMenu() {
-    if (!menu) return null;
-    return JSON.parse(JSON.stringify(menu));
-}
-
-function updateItemProperty(id, property, value) {
-    const result = findItemRecursive(id, menu.items);
-    if (result) {
-        result.item[property] = value;
-        return true;
-    }
-    return false;
-}
-
-function toggleItemVisibility(id) {
-    const result = findItemRecursive(id, menu.items);
-    if (result) {
-        result.item.ocultar = !result.item.ocultar;
-        return true;
-    }
-    return false;
-}
-
-function deleteItem(id) {
-    const result = findItemRecursive(id, menu.items);
-    if (result) {
-        const parentArray = result.parent ? result.parent.items : menu.items;
-        parentArray.splice(result.index, 1);
-        return true;
-    }
-    return false;
-}
-
-function duplicateItem(id) {
-    const result = findItemRecursive(id, menu.items);
-    if (!result) return false;
-    const copia = JSON.parse(JSON.stringify(result.item));
-    const assignNewIds = (item) => {
-        item.id = generateUniqueId();
-        if (item.items && item.items.length > 0) item.items.forEach(assignNewIds);
-    };
-    assignNewIds(copia);
-    const parentArray = result.parent ? result.parent.items : menu.items;
-    parentArray.splice(result.index + 1, 0, copia);
-    return true;
-}
-
-function addItem(parentId, itemType) {
-    const newItem = {
-        id: generateUniqueId(),
-        titulo: itemType === 'category' ? 'Nueva Categoría' : 'Nuevo Ítem',
-        descripcion: '',
-        ocultar: false,
-    };
-    if (itemType === 'category') {
-        newItem.es_cat = true;
-        newItem.items = [];
-    } else {
-        newItem.precio = '';
-        newItem.imagen = '';
-    }
-    if (parentId) {
-        const parentResult = findItemRecursive(parentId, menu.items);
-        if (parentResult && parentResult.item.es_cat) {
-            parentResult.item.items.push(newItem);
-            return true;
+    function updateMenuProperty(key, value) {
+        if (menu && typeof menu === 'object') {
+            menu[key] = value;
+            hasChanges = true;
         }
-        return false;
-    } else {
-        menu.items.push(newItem);
-        return true;
     }
-}
 
-export const MenuState = {
-    load, getMenu, updateItemProperty, toggleItemVisibility,
-    deleteItem, duplicateItem, addItem,
-    reorderItem
-};
+    function deleteItem(id) {
+        const found = findItemRecursive(id);
+        if (found) {
+            const list = found.parent ? found.parent.items : menu.items;
+            list.splice(found.index, 1);
+            hasChanges = true;
+        }
+    }
+    
+    function generateId() {
+        return 'item-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function duplicateItem(id) {
+        const found = findItemRecursive(id);
+        if (found) {
+            const list = found.parent ? found.parent.items : menu.items;
+            const originalItem = found.item;
+            
+            const newItem = JSON.parse(JSON.stringify(originalItem));
+            newItem.id = generateId();
+            
+            if (newItem.type === 'category' && newItem.items) {
+                const assignNewIds = (items) => {
+                    items.forEach(item => {
+                        item.id = generateId();
+                        if (item.type === 'category' && item.items) {
+                            assignNewIds(item.items);
+                        }
+                    });
+                };
+                assignNewIds(newItem.items);
+            }
+
+            list.splice(found.index + 1, 0, newItem);
+            hasChanges = true;
+        }
+    }
+
+    function addItem(parentId, itemData) {
+        const newId = generateId();
+        const newItem = { id: newId, ...itemData };
+        
+        if (parentId) {
+            const foundParent = findItemRecursive(parentId);
+            if (foundParent && foundParent.item.type === 'category') {
+                if (!foundParent.item.items) {
+                    foundParent.item.items = [];
+                }
+                foundParent.item.items.push(newItem);
+            }
+        } else {
+            if (!menu.items) {
+                menu.items = [];
+            }
+            menu.items.push(newItem);
+        }
+        hasChanges = true;
+    }
+    
+    function reorderItem(draggedId, newParentId, newIndex) {
+        const found = findItemRecursive(draggedId);
+        if (!found) return;
+
+        const { item: draggedItem, parent: originalParent, index: originalIndex } = found;
+        const originalParentId = originalParent ? originalParent.id : null;
+
+        const sourceList = originalParent ? originalParent.items : menu.items;
+        sourceList.splice(originalIndex, 1);
+        
+        let destinationList;
+        if (newParentId) {
+            const newParentInfo = findItemRecursive(newParentId);
+            if (!newParentInfo || newParentInfo.item.type !== 'category') return; 
+            if (!newParentInfo.item.items) {
+                newParentInfo.item.items = [];
+            }
+            destinationList = newParentInfo.item.items;
+        } else {
+            destinationList = menu.items;
+        }
+
+        if (originalParentId === newParentId && originalIndex < newIndex) {
+            newIndex--;
+        }
+
+        destinationList.splice(newIndex, 0, draggedItem);
+        hasChanges = true;
+    }
+
+    return {
+        load,
+        getMenu,
+        updateItemProperty,
+        updateMenuProperty,
+        deleteItem,
+        duplicateItem,
+        addItem,
+        reorderItem
+    };
+})();
+
+export default MenuState;

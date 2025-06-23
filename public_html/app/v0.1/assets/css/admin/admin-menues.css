@@ -1,16 +1,13 @@
-/* admin-menues.css - v11 - Estilos para Drag & Drop y Controles de Admin */
 
-/* Resaltado del ítem activo. Ahora se aplica sobre .item y .c-container */
 .item.is-active-admin-item,
 .c-container.is-active-admin-item {
     background-color: #f0f9ff;
-    border-color: #3b82f6 !important; /* Usamos !important para sobreescribir otros bordes */
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Añade un sutil resplandor azul */
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-/* --- PANEL DE CONTROLES FLOTANTE --- */
 #admin-floating-controls {
-    position: absolute; /* Se posiciona relativo al body */
+    position: absolute; 
     display: flex;
     align-items: center;
     gap: 5px;
@@ -18,9 +15,7 @@
     padding: 5px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 50; /* Asegura que esté por encima del contenido del menú */
-    
-    /* Por defecto está oculto y fuera de la pantalla */
+    z-index: 50; 
     visibility: hidden;
     opacity: 0;
     transform: scale(0.95);
@@ -33,67 +28,62 @@
     transform: scale(1);
 }
 
-/* Oculta cualquier drag handle si, por error, sigue en el panel flotante */
 #admin-floating-controls .item-drag-handle { /* */
     display: none; 
 }
 
 
-/* --- ESTILOS PARA LA MANIJA DE ARRASTRE DENTRO DE LOS ÍTEMS --- */
-/* Asegura que el contenedor del ítem sea el contexto de posicionamiento */
 .item,
 .c-container {
-    position: relative; /* */
-    /* Asegúrate de que haya suficiente padding-right para que la manija no cubra el precio/imagen */
-    padding-right: 40px; /* Ajusta según el tamaño de tu manija + margen */
+    position: relative;
+    padding-right: 40px;
 }
 
 .item-drag-handle {
-    position: absolute; /* */
+    position: absolute;
     top: 50%;
-    right: 10px; /* Posiciona a la derecha, ajusta según sea necesario */
-    transform: translateY(-50%); /* Centra verticalmente */
-    cursor: grab; /* Indica que es arrastrable */
-    color: #a1a1aa; /* Color del icono */
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: grab;
+    color: #a1a1aa;
     font-size: 20px;
     padding: 5px;
-    z-index: 5; /* Asegura que esté sobre el contenido del ítem pero debajo de los controles flotantes */
-    display: flex; /* Para centrar el contenido (el símbolo ⠿) */
+    z-index: 5;
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px; /* Ancho para el área de clic */
-    height: 30px; /* Alto para el área de clic */
-    transition: color 0.2s ease; /* Suave transición al hacer hover */
+    width: 30px;
+    height: 30px;
+    transition: color 0.2s ease;
 }
 
 .item-drag-handle:hover {
-    color: #3b82f6; /* Cambia de color al pasar el ratón */
+    color: #3b82f6;
 }
 
 .item-drag-handle:active {
-    cursor: grabbing; /* Cambia el cursor cuando se está arrastrando */
+    cursor: grabbing;
 }
 
 
-/* --- FEEDBACK VISUAL DE ARRASTRE --- */
 .item.is-dragging,
 .c-container.is-dragging {
     opacity: 0.4;
-    border-style: dashed !important; /* Haz que el borde del elemento arrastrado sea discontinuo */
-    background-color: #f8fafc; /* Ligeramente más claro para indicar que se está moviendo */
+    border-style: dashed !important;
+    background-color: #f8fafc;
 }
 
 .drop-placeholder {
-    background-color: rgba(59, 130, 246, 0.05); /* Color de fondo sutil para el placeholder */
-    border: 1px dashed rgba(59, 130, 246, 0.4); /* Borde discontinuo azul */
+    background-color: rgba(59, 130, 246, 0.05);
+    border: 1px dashed rgba(59, 130, 246, 0.4);
     border-radius: 8px;
-    margin: 4px 0; /* Margen para simular el espacio del ítem */
-    pointer-events: none; /* Asegura que no interfiera con los eventos de drop */
+    margin: 4px 0;
+    pointer-events: none;
     opacity: 1;
-    transition: height 0.2s ease-out; /* Transición para un efecto más suave al aparecer */
+    transition: height 0.2s ease-out;
 }
 
-/* El resto de estilos para popups, placeholders de imagen, etc., no cambian */
+
 .item-actions-panel { position: relative; }
 .item-actions-panel .action-button { background: none; border: none; cursor: pointer; font-size: 18px; padding: 5px; }
 .item-actions-panel .options-popup { visibility: hidden; opacity: 0; transform: translateY(-50%) scale(0.95); transition: all 0.15s ease-out; position: absolute; left: 100%; top: 50%; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; padding: 5px; display: flex; flex-direction: column; gap: 4px; margin-left: 12px; }
@@ -101,22 +91,15 @@
 .options-popup button { background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; cursor: pointer; font-size: 14px; padding: 6px 8px; display: flex; align-items: center; gap: 5px; transition: background-color 0.2s; white-space: nowrap; }
 .options-popup button:hover { background-color: #e4e4e7; }
 .options-popup button.danger:hover { background-color: #fee2e2; color: #ef4444; border-color: #fca5a5; }
-/* Estilos para campos editables y placeholders de imagen */
+
 [contenteditable=true][data-placeholder]:empty:before { content: attr(data-placeholder); color: #a1a1aa; font-style: italic; pointer-events: none; }
 .item-imagen-wrapper.is-placeholder { background-color: #f4f4f5; display: flex; align-items: center; justify-content: center; border: 1px dashed #d4d4d8; }
-/* Estilo para ítems ocultos */
+
 .is-admin-hidden { 
     opacity: 0.5; 
-    /* Opcional: añadir una indicación visual más fuerte, como un borde gris */
     border: 1px dashed #ccc !important; 
-    pointer-events: none; /* Deshabilita la interacción si está oculto */
+    pointer-events: none;
 }
 
-/* Ajustes para el layout general del menú para acomodar los controles flotantes si fuera necesario */
-/* Esto puede requerir ajustes específicos para cada skin (default, revelcafe, revelbar) */
-/* Por ejemplo, podrías necesitar un margen lateral en #app-container o #item-list-container */
-/* para asegurar que el panel flotante siempre tenga espacio a la izquierda del item */
 #app-container {
-    /* Ajusta este valor si los controles se superponen al contenido cuando están a la izquierda */
-    /* Por ejemplo, margin: 14vh auto; podría cambiarse a margin: 14vh 20px 14vh 80px; */
 }

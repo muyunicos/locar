@@ -48,7 +48,8 @@ class ModuleLoader
         
         require_once $logicPath;
 
-        $moduleData = get_module_data($moduleConfig, $this->activeEventContext);
+        $moduleData = get_module_data($moduleConfig, $this->activeEventContext, $isAdmin);
+        
         $viewData = $moduleData;
         $viewData['module_data'] = $moduleData; 
         $viewData['is_admin'] = $isAdmin;

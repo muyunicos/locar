@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- CACHÉ DE ELEMENTOS DEL DOM Y VARIABLES ---
     const navPanel = document.getElementById('nav-panel');
     const hamburgerBtn = document.getElementById('hamburger-button');
     const mainContentWrapper = document.getElementById('module-content-wrapper'); 
@@ -12,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- MANEJADORES DE EVENTOS DE LA NAVEGACIÓN ---
     hamburgerBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         navPanel.classList.toggle('open');
@@ -31,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- LÓGICA DE CARGA DE MÓDULOS ---
     async function handleNavLinkClick(e, linkElement) {
         if (linkElement.classList.contains('is-external')) {
             navPanel.classList.remove('open');
@@ -70,16 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorText || `Error en la respuesta de la API: ${response.statusText}`);
             }
 
-            // ======================================================================
-            // CORRECCIÓN CLAVE: Volvemos a la lógica original de manejo de datos.
-            // La API devuelve el objeto del módulo directamente, no uno encapsulado.
-            // ======================================================================
             const moduleData = await response.json();
-
-            // Ya no se necesita esta comprobación porque la API no la soporta.
-            // if (!moduleData.success) {
-            //     throw new Error(moduleData.message || 'La API devolvió un error no especificado.');
-            // }
 
             updatePageContent(moduleData);
 
