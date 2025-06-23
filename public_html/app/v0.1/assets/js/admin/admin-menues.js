@@ -65,11 +65,10 @@ import DragDropManager from './menues/DragDropManager.js';
         }
     }
 
-    function setChangesMade(state) {
-        hasChanges = state;
-        saveFab.classList.toggle('visible', hasChanges);
-    }
-
+   function setChangesMade(state) {
+    hasChanges = state;
+    saveFab.classList.toggle('is-hidden', !state);
+}
     function handleSelection(e) {
         if (e.target.isContentEditable || e.target.closest('.item-drag-handle')) return;
         const targetItem = e.target.closest('.item, .c-container');
@@ -147,17 +146,32 @@ import DragDropManager from './menues/DragDropManager.js';
         floatingControls.querySelector('[data-action="add-category"]').style.display = isCategory ? 'inline-flex' : 'none';
     }
 
-    function handleSaveMenu() {
-        if (isSaving) return;
-        const payload = {
-            menuData: MenuState.getMenu(),
-            dataSource: appConfig.dataSource,
-            client: appConfig.config.clientId,
-            url: appConfig.config.clientUrl,
-            dev: appConfig.config.devId,
-        };
-        MenuApiService.saveMenu(payload);
+async function handleSaveMenu() {
+    if (isSaving) return;
+    isSaving = true;
+    setFabSaving(true);
+
+    // --- CORRECCIÓN: VOLVEMOS A AÑADIR LOS PARÁMETROS REQUERIDOS ---
+    const payload = {
+        menuData: MenuState.getMenu(),
+        dataSource: appConfig.dataSource,
+        client: appConfig.config.clientId,
+        url: appConfig.config.clientUrl,
+        dev: appConfig.config.devId
+    };
+
+    try {
+        const response = await MenuApiService.saveMenu(payload);
+        handleSaveSuccess(response);
+
+    } catch (error) {
+        handleSaveError(error.message || 'Error desconocido.');
+
+    } finally {
+        isSaving = false;
+        setFabSaving(false);
     }
+}
     
     function setFabSaving(isSaving) {
         const icon = saveFab.querySelector('i');

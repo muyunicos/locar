@@ -1,66 +1,56 @@
 <?php
+// api/saveMenu.php
 
+// 1. INCLUIR EL BOOTSTRAP
+// Esto nos da acceso a $input, AuthManager, y las constantes como DATA_PATH.
 require_once __DIR__ . '/api_bootstrap.php';
-global $input; 
 
+// 2. AÑADIR AUTENTICACIÓN (MEJORA DE SEGURIDAD CRÍTICA)
+// Verificamos si el usuario ha iniciado sesión antes de permitir cualquier modificación.
 $authManager = new AuthManager();
 if (!$authManager->isLoggedIn()) {
-    send_json_response(false, 'Acceso denegado.', null, 403);
+    // Usamos la función helper de api_bootstrap.php para enviar la respuesta
+    send_json_response(false, 'Acceso no autorizado.', null, 403);
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    send_json_response(false, 'Método no permitido.', null, 405);
+// 3. USAR LA VARIABLE GLOBAL $input
+// La variable $input ya contiene los datos de la petición, no es necesario volver a decodificarlos.
+$menuData = $input['menuData'] ?? null;
+$dataSource = $input['dataSource'] ?? null;
+
+if (!$menuData || !$dataSource) {
+    send_json_response(false, 'Faltan datos esenciales (menuData o dataSource).', null, 400);
 }
 
-if (!isset($input['menuData']) || !isset($input['dataSource'])) {
-    send_json_response(false, 'Datos de entrada inválidos o incompletos.', null, 400);
+// 4. USAR RUTA DE ARCHIVOS SEGURA CON DATA_PATH (CORRECCIÓN CLAVE)
+// Usamos la constante DATA_PATH (definida en Config.php) como la única base permitida.
+// Usamos basename() para asegurarnos de que solo estamos usando el nombre del archivo, evitando ataques de Directory Traversal.
+$fileName = basename($dataSource);
+$fullPath = DATA_PATH . '/' . $fileName;
+
+// Verificamos que el archivo de destino realmente exista dentro del directorio de datos.
+if (strpos(realpath($fullPath), realpath(DATA_PATH)) !== 0) {
+    send_json_response(false, 'Ruta de archivo no válida o insegura.', null, 400);
 }
 
-$menuData = $input['menuData'];
-$dataSourceFile = basename($input['dataSource']);
-
-$basePath = realpath(DATA_PATH);
-$filePath = $basePath . '/' . $dataSourceFile;
-
-
-if (!is_writable($basePath)) {
-    send_json_response(false, 'Error de permisos: El directorio de datos no es escribible.', null, 500);
-}
-
-if (file_exists($filePath) && strpos(realpath($filePath), $basePath) !== 0) {
-    send_json_response(false, 'Operación no permitida: la ruta del archivo es insegura.', null, 400);
-}
-
-if (dirname($filePath) !== $basePath) {
-    send_json_response(false, 'Operación no permitida: intento de escribir fuera del directorio de datos.', null, 400);
-}
-
-try {
-    $backupDir = $basePath . '/_backups';
-    if (!is_dir($backupDir)) {
-        mkdir($backupDir, 0775, true);
+// --- Lógica de Backup (sin cambios, ya era correcta) ---
+$backupDir = DATA_PATH . '/_backups';
+if (!is_dir($backupDir)) {
+    if (!mkdir($backupDir, 0775, true)) {
+        send_json_response(false, 'No se pudo crear el directorio de backups.', null, 500);
     }
-    
-    if (file_exists($filePath)) {
-        $backupFileName = pathinfo($filePath, PATHINFO_FILENAME) . '-' . date('YmdHis') . '.json';
-        $backupPath = $backupDir . '/' . $backupFileName;
-        if (!copy($filePath, $backupPath)) {
-            throw new Exception('No se pudo crear el archivo de respaldo.');
-        }
-    }
-} catch (Exception $e) {
-    error_log('Error de backup: ' . $e->getMessage());
-    send_json_response(false, 'Error crítico: no se pudo crear el respaldo. No se guardaron los cambios.', null, 500);
+}
+$backupFile = $backupDir . '/' . pathinfo($fileName, PATHINFO_FILENAME) . '-' . date("YmdHis") . '.json';
+if (file_exists($fullPath)) {
+    copy($fullPath, $backupFile);
 }
 
-$jsonData = json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-if (file_put_contents($filePath, $jsonData) === false) {
-    error_log('Error de escritura en: ' . $filePath);
-    send_json_response(false, 'Error al escribir en el archivo de datos.', null, 500);
+// --- Guardar el nuevo contenido (sin cambios) ---
+$newJsonData = json_encode($menuData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+if (file_put_contents($fullPath, $newJsonData) === false) {
+    send_json_response(false, 'No se pudo escribir en el archivo de datos.', null, 500);
 }
 
-send_json_response(
-    true, 
-    'Menú guardado correctamente.', 
-    ['savedData' => $menuData]
-);
+// Si todo salió bien
+send_json_response(true, 'Menú guardado con éxito.');

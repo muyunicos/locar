@@ -23,6 +23,7 @@ const DragDropManager = (function() {
     }
 
     function handleDragStart(e) {
+
         const dragHandle = e.target.closest('.item-drag-handle');
         if (!dragHandle) {
             e.preventDefault();
@@ -32,6 +33,7 @@ const DragDropManager = (function() {
         draggedElement = e.target.closest('.item, .c-container');
         
         draggedId = draggedElement.dataset.id;
+e.dataTransfer.setData('text/plain', draggedId); // Añade el ID a la transferencia
 
         setTimeout(() => {
             if (draggedElement) {
@@ -99,9 +101,7 @@ const DragDropManager = (function() {
             draggedElement.classList.remove('is-dragging');
         }
 
-        if (_onDragEndCallback) {
-            _onDragEndCallback();
-        }
+        
     }
 
     function handleDragEnd(e) {
@@ -109,6 +109,9 @@ const DragDropManager = (function() {
         if (draggedElement) {
             draggedElement.classList.remove('is-dragging');
         }
+        if (_onDragEndCallback) {
+        _onDragEndCallback();
+    }
     }
 
     return {

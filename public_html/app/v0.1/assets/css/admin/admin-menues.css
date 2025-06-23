@@ -66,22 +66,6 @@
 }
 
 
-.item.is-dragging,
-.c-container.is-dragging {
-    opacity: 0.4;
-    border-style: dashed !important;
-    background-color: #f8fafc;
-}
-
-.drop-placeholder {
-    background-color: rgba(59, 130, 246, 0.05);
-    border: 1px dashed rgba(59, 130, 246, 0.4);
-    border-radius: 8px;
-    margin: 4px 0;
-    pointer-events: none;
-    opacity: 1;
-    transition: height 0.2s ease-out;
-}
 
 
 .item-actions-panel { position: relative; }
@@ -102,4 +86,25 @@
 }
 
 #app-container {
+}
+
+/* Estilo para el elemento mientras lo estás arrastrando */
+.item.is-dragging,
+.c-container.is-dragging {
+    opacity: 0.4;
+    border-style: dashed !important;
+    background-color: #f8fafc;
+}
+
+/* Estilo para el marcador de posición que muestra dónde caerá el elemento */
+.drop-placeholder {
+    display: block;
+    height: 16px;
+    width: 100%;
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px dashed rgba(59, 130, 246, 0.5);
+    border-radius: 8px;
+    margin: 8px 0;
+    pointer-events: none;
+    transition: height 0.2s ease-out;
 }

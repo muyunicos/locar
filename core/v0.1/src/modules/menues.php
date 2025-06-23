@@ -38,6 +38,8 @@ function get_module_data(array $moduleConfig, array $context, bool $isAdmin = fa
     
     if (!$isAdmin) {
         process_images_recursively($data);
+    } else { 
+        $data["imagen_url"] = Utils::buildImageUrl($data["imagen"]);
     }
     
     $items = $data["items"] ?? [];
@@ -74,7 +76,7 @@ function get_module_data(array $moduleConfig, array $context, bool $isAdmin = fa
         "menu_title" => $data["titulo"] ?? $moduleConfig["titulo"],
         "skin" => $data["skin"] ?? null,
         "main_skin" => $data["main_skin"] ?? null,
-        "imagen" => Utils::buildImageUrl($data["imagen"] ?? null),
+        "imagen" => $data["imagen_url"],
         "sufijo" => $data["sufijo"] ?? null,
         "items" => $items,
         "footer_text" => $data["footer"] ?? "",
