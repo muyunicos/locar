@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const hamburgerBtn = document.getElementById('hamburger-button');
     const mainContentWrapper = document.getElementById('module-content-wrapper'); 
     
-    const { publicUrl, clientUrl, devId, clientId, initialContext } = document.body.dataset;
-    const { profile_title: baseTitle } = JSON.parse(initialContext || '{}');
+    const config = window.locarConfig || {};
+    const { profile_title: baseTitle } = JSON.parse(document.body.dataset.initialContext || '{}');
 
     if (!hamburgerBtn || !navPanel || !mainContentWrapper) {
         console.error('Error crítico: Faltan elementos esenciales del DOM (nav-panel, hamburger-button, o module-content-wrapper).');
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function loadModule(moduleId) {
-        if (!clientId || !moduleId) {
+        if (!config.clientId || !moduleId) {
             mainContentWrapper.innerHTML = `<div class='app-error'>Error: No se pudo determinar el cliente o el módulo.</div>`;
             return;
         }
@@ -51,14 +51,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const params = new URLSearchParams({
-                client: clientId,
+                client: config.clientId,
                 id: moduleId,
-                url: clientUrl
+                url: config.clientUrl
             });
-            if (devId) {
-                params.append('dev', devId);
+            if (config.devId) {
+                params.append('dev', config.devId);
             }
-            const apiUrl = `${publicUrl}/api/getModule.php?${params.toString()}`;
+            const apiUrl = `${config.publicUrl}/api/getModule.php?${params.toString()}`;
 
             const response = await fetch(apiUrl);
             
@@ -68,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const moduleData = await response.json();
-
             updatePageContent(moduleData);
 
         } catch (error) {
@@ -96,10 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         mainContentWrapper.innerHTML = moduleData.html;
 
-        const moduleType = moduleData.tipo;
-        if (moduleType && window.adminModuleInitializers && typeof window.adminModuleInitializers[moduleType] === 'function') {
+        const newModuleElement = mainContentWrapper.querySelector('.module-container');
+        
+        const moduleType = moduleData.module_type;
+        if (moduleType && newModuleElement && window.adminModuleInitializers && typeof window.adminModuleInitializers[moduleType] === 'function') {
             console.log(`Ejecutando inicializador de admin para el módulo: ${moduleType}`);
-            window.adminModuleInitializers[moduleType]();
+            window.adminModuleInitializers[moduleType](newModuleElement);
         }
     }
 });
