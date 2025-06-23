@@ -17,8 +17,8 @@ import DragDropManager from './menues/DragDropManager.js';
              return;
         }
 
-        floatingControls = menuContainer.querySelector('.admin-floating-controls');
-        saveFab = menuContainer.querySelector('.admin-save-fab');
+        floatingControls = menuContainer.querySelector('.admin-controls');
+        saveFab = menuContainer.querySelector('.admin-fab');
         itemListContainer = menuContainer.querySelector('#item-list-container');
 
         if (!floatingControls || !saveFab || !itemListContainer) {

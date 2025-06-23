@@ -60,7 +60,9 @@ if (!function_exists("render_public_item")) {
     <?php endif; ?>
 >
     <?php if ($is_admin ?? false): ?>
-        <?php include(PRIVATE_PATH . '/templates/admin/menues/controls.html'); ?>
+        <div id="admin-floating-controls" class="admin-controls">
+            <?php include(PRIVATE_PATH . '/templates/admin/menues/controls.html'); ?>
+        </div>
         <?php include(PRIVATE_PATH . '/templates/admin/menues/fab.html'); ?>
     <?php endif; ?>
 
