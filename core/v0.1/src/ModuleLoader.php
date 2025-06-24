@@ -14,6 +14,7 @@ class ModuleLoader {
 
     public function loadById(string $moduleId, bool $isAdmin = false): array
     {
+        // 1. --- Buscar la configuración del módulo en el manifiesto ---
         $moduleConfig = null;
         foreach ($this->manifest["modulos"] as $module) {
             if ((string) $module["id"] === $moduleId) {
@@ -22,46 +23,43 @@ class ModuleLoader {
             }
         }
 
+        // Si no se encuentra el módulo, devolver un error.
         if (!$moduleConfig) {
             return [
                 "html" => "<div class='app-error'>Error: El módulo con ID '{$moduleId}' no fue encontrado.</div>",
-                "css" => [],
-                "js" => [],
-                "skin" => $this->manifest["skin"],
-                "main_skin_override" => false,
-                "error" => true
+                "css" => [], "js" => [], "error" => true,
+                "skin" => $this->manifest["skin"], "main_skin_override" => false
             ];
         }
 
+        // 2. --- Cargar la lógica del módulo (ej. menues.php) ---
         $moduleType = $moduleConfig["tipo"];
         $logicPath = PRIVATE_PATH . "/src/modules/" . $moduleType . ".php";
 
         if (!file_exists($logicPath)) {
             return [
                 "html" => "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>",
-                "css" => [],
-                "js" => [],
-                "skin" => $this->manifest["skin"],
-                "main_skin_override" => false,
-                "error" => true
+                "css" => [], "js" => [], "error" => true,
+                "skin" => $this->manifest["skin"], "main_skin_override" => false
             ];
         }
         
         require_once $logicPath;
 
+        // 3. --- Obtener datos y renderizar el HTML ---
         $moduleData = get_module_data($moduleConfig, $this->activeEventContext, $isAdmin);
         
         $viewData = $moduleData;
         $viewData['is_admin'] = $isAdmin;
         $viewData['dataSourceFile'] = $moduleConfig['url']; 
 
-        // Esta es la corrección clave que hicimos. Se asegura de que el editor
-        // JavaScript reciba los datos crudos y limpios del JSON.
+        // Esta es la corrección estructural clave que hicimos.
+        // Asegura que el editor JavaScript reciba los datos crudos y limpios del JSON.
         $viewData['json_for_admin'] = $moduleData['raw_data_for_admin'] ?? [];
 
         $htmlContent = View::render("modules/" . $moduleType, $viewData);
 
-        // --- INICIO: Lógica para cargar assets (esencial y conservada) ---
+        // 4. --- Recopilar los archivos CSS y JS necesarios ---
         $activeEvent = $this->activeEventContext["active_event"];
         $globalSkin = $activeEvent["cambios"]["skin"] ?? $this->manifest["skin"];
         $moduleSkin = $moduleData["skin"] ?? $globalSkin;
@@ -82,19 +80,17 @@ class ModuleLoader {
 
         // Si es admin, cargar también los archivos de administración
         if ($isAdmin) {
-            // Cargar CSS de admin (ej. /assets/css/admin/admin-menues.css)
             $adminCssPath = "/assets/css/admin/admin-{$moduleType}.css";
             if (file_exists(PUBLIC_PATH . $adminCssPath)) {
                 $cssUrls[]  = PUBLIC_URL . $adminCssPath;
             }
-            // Cargar JS de admin (ej. /assets/js/admin/admin-menues.js)
             $adminJsPath = "/assets/js/admin/admin-{$moduleType}.js";
             if (file_exists(PUBLIC_PATH . $adminJsPath)) {
                 $jsUrls[]  = PUBLIC_URL . $adminJsPath;
             }
         }
-        // --- FIN: Lógica para cargar assets ---
 
+        // 5. --- Devolver el resultado completo ---
         return [
             "html" => $htmlContent,
             "css" => $cssUrls,
