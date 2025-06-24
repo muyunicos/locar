@@ -1,94 +1,166 @@
+/**
+ * Estilos para la interfaz de administración de menús.
+ */
 
+/* Resaltado para el ítem o categoría activa (seleccionada) */
 .item.is-active-admin-item,
-.c-container.is-active-admin-item {
+.c-container.is-active-admin-item > .category-header {
     background-color: #f0f9ff;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: 2px solid #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-radius: 8px; /* Redondear el contorno de la selección */
 }
 
-#admin-floating-controls {
-    position: absolute; 
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background-color: #fff;
-    padding: 5px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    z-index: 50; 
-    visibility: hidden;
-    opacity: 0;
-    transform: scale(0.95);
-    transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+/* Hace que los campos editables sean más obvios cuando su ítem está activo */
+.is-active-admin-item [contenteditable="true"] {
+    background-color: rgba(59, 130, 246, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.4);
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
 }
 
-#admin-floating-controls.visible {
-    visibility: visible;
-    opacity: 1;
-    transform: scale(1);
+/* Estructura base para un ítem o cabecera de categoría en modo admin */
+.is-admin-item, 
+.category-header {
+    position: relative; /* Contexto para posicionar los controles */
 }
 
-#admin-floating-controls .item-drag-handle { /* */
-    display: none; 
-}
-
-
-.item,
-.c-container {
-    position: relative;
-    padding-right: 40px;
-}
-
+/* Manejador para arrastrar y soltar (Drag & Drop) */
 .item-drag-handle {
     position: absolute;
     top: 50%;
-    right: 10px;
+    left: -15px; /* Lo posiciona ligeramente fuera a la izquierda */
     transform: translateY(-50%);
     cursor: grab;
     color: #a1a1aa;
-    font-size: 20px;
-    padding: 5px;
+    padding: 8px;
+    border-radius: 50%;
+    opacity: 0; /* Oculto por defecto */
+    transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease;
     z-index: 5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    transition: color 0.2s ease;
+}
+
+/* El manejador aparece cuando el cursor está sobre el ítem */
+.is-admin-item:hover .item-drag-handle {
+    opacity: 1;
 }
 
 .item-drag-handle:hover {
     color: #3b82f6;
+    background-color: #eef2ff;
 }
 
 .item-drag-handle:active {
     cursor: grabbing;
 }
 
+/* Panel de acciones (contenedor del botón de opciones y el popup) */
+.item-actions-panel {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    z-index: 10;
+}
 
+/* Botón para abrir el popup de opciones (...) */
+.options-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    color: #71717a;
+    transition: background-color 0.2s, color 0.2s;
+}
+.options-trigger:hover {
+    background-color: #f4f4f5;
+    color: #18181b;
+}
 
+/* Popup con las opciones */
+.options-popup {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    transition: all 0.15s ease-out;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 5px);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 11;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: max-content; /* El ancho se ajusta al contenido */
+    border: 1px solid #e4e4e7;
+}
 
-.item-actions-panel { position: relative; }
-.item-actions-panel .action-button { background: none; border: none; cursor: pointer; font-size: 18px; padding: 5px; }
-.item-actions-panel .options-popup { visibility: hidden; opacity: 0; transform: translateY(-50%) scale(0.95); transition: all 0.15s ease-out; position: absolute; left: 100%; top: 50%; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10; padding: 5px; display: flex; flex-direction: column; gap: 4px; margin-left: 12px; }
-.item-actions-panel.is-open .options-popup { visibility: visible; opacity: 1; transform: translateY(-50%) scale(1); }
-.options-popup button { background-color: #f4f4f5; border: 1px solid #e4e4e7; border-radius: 6px; cursor: pointer; font-size: 14px; padding: 6px 8px; display: flex; align-items: center; gap: 5px; transition: background-color 0.2s; white-space: nowrap; }
-.options-popup button:hover { background-color: #e4e4e7; }
-.options-popup button.danger:hover { background-color: #fee2e2; color: #ef4444; border-color: #fca5a5; }
+/* El popup se hace visible cuando el panel tiene la clase 'is-open' */
+.item-actions-panel.is-open .options-popup {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
 
-[contenteditable=true][data-placeholder]:empty:before { content: attr(data-placeholder); color: #a1a1aa; font-style: italic; pointer-events: none; }
-.item-imagen-wrapper.is-placeholder { background-color: #f4f4f5; display: flex; align-items: center; justify-content: center; border: 1px dashed #d4d4d8; }
+/* Botones dentro del popup */
+.options-popup button {
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    text-align: left;
+    color: #3f3f46;
+}
 
-.is-admin-hidden { 
-    opacity: 0.5; 
-    border: 1px dashed #ccc !important; 
+.options-popup button svg {
+    flex-shrink: 0;
+}
+
+.options-popup button:hover {
+    background-color: #f4f4f5;
+    color: #18181b;
+}
+
+.options-popup button.danger:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+/* Estilo para los placeholders en campos editables vacíos */
+[contenteditable=true][data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: #a1a1aa;
+    font-style: italic;
     pointer-events: none;
 }
 
-#app-container {
+/* Estilo para los ítems marcados como ocultos */
+.is-admin-hidden { 
+    opacity: 0.6; 
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        transparent, 
+        transparent 5px, 
+        rgba(228, 228, 231, 0.5) 5px, 
+        rgba(228, 228, 231, 0.5) 10px
+    );
+    border: 1px dashed #d4d4d8 !important;
 }
 
-/* Estilo para el elemento mientras lo estás arrastrando */
+/* Estilos para el proceso de arrastrar y soltar */
 .item.is-dragging,
 .c-container.is-dragging {
     opacity: 0.4;
@@ -96,7 +168,7 @@
     background-color: #f8fafc;
 }
 
-/* Estilo para el marcador de posición que muestra dónde caerá el elemento */
+/* Marcador de posición que indica dónde se soltará el ítem */
 .drop-placeholder {
     display: block;
     height: 16px;
@@ -106,5 +178,19 @@
     border-radius: 8px;
     margin: 8px 0;
     pointer-events: none;
-    transition: height 0.2s ease-out;
+}
+
+/* Animación para el spinner del botón de guardado */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.is-spinning {
+    animation: spin 1s linear infinite;
+}
+.spinner-path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linecap: round;
 }

@@ -68,6 +68,7 @@ function launchApp()
                     PUBLIC_URL . "/assets/js/admin/admin-core.js"
                 ],
                 "module_scripts" => [],
+                "module_data " => [],
                 "is_admin" => false,
                 "content" => $content,
                 "spinner" => CLIENT_URL . "/imagenes/spinner.gif",
@@ -78,6 +79,8 @@ function launchApp()
             ]);
             return;
         }
+
+
 
         $resetToken = $_GET['reset'] ?? null;
         if ($resetToken) {
@@ -107,6 +110,7 @@ function launchApp()
                     PUBLIC_URL . "/assets/js/admin/admin-core.js"
                 ],
                 "module_scripts" => [],
+                "module_data " => [],
                 "is_admin" => false,
                 "spinner" => CLIENT_URL . "/imagenes/spinner.gif",
                 "active_event_id" => null,
@@ -117,7 +121,7 @@ function launchApp()
             return;
         }
     }
-    
+
     $isAdmin = $authManager->isLoggedIn();
     log_dev_message("AppKernel: Admin isLoggedIn: " . ($isAdmin ? 'true' : 'false'));
 
@@ -150,7 +154,8 @@ function launchApp()
 
     $moduleLoader = new ModuleLoader($manifest, $activeEventContext);
     $activeModuleId = $activeEvent["cambios"]["modulo"] ?? $manifest["modulo"];
-    $moduleResult = $moduleLoader->loadById($activeModuleId, $isAdmin);
+    $moduleResult = $moduleLoader->loadById($activeModuleId, $isAdmin && IS_ADMIN_URL);
+
     
     if (isset($activeEvent["cambios"]["sufijo"])) {
         $pageTitle .= $activeEvent["cambios"]["sufijo"];

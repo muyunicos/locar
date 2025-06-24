@@ -4,13 +4,16 @@ import MenuApiService from './menues/MenuApiService.js';
 import DragDropManager from './menues/DragDropManager.js';
 
 (function() {
-    // Declaración de variables a nivel de ámbito para ser accesibles en todo el IIFE
-    let appConfig = {}; // Ahora será el objeto de configuración general
-    let activeItem = null;
-    let hasChanges = false;
+    // Declaración de variables para el módulo
+    let appConfig = {};
+    let activeItemElement = null; // El elemento del DOM que está seleccionado
+    let menuContainer, saveFab, itemListContainer;
     let isSaving = false;
-    let menuContainer, floatingControls, saveFab, itemListContainer;
 
+    /**
+     * Inicializa el editor de menús para un elemento de módulo específico.
+     * @param {HTMLElement} moduleElement - El contenedor principal del módulo de menú.
+     */
     function init(moduleElement) {
         menuContainer = moduleElement;
         if (!menuContainer) {
@@ -18,47 +21,31 @@ import DragDropManager from './menues/DragDropManager.js';
              return;
         }
 
-        floatingControls = menuContainer.querySelector('.admin-controls');
+        // Referencias a elementos clave del DOM
         saveFab = menuContainer.querySelector('.admin-fab');
         itemListContainer = menuContainer.querySelector('#item-list-container');
 
-        if (!floatingControls || !saveFab || !itemListContainer) {
+        if (!saveFab || !itemListContainer) {
             console.error("Faltan elementos esenciales del DOM para el editor de menús.");
             return;
         }
-        
-        // --- INICIO: CORRECCIÓN DE LA INICIALIZACIÓN DE appConfig ---
-        // Accede a la configuración global (window.appConfig)
+
+        // Carga la configuración global y específica del módulo
         const globalConfig = window.appConfig || {}; 
-        
-        // Asigna la configuración específica del módulo desde el globalConfig
-        // Esto asume que tu PHP ya está pasando dataSourceFile y initialJson dentro de window.appConfig
-        // como lo discutimos en "Consolidando data-source-file y data-initial-json en window.appConfig".
-        // Si no, deberás ajustar tu PHP para incluir estas propiedades en window.appConfig.
         appConfig = {
-            clientId: globalConfig.clientId,
-            clientUrl: globalConfig.clientUrl,
-            publicUrl: globalConfig.publicUrl,
-            devId: globalConfig.devId, // Corresponde a DEV_BRANCH en PHP
-            dataSource: globalConfig.dataSourceFile, // Asumiendo que PHP lo pasa como 'dataSourceFile'
-            initialData: globalConfig.initialJson || {}, // Asumiendo que PHP lo pasa como 'initialJson' y ya está parseado
+            ...globalConfig,
+            dataSource: menuContainer.dataset.sourceFile,
+            initialData: JSON.parse(menuContainer.dataset.initialJson || '{}'),
         };
 
-        // Si todavía usas data-attributes para dataSource y initialData (menos recomendado),
-        // podrías hacer un fallback o un merge, pero lo ideal es eliminarlos del HTML.
-        // Ejemplo de fallback si el JS del módulo se carga ANTES de que PHP inyecte el script global:
-        // appConfig.dataSource = appConfig.dataSource || menuContainer.dataset.sourceFile;
-        // appConfig.initialData = appConfig.initialData || JSON.parse(menuContainer.dataset.initialJson || '{}');
-        // --- FIN: CORRECCIÓN DE LA INICIALIZACIÓN DE appConfig ---
-
+        // Inicialización de los sub-módulos de JS
         MenuState.load(appConfig.initialData);
         MenuView.init(menuContainer); 
-        // PASAR appConfig a MenuApiService para que tenga acceso a clientId, publicUrl, etc.
         MenuApiService.init(appConfig); 
         DragDropManager.init({
             onDragEnd: () => {
                 setChangesMade(true);
-                renderMenu();
+                renderMenu(); // Re-renderizar para asegurar consistencia
             }
         });
 
@@ -66,186 +53,290 @@ import DragDropManager from './menues/DragDropManager.js';
         renderMenu();
     }
 
+    /**
+     * Configura todos los listeners de eventos necesarios para la edición.
+     */
     function setupEventListeners() {
-        menuContainer.addEventListener('input', handleContentEdit);
-        itemListContainer.addEventListener('click', handleSelection);
-        floatingControls.addEventListener('click', handleControlsClick);
+        // 'focusout' es más fiable que 'input' para contenido editable,
+        // ya que se dispara cuando el usuario termina de editar.
+        itemListContainer.addEventListener('input', handleContentEdit, true);
+        
+        // Un único listener en el contenedor para manejar todas las acciones de los ítems.
+        itemListContainer.addEventListener('click', handleItemClick);
+        
+        // Listener para deseleccionar ítems si se hace clic fuera del área de trabajo.
+        document.addEventListener('click', handleDocumentClick, true);
+
+        // Listener para el botón flotante de guardado.
         saveFab.addEventListener('click', handleSaveMenu);
-        document.addEventListener('click', handleDocumentClick);
     }
     
+    /**
+     * Renderiza o vuelve a dibujar el menú completo usando los datos de MenuState.
+     */
     function renderMenu() {
-        const activeId = activeItem ? activeItem.dataset.id : null;
+        // Guarda el ID del ítem activo para poder re-seleccionarlo después de renderizar.
+        const activeId = activeItemElement ? activeItemElement.dataset.id : null;
+        
         MenuView.render(MenuState.getMenu());
+        
+        // Si había un ítem activo, lo busca en el nuevo DOM y lo vuelve a activar.
         if (activeId) {
-            const newActiveElement = menuContainer.querySelector(`[data-id="${activeId}"]`);
+            const newActiveElement = itemListContainer.querySelector(`[data-id="${activeId}"]`);
             if (newActiveElement) {
-                activateItem(newActiveElement, false);
+                setActiveItem(newActiveElement);
             }
         }
     }
-
-   function setChangesMade(state) {
-    hasChanges = state;
-    saveFab.classList.toggle('is-hidden', !state);
-}
-    function handleSelection(e) {
-        if (e.target.isContentEditable || e.target.closest('.item-drag-handle')) return;
-        const targetItem = e.target.closest('.item, .c-container');
-        if (targetItem) activateItem(targetItem);
+    
+    /**
+     * Activa o desactiva el botón de guardar y actualiza el estado de cambios.
+     * @param {boolean} state - True si hay cambios sin guardar, false si no.
+     */
+    function setChangesMade(state) {
+        MenuState.setChanges(state);
+        saveFab.classList.toggle('is-hidden', !state);
     }
 
+    /**
+     * Maneja la edición de cualquier campo 'contenteditable'.
+     * @param {Event} e - El evento 'focusout'.
+     */
     function handleContentEdit(e) {
         const target = e.target;
+        if (!target.isContentEditable) return;
+
         setChangesMade(true);
+
         const menuProperty = target.dataset.editableMenuProperty;
-        if (menuProperty) {
-            MenuState.updateMenuProperty(menuProperty, target.textContent);
-            return;
-        }
         const itemProperty = target.dataset.editableProperty;
         const itemElement = target.closest('[data-id]');
+
+        // Si se está editando una propiedad general del menú (ej. el título principal)
+        if (menuProperty) {
+            MenuState.updateMenuProperty(menuProperty, target.textContent.trim());
+            return;
+        }
+        
+        // Si se está editando la propiedad de un ítem
         if (itemProperty && itemElement) {
-            MenuState.updateItemProperty(itemElement.dataset.id, itemProperty, target.textContent);
+            let value = target.textContent.trim();
+            
+            // Si la propiedad es 'precio', se convierte el texto formateado a un número.
+            // Ej: "$1.500,50" -> 1500.50
+            if (itemProperty === 'precio') {
+                value = parseFloat(String(value).replace(/[$.]/g, '').replace(',', '.')) || 0;
+            }
+            MenuState.updateItemProperty(itemElement.dataset.id, itemProperty, value);
         }
     }
 
-    function handleControlsClick(e) {
-        const button = e.target.closest('button');
-        if (!button || !activeItem) return;
-        const action = button.dataset.action;
-        const id = activeItem.dataset.id;
-        deactivateCurrentItem();
-        switch (action) {
-            case 'delete':
-                if (confirm('¿Estás seguro?')) MenuState.deleteItem(id);
-                break;
-            case 'duplicate':
-                MenuState.duplicateItem(id);
-                break;
-            case 'add-item':
-                MenuState.addItem(id, { titulo: 'Nuevo Ítem', precio: '0.00', type: 'item' });
-                break;
-            case 'add-category':
-                 MenuState.addItem(id, { titulo: 'Nueva Categoría', type: 'category', items: [] });
-                 break;
+    /**
+     * Maneja todos los clics que ocurren dentro de la lista de ítems.
+     * @param {Event} e - El evento 'click'.
+     */
+    function handleItemClick(e) {
+        const itemElement = e.target.closest('.is-admin-item');
+        const optionsTrigger = e.target.closest('.options-trigger');
+        const actionButton = e.target.closest('.options-popup button');
+
+        // Si se hizo clic en el botón de opciones (...)
+        if (optionsTrigger) {
+            e.preventDefault();
+            toggleOptionsMenu(optionsTrigger.closest('.item-actions-panel'));
+            return;
         }
-        setChangesMade(true);
-        renderMenu();
+
+        // Si se hizo clic en un botón de acción (ej. 'Eliminar')
+        if (actionButton) {
+            e.preventDefault();
+            handleAction(actionButton, itemElement.dataset.id);
+            return;
+        }
+
+        // Si se hizo clic en cualquier otra parte de un ítem, se selecciona.
+        if (itemElement) {
+            setActiveItem(itemElement);
+        }
+    }
+
+    /**
+     * Ejecuta una acción (duplicar, eliminar, etc.) sobre un ítem.
+     * @param {HTMLElement} button - El botón que fue presionado.
+     * @param {string} itemId - El ID del ítem a modificar.
+     */
+    function handleAction(button, itemId) {
+        const action = button.dataset.action;
+        if (!itemId) return;
+
+        let confirmAction = true;
+        if (action === 'delete') {
+            confirmAction = confirm('¿Estás seguro de que quieres eliminar este ítem? Esta acción no se puede deshacer.');
+        }
+
+        if (confirmAction) {
+            switch(action) {
+                case 'delete':
+                    MenuState.deleteItem(itemId);
+                    // Como el ítem ya no existe, lo deseleccionamos.
+                    activeItemElement = null;
+                    break;
+                case 'duplicate':
+                    MenuState.duplicateItem(itemId);
+                    break;
+                case 'toggle-visibility':
+                    MenuState.toggleVisibility(itemId);
+                    break;
+            }
+            setChangesMade(true);
+            renderMenu(); // Vuelve a dibujar el menú para reflejar el cambio.
+        }
+        
+        closeAllOptionMenus(); // Cierra el popup de opciones después de la acción.
+    }
+
+    /**
+     * Abre o cierra el menú de opciones para un panel de acciones.
+     * @param {HTMLElement} actionsPanel - El panel que contiene el menú.
+     */
+    function toggleOptionsMenu(actionsPanel) {
+        const wasOpen = actionsPanel.classList.contains('is-open');
+        closeAllOptionMenus(); // Cierra cualquier otro menú que esté abierto.
+        if (!wasOpen) {
+            actionsPanel.classList.add('is-open');
+        }
     }
     
+    /**
+     * Cierra todos los menús de opciones abiertos.
+     */
+    function closeAllOptionMenus() {
+        itemListContainer.querySelectorAll('.item-actions-panel.is-open').forEach(panel => {
+            panel.classList.remove('is-open');
+        });
+    }
+
+    /**
+     * Establece un ítem como el activo, actualizando su estilo visual.
+     * @param {HTMLElement} itemElement - El elemento a activar.
+     */
+    function setActiveItem(itemElement) {
+        if (itemElement === activeItemElement) return;
+
+        if (activeItemElement) {
+            activeItemElement.classList.remove('is-active-admin-item');
+        }
+
+        activeItemElement = itemElement;
+        activeItemElement.classList.add('is-active-admin-item');
+        
+        // Cierra los menús de opciones al seleccionar un nuevo ítem.
+        closeAllOptionMenus();
+    }
+
+    /**
+     * Deselecciona cualquier ítem que esté activo.
+     */
+    function deactivateCurrentItem() {
+        if (activeItemElement) {
+            activeItemElement.classList.remove('is-active-admin-item');
+            activeItemElement = null;
+        }
+        closeAllOptionMenus();
+    }
+    
+    /**
+     * Maneja clics en el documento para deseleccionar ítems o cerrar menús.
+     * @param {Event} e - El evento 'click'.
+     */
     function handleDocumentClick(e) {
-        if (!e.target.closest('#menu-container, .admin-floating-controls, .admin-save-fab')) {
+        const isClickInsideMenu = e.target.closest('#item-list-container, .admin-fab');
+        const isClickOnActions = e.target.closest('.item-actions-panel');
+
+        // Si se hace clic fuera del área de trabajo, deselecciona el ítem activo.
+        if (!isClickInsideMenu) {
             deactivateCurrentItem();
         }
+        
+        // Si se hace clic en cualquier lugar que no sea el panel de acciones, se cierra.
+        if (!isClickOnActions) {
+            closeAllOptionMenus();
+        }
     }
-
-    function activateItem(itemElement, shouldPositionControls = true) {
-        if (itemElement === activeItem) return;
-        deactivateCurrentItem();
-        activeItem = itemElement;
-        activeItem.classList.add('is-active');
-        if (shouldPositionControls) positionFloatingControls();
-        floatingControls.classList.add('visible');
-    }
-
-    function deactivateCurrentItem() {
-        if (activeItem) activeItem.classList.remove('is-active');
-        activeItem = null;
-        floatingControls.classList.remove('visible');
-    }
-
-    function positionFloatingControls() {
-        if (!activeItem || !floatingControls) return;
-        const itemRect = activeItem.getBoundingClientRect();
-        const containerRect = itemListContainer.getBoundingClientRect();
-        floatingControls.style.top = `${itemRect.top - containerRect.top}px`;
-        const type = activeItem.dataset.type;
-        const isCategory = type === 'category';
-        floatingControls.querySelector('[data-action="add-item"]').style.display = isCategory ? 'inline-flex' : 'none';
-        floatingControls.querySelector('[data-action="add-category"]').style.display = isCategory ? 'inline-flex' : 'none';
-    }
-
-async function handleSaveMenu() {
-    if (isSaving) return;
-    isSaving = true;
-    setFabSaving(true);
-
-    // Los parámetros ya están en appConfig, los pasamos en el payload
-    const payload = {
-        menuData: MenuState.getMenu(),
-        dataSource: appConfig.dataSource, // Ahora viene de appConfig
-        client_id: appConfig.clientId,    // Usar client_id
-        url: appConfig.clientUrl,         // Usar clientUrl
-        dev_branch: appConfig.devId       // Usar dev_branch
-    };
-
-    try {
-        // MenuApiService necesita la publicUrl del appConfig para construir el endpoint
-        const response = await MenuApiService.saveMenu(payload);
-        handleSaveSuccess(response);
-
-    } catch (error) {
-        handleSaveError(error.message || 'Error desconocido.');
-
-    } finally {
-        isSaving = false;
-        setFabSaving(false);
-    }
-}
     
-    function setFabSaving(isSaving) {
-        const icon = saveFab.querySelector('i');
-        if (!icon) return;
-        icon.className = isSaving ? 'fas fa-spinner fa-spin' : 'fas fa-save';
-        saveFab.disabled = isSaving;
+    /**
+     * Maneja el proceso de guardado del menú.
+     */
+    async function handleSaveMenu() {
+        if (isSaving) return;
+        isSaving = true;
+        setFabSaving(true);
+
+        const payload = {
+            menuData: MenuState.getMenu(),
+            dataSource: appConfig.dataSource,
+        };
+
+        try {
+            const response = await MenuApiService.saveMenu(payload);
+            handleSaveSuccess(response);
+        } catch (error) {
+            handleSaveError(error.message || 'Error desconocido.');
+        } finally {
+            isSaving = false;
+            setFabSaving(false);
+        }
+    }
+    
+    /**
+     * Actualiza la UI del botón de guardado para mostrar un estado de carga.
+     * @param {boolean} saving - True si está guardando, false si no.
+     */
+    function setFabSaving(saving) {
+        const button = saveFab.querySelector('button');
+        const icon = button.querySelector('svg');
+        if (!button || !icon) return;
+        
+        button.disabled = saving;
+        if (saving) {
+            // Icono de spinner (puedes reemplazarlo con uno de FontAwesome si lo usas)
+            icon.innerHTML = '<path d="M12 4V2A10 10 0 0 0 2 12h2a8 8 0 0 1 8-8Z" class="spinner-path" />';
+            icon.classList.add('is-spinning');
+        } else {
+            icon.innerHTML = '<path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>';
+            icon.classList.remove('is-spinning');
+        }
     }
 
+    /**
+     * Maneja la respuesta exitosa del guardado.
+     * @param {object} response - La respuesta del servidor.
+     */
     function handleSaveSuccess(response) {
         alert(response.message || 'Menú guardado con éxito');
         setChangesMade(false);
-        // Opcional: Mostrar server_logs aquí también si saveMenu los devuelve
-        if (response.server_logs && Array.isArray(response.server_logs)) {
-            console.groupCollapsed("PHP Server-Side Logs (Menu Save)");
-            response.server_logs.forEach(log => console.log(log));
-            console.groupEnd();
-        }
     }
 
+    /**
+     * Maneja los errores durante el guardado.
+     * @param {string} error - El mensaje de error.
+     */
     function handleSaveError(error) {
-        alert(error);
-        // Opcional: Mejorar el manejo de errores para mostrar en el DOM
+        alert('Error al guardar: ' + error);
     }
 
+    // Registra la función `init` para que pueda ser llamada cuando se cargue el módulo.
     if (!window.adminModuleInitializers) window.adminModuleInitializers = {};
     window.adminModuleInitializers.menues = init;
-
-    const initialMenuContainer = document.getElementById('menu-container');
+    
+    // Si el módulo ya está en la página en la carga inicial, lo inicializa.
+    const initialMenuContainer = document.querySelector('[data-module-id="menues"][data-initial-json]');
     if (initialMenuContainer) {
-        // Asegurarse de que el script se inicialice después de que el DOM esté completamente cargado
-        // y window.appConfig esté disponible.
-        // Ya tienes document.addEventListener('DOMContentLoaded', ...); en el nivel superior,
-        // así que init() puede ser llamado directamente si el contenedor existe.
-        // Pero el appConfig aún puede no estar listo si el script se ejecuta demasiado rápido.
-        // Una forma más segura es asegurar que window.appConfig exista antes de llamar a init.
+        // Asegurarse de que el DOM esté listo
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            // Un pequeño retraso para asegurar que window.appConfig se ha poblado, si el script global
-            // se carga justo antes de este módulo.
-            setTimeout(() => {
-                if (window.appConfig) { // Doble check
-                    init(initialMenuContainer);
-                } else {
-                    console.error("admin-menues.js: window.appConfig no disponible en la inicialización.");
-                }
-            }, 0); // Retraso mínimo para que el stack de ejecución se vacíe
+            init(initialMenuContainer);
         } else {
-            document.addEventListener('DOMContentLoaded', () => {
-                if (window.appConfig) {
-                    init(initialMenuContainer);
-                } else {
-                    console.error("admin-menues.js: window.appConfig no disponible después de DOMContentLoaded.");
-                }
-            });
+            document.addEventListener('DOMContentLoaded', () => init(initialMenuContainer));
         }
     }
 })();

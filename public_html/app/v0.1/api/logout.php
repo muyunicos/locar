@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/api_bootstrap.php';
-
 use Admin\AuthManager;
 
 $authManager = new AuthManager();

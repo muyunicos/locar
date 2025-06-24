@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     handleAuthFormSubmit(loginForm, '/api/login.php', () => {
-        window.location.href = clientUrl;
+        setTimeout(() => { window.location.href = clientUrl + '/admin'; }, 2000);
     });
 
     handleAuthFormSubmit(requestResetForm, '/api/request_password_reset.php', () => {

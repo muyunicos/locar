@@ -1,6 +1,7 @@
 <?php
 namespace Core;
 use Core\View;
+
 class ModuleLoader {
     private array $manifest;
     private array $activeEventContext;
@@ -24,8 +25,8 @@ class ModuleLoader {
         if (!$moduleConfig) {
             return [
                 "html" => "<div class='app-error'>Error: El módulo con ID '{$moduleId}' no fue encontrado.</div>",
-                "css_url" => null,
-                "admin_js_url" => null,
+                "css" => [],
+                "js" => [],
                 "skin" => $this->manifest["skin"],
                 "main_skin_override" => false,
                 "error" => true
@@ -38,8 +39,8 @@ class ModuleLoader {
         if (!file_exists($logicPath)) {
             return [
                 "html" => "<div class='app-error'>Error: No se encontró la lógica para el módulo de tipo '{$moduleType}'.</div>",
-                "css_url" => null,
-                "admin_js_url" => null,
+                "css" => [],
+                "js" => [],
                 "skin" => $this->manifest["skin"],
                 "main_skin_override" => false,
                 "error" => true
@@ -54,32 +55,45 @@ class ModuleLoader {
         $viewData['is_admin'] = $isAdmin;
         $viewData['dataSourceFile'] = $moduleConfig['url']; 
 
+        // Esta es la corrección clave que hicimos. Se asegura de que el editor
+        // JavaScript reciba los datos crudos y limpios del JSON.
+        $viewData['json_for_admin'] = $moduleData['raw_data_for_admin'] ?? [];
+
         $htmlContent = View::render("modules/" . $moduleType, $viewData);
 
-        $moduleData['is_admin'] = $isAdmin;
+        // --- INICIO: Lógica para cargar assets (esencial y conservada) ---
         $activeEvent = $this->activeEventContext["active_event"];
         $globalSkin = $activeEvent["cambios"]["skin"] ?? $this->manifest["skin"];
         $moduleSkin = $moduleData["skin"] ?? $globalSkin;
         $cssUrls = [];
+        $jsUrls = [];
+
+        // Cargar CSS del módulo (ej. /assets/css/revelbar/menues.css)
         $moduleCssPath = "/assets/css/{$moduleSkin}/{$moduleType}.css";
         if (file_exists(PUBLIC_PATH . $moduleCssPath)) {
             $cssUrls[] = PUBLIC_URL . $moduleCssPath;
         }
-        $jsUrls = [];
-        $moduleJsPath = "/assets/js/{$moduleType}.js";
+
+        // Cargar JS del módulo (ej. /assets/js/modules/menues.js)
+        $moduleJsPath = "/assets/js/modules/{$moduleType}.js";
         if (file_exists(PUBLIC_PATH . $moduleJsPath)) {
             $jsUrls[] = PUBLIC_URL . $moduleJsPath;
         }
+
+        // Si es admin, cargar también los archivos de administración
         if ($isAdmin) {
+            // Cargar CSS de admin (ej. /assets/css/admin/admin-menues.css)
             $adminCssPath = "/assets/css/admin/admin-{$moduleType}.css";
             if (file_exists(PUBLIC_PATH . $adminCssPath)) {
                 $cssUrls[]  = PUBLIC_URL . $adminCssPath;
             }
+            // Cargar JS de admin (ej. /assets/js/admin/admin-menues.js)
             $adminJsPath = "/assets/js/admin/admin-{$moduleType}.js";
             if (file_exists(PUBLIC_PATH . $adminJsPath)) {
                 $jsUrls[]  = PUBLIC_URL . $adminJsPath;
             }
         }
+        // --- FIN: Lógica para cargar assets ---
 
         return [
             "html" => $htmlContent,
@@ -89,7 +103,7 @@ class ModuleLoader {
             "sufijo" => $moduleData["sufijo"] ?? null,
             "main_skin_override" => $moduleData["main_skin"] ?? false,
             "type" => $moduleType,
-            "error" => false
+            "error" => $moduleData['error'] ?? false
         ];
     }
 }

@@ -1,6 +1,5 @@
 <?php
 namespace Admin;
-
 use Core\DatabaseManager;
 use PDO;
 use PDOException;
