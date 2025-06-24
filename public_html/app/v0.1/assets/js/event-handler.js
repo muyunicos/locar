@@ -8,11 +8,15 @@ document.addEventListener('DOMContentLoaded', () => {
             this.publicUrl = config.publicUrl;
             this.clientUrl = config.clientUrl;
             this.devId = config.devId;
+            
             this.body = document.body;
-            this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
+            // **AJUSTE CLAVE:** Usamos el selector '.main-stylesheet' que coincide con tu plantilla main.html
+            this.skinStylesheets = document.querySelectorAll('.main-stylesheet');
             this.favicon = document.getElementById('favicon');
+            
             this.activeEvents = {};
             this.timers = []; 
+            
             this.currentSkin = this.initialContext.default_skin || 'default';
             this.serverLoadedEventId = config.activeEventId || null;
             this.isInitialUpdate = true;
@@ -45,6 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         console.groupEnd();
                     }
                     this.scheduleEvents(agendaData.data);
+                    
+                    // Sincronizar la vista inmediatamente después de programar para procesar el estado inicial.
+                    this.updateView();
+
                 } else {
                     console.error('Error en la respuesta de la API de agenda:', agendaData.message);
                 }
@@ -67,17 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const startTime = new Date(scheduledEvent.start_iso);
                 const endTime = new Date(scheduledEvent.end_iso);
 
-                if (startTime > now) {
-                    const delay = startTime.getTime() - now.getTime();
-                    console.log(`Evento '${event.nombre}' programado para INICIAR en ${Math.round(delay/1000)}s.`);
-                    const timerId = setTimeout(() => {
-                        console.log(`%cINICIANDO EVENTO: ${event.nombre}`, 'color: green; font-weight: bold;');
-                        this.manageEventState(event, 'add');
-                    }, delay);
-                    this.timers.push(timerId);
-                }
-
-                if (endTime > now) {
+                // Lógica para manejar eventos ya activos vs. futuros.
+                if (startTime <= now && endTime > now) {
+                    // Evento ya activo: añadir al estado y solo programar su final.
+                    console.log(`Evento '${event.nombre}' ya está ACTIVO. Añadiendo al estado.`);
+                    this.activeEvents[event.id] = event;
+                    
                     const delay = endTime.getTime() - now.getTime();
                     console.log(`Evento '${event.nombre}' programado para FINALIZAR en ${Math.round(delay/1000)}s.`);
                     const timerId = setTimeout(() => {
@@ -85,6 +88,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         this.manageEventState(event, 'remove');
                     }, delay);
                     this.timers.push(timerId);
+
+                } else if (startTime > now) {
+                    // Evento futuro: programar inicio y final.
+                    const startDelay = startTime.getTime() - now.getTime();
+                    console.log(`Evento '${event.nombre}' programado para INICIAR en ${Math.round(startDelay/1000)}s.`);
+                    const startTimerId = setTimeout(() => {
+                        console.log(`%cINICIANDO EVENTO: ${event.nombre}`, 'color: green; font-weight: bold;');
+                        this.manageEventState(event, 'add');
+                    }, startDelay);
+                    this.timers.push(startTimerId);
+
+                    const endDelay = endTime.getTime() - now.getTime();
+                    console.log(`Evento '${event.nombre}' programado para FINALIZAR en ${Math.round(endDelay/1000)}s.`);
+                    const endTimerId = setTimeout(() => {
+                        console.log(`%cFINALIZANDO EVENTO: ${event.nombre}`, 'color: red; font-weight: bold;');
+                        this.manageEventState(event, 'remove');
+                    }, endDelay);
+                    this.timers.push(endTimerId);
                 }
             });
         }
@@ -107,8 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 winningEvent = events[0];
             }
 
+            // Sincronizar el estado del skin en la carga inicial.
             if (this.isInitialUpdate && winningEvent && winningEvent.id == this.serverLoadedEventId) {
-                console.log(`El estado del evento '${winningEvent.nombre}' ya fue cargado por el servidor. Omitiendo actualización inicial.`);
+                console.log(`El estado del evento '${winningEvent.nombre}' ya fue cargado por el servidor. Omitiendo actualización visual.`);
+                // Sincronizamos el estado del skin actual. ¡Esto es crucial!
+                this.currentSkin = winningEvent.cambios?.skin || this.currentSkin;
                 this.isInitialUpdate = false;
                 return;
             }
@@ -129,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (this.favicon && faviconPath) {
                 let finalFaviconUrl = '';
                 if (faviconPath.startsWith('http')) {
-                    // URL absoluta
                     finalFaviconUrl = faviconPath;
                 } else if (faviconPath.startsWith('/')) {
                     finalFaviconUrl = `${this.publicUrl}${faviconPath}`;
@@ -145,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.skinStylesheets.forEach(sheet => {
                     const currentHref = sheet.getAttribute('href');
                     if (currentHref) {
+                        // Esta lógica reemplaza la parte del path que contiene el nombre del skin
                         const newHref = currentHref.replace(`/${this.currentSkin}/`, `/${newSkin}/`);
                         if (currentHref !== newHref) {
                             sheet.setAttribute('href', newHref);

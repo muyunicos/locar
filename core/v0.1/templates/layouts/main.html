@@ -20,6 +20,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Bona+Nova+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="loading-overlay" class="loading-overlay active">
+        <img src="<?= htmlspecialchars($spinner) ?>" alt="Cargando...">
+    </div>
     <?php if ($show_login_modal): ?>
         <?php include(PRIVATE_PATH . '/templates/admin/login-modal.html'); ?>
     <?php endif; ?>

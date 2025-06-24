@@ -162,6 +162,7 @@ function launchApp()
         "main_scripts" => $mainScripts,
         "module_scripts" => $moduleResult['js'],
         "content" => $content,
+        "spinner" => CLIENT_URL . "/imagenes/spinner.gif",
         //"client_id" => CLIENT_ID,
         //"dev_id" => DEV_BRANCH,
         //"public_url" => PUBLIC_URL,
