@@ -20,7 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Bona+Nova+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="loading-overlay" class="loading-overlay active">
+    <div id="loading-overlay" class="loading-overlay">
         <img src="<?= htmlspecialchars($spinner) ?>" alt="Cargando...">
     </div>
     <?php if ($show_login_modal): ?>
@@ -41,9 +41,9 @@
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>
-            <?php if (IS_ADMIN_URL || !$show_login_modal): ?>
+            <?php if ($is_admin): ?>
                 <li>
-                    <a href="<?= htmlspecialchars($public_url . '/api/logout.php?client=' . $client_id . '&dev=' . $dev_id . '&redirect_url=' . urlencode($client_url)) ?>" class="nav-link is-external">Cerrar Sesión</a>
+                    <a href="<?= htmlspecialchars(PUBLIC_URL . '/api/logout.php?client_id=' . CLIENT_ID . '&dev_branch=' . DEV_BRANCH . '&url=' . urlencode(CLIENT_URL)) ?>" class="nav-link is-external">Cerrar Sesión</a>
                 </li>
             <?php endif; ?>
         </ul>

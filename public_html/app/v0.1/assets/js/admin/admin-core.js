@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const dataset = document.body.dataset;
-    const publicUrl = dataset.publicUrl;
-    const clientUrl = dataset.clientUrl;
-    const devId = dataset.devId;
-    const clientId = dataset.clientId;
+    // Lee la configuración de window.appConfig.
+    const config = window.appConfig || {}; 
+    const publicUrl = config.publicUrl;
+    const clientUrl = config.clientUrl;
+    const devId = config.devId; 
+    const clientId = config.clientId;
+    const showLoginModalFromConfig = config.showLoginModal;
 
     const handleAuthFormSubmit = (formElement, apiEndpoint, onSuccess) => {
         if (!formElement) return;
@@ -18,14 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
             let finalApiEndpoint = `${publicUrl}${apiEndpoint}`;
             const params = new URLSearchParams();
 
+            // Usa nombres de parámetros consistentes con api_bootstrap.php.
             if (clientUrl) {
-                params.append('url', clientUrl);
+                params.append('url', clientUrl); 
             }
             if (clientId) {
-                params.append('client', clientId);
+                params.append('client_id', clientId); 
             }
             if (devId) {
-                params.append('dev', devId);
+                params.append('dev_branch', devId);
             }
 
             const queryString = params.toString();
@@ -50,8 +53,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 credentials: 'include',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                // Manejo de errores mejorado para ver el cuerpo de la respuesta.
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(`API Error ${response.status}: ${errorData.message || JSON.stringify(errorData)}`);
+                    }).catch(() => {
+                        throw new Error(`API Error ${response.status}: ${response.statusText}`);
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
+                // Muestra logs del servidor si existen.
+                if (data.server_logs && Array.isArray(data.server_logs)) {
+                    console.groupCollapsed("PHP Server-Side Logs (Admin API)");
+                    data.server_logs.forEach(log => console.log(log));
+                    console.groupEnd();
+                }
+
                 if (messageDiv) {
                     messageDiv.textContent = data.message;
                     if (data.success) {
@@ -69,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => {
                 console.error('Error en la petición:', error);
                 if (messageDiv) {
-                    messageDiv.textContent = 'Ocurrió un error de conexión.';
+                    messageDiv.textContent = error.message || 'Ocurrió un error de conexión.';
                     messageDiv.classList.add('error');
                 }
             })
@@ -102,10 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loginModalBackdrop = document.getElementById('login-modal-backdrop');
     if (loginModalBackdrop) {
-        if (dataset.showLoginModal === 'true') {
+        // Activa el modal de login basado en la configuración.
+        if (showLoginModalFromConfig === true) {
             loginModalBackdrop.style.display = 'flex';
         }
         
+        // El typo `loginModalBackrop` ya fue corregido a `loginModalBackdrop`.
         loginModalBackdrop.addEventListener('click', (e) => {
             if (e.target.id === 'login-modal-backdrop' || e.target.classList.contains('close-button')) {
                 loginModalBackdrop.style.display = 'none';

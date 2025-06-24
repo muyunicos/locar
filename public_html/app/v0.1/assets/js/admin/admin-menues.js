@@ -4,7 +4,8 @@ import MenuApiService from './menues/MenuApiService.js';
 import DragDropManager from './menues/DragDropManager.js';
 
 (function() {
-    let appConfig = {};
+    // Declaración de variables a nivel de ámbito para ser accesibles en todo el IIFE
+    let appConfig = {}; // Ahora será el objeto de configuración general
     let activeItem = null;
     let hasChanges = false;
     let isSaving = false;
@@ -26,15 +27,34 @@ import DragDropManager from './menues/DragDropManager.js';
             return;
         }
         
+        // --- INICIO: CORRECCIÓN DE LA INICIALIZACIÓN DE appConfig ---
+        // Accede a la configuración global (window.appConfig)
+        const globalConfig = window.appConfig || {}; 
+        
+        // Asigna la configuración específica del módulo desde el globalConfig
+        // Esto asume que tu PHP ya está pasando dataSourceFile y initialJson dentro de window.appConfig
+        // como lo discutimos en "Consolidando data-source-file y data-initial-json en window.appConfig".
+        // Si no, deberás ajustar tu PHP para incluir estas propiedades en window.appConfig.
         appConfig = {
-            config: window.locarConfig || {}, 
-            dataSource: menuContainer.dataset.sourceFile,
-            initialData: JSON.parse(menuContainer.dataset.initialJson || '{}'),
+            clientId: globalConfig.clientId,
+            clientUrl: globalConfig.clientUrl,
+            publicUrl: globalConfig.publicUrl,
+            devId: globalConfig.devId, // Corresponde a DEV_BRANCH en PHP
+            dataSource: globalConfig.dataSourceFile, // Asumiendo que PHP lo pasa como 'dataSourceFile'
+            initialData: globalConfig.initialJson || {}, // Asumiendo que PHP lo pasa como 'initialJson' y ya está parseado
         };
+
+        // Si todavía usas data-attributes para dataSource y initialData (menos recomendado),
+        // podrías hacer un fallback o un merge, pero lo ideal es eliminarlos del HTML.
+        // Ejemplo de fallback si el JS del módulo se carga ANTES de que PHP inyecte el script global:
+        // appConfig.dataSource = appConfig.dataSource || menuContainer.dataset.sourceFile;
+        // appConfig.initialData = appConfig.initialData || JSON.parse(menuContainer.dataset.initialJson || '{}');
+        // --- FIN: CORRECCIÓN DE LA INICIALIZACIÓN DE appConfig ---
 
         MenuState.load(appConfig.initialData);
         MenuView.init(menuContainer); 
-        MenuApiService.init({});
+        // PASAR appConfig a MenuApiService para que tenga acceso a clientId, publicUrl, etc.
+        MenuApiService.init(appConfig); 
         DragDropManager.init({
             onDragEnd: () => {
                 setChangesMade(true);
@@ -151,16 +171,17 @@ async function handleSaveMenu() {
     isSaving = true;
     setFabSaving(true);
 
-    // --- CORRECCIÓN: VOLVEMOS A AÑADIR LOS PARÁMETROS REQUERIDOS ---
+    // Los parámetros ya están en appConfig, los pasamos en el payload
     const payload = {
         menuData: MenuState.getMenu(),
-        dataSource: appConfig.dataSource,
-        client: appConfig.config.clientId,
-        url: appConfig.config.clientUrl,
-        dev: appConfig.config.devId
+        dataSource: appConfig.dataSource, // Ahora viene de appConfig
+        client_id: appConfig.clientId,    // Usar client_id
+        url: appConfig.clientUrl,         // Usar clientUrl
+        dev_branch: appConfig.devId       // Usar dev_branch
     };
 
     try {
+        // MenuApiService necesita la publicUrl del appConfig para construir el endpoint
         const response = await MenuApiService.saveMenu(payload);
         handleSaveSuccess(response);
 
@@ -183,10 +204,17 @@ async function handleSaveMenu() {
     function handleSaveSuccess(response) {
         alert(response.message || 'Menú guardado con éxito');
         setChangesMade(false);
+        // Opcional: Mostrar server_logs aquí también si saveMenu los devuelve
+        if (response.server_logs && Array.isArray(response.server_logs)) {
+            console.groupCollapsed("PHP Server-Side Logs (Menu Save)");
+            response.server_logs.forEach(log => console.log(log));
+            console.groupEnd();
+        }
     }
 
     function handleSaveError(error) {
         alert(error);
+        // Opcional: Mejorar el manejo de errores para mostrar en el DOM
     }
 
     if (!window.adminModuleInitializers) window.adminModuleInitializers = {};
@@ -194,10 +222,30 @@ async function handleSaveMenu() {
 
     const initialMenuContainer = document.getElementById('menu-container');
     if (initialMenuContainer) {
+        // Asegurarse de que el script se inicialice después de que el DOM esté completamente cargado
+        // y window.appConfig esté disponible.
+        // Ya tienes document.addEventListener('DOMContentLoaded', ...); en el nivel superior,
+        // así que init() puede ser llamado directamente si el contenedor existe.
+        // Pero el appConfig aún puede no estar listo si el script se ejecuta demasiado rápido.
+        // Una forma más segura es asegurar que window.appConfig exista antes de llamar a init.
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            init(initialMenuContainer);
+            // Un pequeño retraso para asegurar que window.appConfig se ha poblado, si el script global
+            // se carga justo antes de este módulo.
+            setTimeout(() => {
+                if (window.appConfig) { // Doble check
+                    init(initialMenuContainer);
+                } else {
+                    console.error("admin-menues.js: window.appConfig no disponible en la inicialización.");
+                }
+            }, 0); // Retraso mínimo para que el stack de ejecución se vacíe
         } else {
-            document.addEventListener('DOMContentLoaded', () => init(initialMenuContainer));
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.appConfig) {
+                    init(initialMenuContainer);
+                } else {
+                    console.error("admin-menues.js: window.appConfig no disponible después de DOMContentLoaded.");
+                }
+            });
         }
     }
 })();

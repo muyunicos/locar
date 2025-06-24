@@ -2,7 +2,7 @@
     <div class="auth-form-card">
         <h2>Enlace Inválido</h2>
         <p>
-            {{ message }}
+            <?php echo htmlspecialchars($message ?? 'Ha ocurrido un error inesperado con el enlace.'); ?>
         </p>
         <a href="admin" class="auth-link">Volver al inicio de sesión</a>
     </div>

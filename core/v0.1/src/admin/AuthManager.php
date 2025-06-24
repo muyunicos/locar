@@ -1,6 +1,11 @@
 <?php
 namespace Admin;
+
 use Core\DatabaseManager;
+use PDO;
+use PDOException;
+use Exception;
+
 class AuthManager {
     private $db;
     private const MAX_LOGIN_ATTEMPTS = 5;
@@ -45,6 +50,9 @@ class AuthManager {
         } catch (PDOException $e) {
             error_log("Error en el inicio de sesión: " . $e->getMessage());
             return false;
+        } catch (Exception $e) {
+            error_log("Error inesperado en login: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -87,6 +95,9 @@ class AuthManager {
         } catch (PDOException $e) {
             error_log("Error en hasAdmins: " . $e->getMessage());
             return false; 
+        } catch (Exception $e) {
+            error_log("Error inesperado en hasAdmins: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -98,6 +109,9 @@ class AuthManager {
             return $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("Error en validateResetToken: " . $e->getMessage());
+            return false;
+        } catch (Exception $e) {
+            error_log("Error inesperado en validateResetToken: " . $e->getMessage());
             return false;
         }
     }
@@ -126,6 +140,9 @@ class AuthManager {
         } catch (PDOException $e) {
             error_log("Error en isBruteForceBlocked: " . $e->getMessage());
             return false;
+        } catch (Exception $e) {
+            error_log("Error inesperado en isBruteForceBlocked: " . $e->getMessage());
+            return false;
         }
     }
 
@@ -142,12 +159,15 @@ class AuthManager {
             ]);
         } catch (PDOException $e) {
             error_log("Error en recordFailedLoginAttempt: " . $e->getMessage());
+        } catch (Exception $e) {
+            error_log("Error inesperado en recordFailedLoginAttempt: " . $e->getMessage());
         }
     }
 
     private function clearLoginAttempts($email)
     {
         try {
+
             $stmt = $this->db->prepare(
                 "DELETE FROM login_attempts 
                  WHERE email_attempted = :email OR ip_address = :ip_address"
@@ -158,6 +178,8 @@ class AuthManager {
             ]);
         } catch (PDOException $e) {
             error_log("Error en clearLoginAttempts: " . $e->getMessage());
+        } catch (Exception $e) {
+            error_log("Error inesperado en clearLoginAttempts: " . $e->getMessage());
         }
     }
 }
