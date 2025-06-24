@@ -1,7 +1,7 @@
 <?php
-
-class ModuleLoader
-{
+namespace Core;
+use Core\View;
+class ModuleLoader {
     private array $manifest;
     private array $activeEventContext;
 
@@ -51,40 +51,44 @@ class ModuleLoader
         $moduleData = get_module_data($moduleConfig, $this->activeEventContext, $isAdmin);
         
         $viewData = $moduleData;
-        $viewData['module_data'] = $moduleData; 
         $viewData['is_admin'] = $isAdmin;
         $viewData['dataSourceFile'] = $moduleConfig['url']; 
 
+        $htmlContent = View::render("modules/" . $moduleType, $viewData);
+
         $moduleData['is_admin'] = $isAdmin;
-        
         $activeEvent = $this->activeEventContext["active_event"];
         $globalSkin = $activeEvent["cambios"]["skin"] ?? $this->manifest["skin"];
         $moduleSkin = $moduleData["skin"] ?? $globalSkin;
-        
-        $cssUrl = null;
+        $cssUrls = [];
         $moduleCssPath = "/assets/css/{$moduleSkin}/{$moduleType}.css";
         if (file_exists(PUBLIC_PATH . $moduleCssPath)) {
-            $cssUrl = PUBLIC_URL . $moduleCssPath;
+            $cssUrls[] = PUBLIC_URL . $moduleCssPath;
         }
-        $adminJsUrl = null;
-
+        $jsUrls = [];
+        $moduleJsPath = "/assets/js/{$moduleType}.js";
+        if (file_exists(PUBLIC_PATH . $moduleJsPath)) {
+            $jsUrls[] = PUBLIC_URL . $moduleJsPath;
+        }
         if ($isAdmin) {
+            $adminCssPath = "/assets/css/admin/admin-{$moduleType}.css";
+            if (file_exists(PUBLIC_PATH . $adminCssPath)) {
+                $cssUrls[]  = PUBLIC_URL . $adminCssPath;
+            }
             $adminJsPath = "/assets/js/admin/admin-{$moduleType}.js";
             if (file_exists(PUBLIC_PATH . $adminJsPath)) {
-                $adminJsUrl = PUBLIC_URL . $adminJsPath;
+                $jsUrls[]  = PUBLIC_URL . $adminJsPath;
             }
         }
 
-        $htmlContent = View::render("modules/" . $moduleType, $viewData);
-
         return [
             "html" => $htmlContent,
-            "css_url" => $cssUrl,
-            "admin_js_url" => $adminJsUrl,
+            "css" => $cssUrls,
+            "js" => $jsUrls,
             "skin" => $moduleSkin,
             "sufijo" => $moduleData["sufijo"] ?? null,
             "main_skin_override" => $moduleData["main_skin"] ?? false,
-            "module_type" => $moduleType,
+            "type" => $moduleType,
             "error" => false
         ];
     }

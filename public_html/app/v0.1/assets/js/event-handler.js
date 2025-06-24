@@ -2,101 +2,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
     class EventScheduler {
         constructor() {
+            const config = window.appConfig || {};
+            this.clientId = config.clientId;
+            this.initialContext = config.initialContext || {};
+            this.publicUrl = config.publicUrl;
+            this.clientUrl = config.clientUrl;
+            this.devId = config.devId;
             this.body = document.body;
-            this.clientId = this.body.dataset.clientId;
-            this.initialContext = JSON.parse(this.body.dataset.initialContext || '{}');
-            this.publicUrl = this.body.dataset.publicUrl;
-            this.url = this.body.dataset.clientUrl;
-            this.devId = this.body.dataset.devId;
             this.skinStylesheets = document.querySelectorAll('.skin-stylesheet');
             this.favicon = document.getElementById('favicon');
             this.activeEvents = {};
-            this.timers = [];
+            this.timers = []; 
             this.currentSkin = this.initialContext.default_skin || 'default';
-            this.serverLoadedEventId = this.body.dataset.activeEventId || null;
+            this.serverLoadedEventId = config.activeEventId || null;
             this.isInitialUpdate = true;
         }
 
         async init() {
-            if (!this.clientId) {
-                console.error('Scheduler Error: Client ID no encontrado.');
-                return;
-            }
-            
-            if (!this.publicUrl) {
-                console.error('Scheduler Error: Base URL no encontrada en el body.');
+            if (!this.clientId || !this.publicUrl) {
+                console.error('Scheduler Error: Client ID o Public URL no encontrados en appConfig.');
                 return;
             }
 
             try {
-                let apiUrl = `${this.publicUrl}/api/agenda.php?client=${this.clientId}&url=${this.url}`;
+                let apiUrl = `${this.publicUrl}/api/agenda.php?client_id=${this.clientId}&url=${encodeURIComponent(this.clientUrl)}`;
                 if (this.devId) {
-                    apiUrl += `&dev=${this.devId}`;
+                    apiUrl += `&dev_branch=${this.devId}`;
                 }
+
                 const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                if (!response.ok) {
+                    const errorBody = await response.json().catch(() => ({}));
+                    throw new Error(`API Error: ${response.statusText}. Details: ${errorBody.message || JSON.stringify(errorBody)}`);
+                }
                 
                 const agendaData = await response.json();
-                this.scheduleEvents(agendaData);
+
+                if (agendaData.success && agendaData.data) {
+                    if (agendaData.server_logs && Array.isArray(agendaData.server_logs)) {
+                        console.groupCollapsed("PHP Server-Side Logs (API Agenda)");
+                        agendaData.server_logs.forEach(log => console.log(log));
+                        console.groupEnd();
+                    }
+                    this.scheduleEvents(agendaData.data);
+                } else {
+                    console.error('Error en la respuesta de la API de agenda:', agendaData.message);
+                }
 
             } catch (error) {
                 console.error('No se pudo obtener la agenda de eventos:', error);
             }
         }
 
+        scheduleEvents(agenda) {
+            this.destroy();
 
-        scheduleEvents(agendaData) {
-            const { server_time_iso, events_agenda } = agendaData;
-            const serverNow = new Date(server_time_iso).getTime();
-            
-            console.log(`Agenda recibida. Hora del servidor: ${server_time_iso}`);
-            console.log(`Se encontraron ${events_agenda.length} eventos futuros.`);
+            const now = new Date(agenda.server_time_iso);
+            const events = agenda.events_agenda || [];
 
-            this.determineInitialState(serverNow, events_agenda);
+            console.log(`Servidor reporta la hora: ${now.toLocaleTimeString()}. Se programarán ${events.length} cambios de estado.`);
 
-            events_agenda.forEach(event => {
-                const startTime = new Date(event.start_iso).getTime();
-                const endTime = new Date(event.end_iso).getTime();
+            events.forEach(scheduledEvent => {
+                const event = scheduledEvent.event_details;
+                const startTime = new Date(scheduledEvent.start_iso);
+                const endTime = new Date(scheduledEvent.end_iso);
 
-                const delayUntilStart = startTime - serverNow;
-                const delayUntilEnd = endTime - serverNow;
-                
-                if (delayUntilStart > 0) {
-                    const timer = setTimeout(() => {
-                        console.log(`%cINICIO EVENTO: ${event.event_details.nombre}`, 'color: green; font-weight: bold;');
-                        this.updateCurrentState(event.event_details, 'start');
-                    }, delayUntilStart);
-                    this.timers.push(timer);
+                if (startTime > now) {
+                    const delay = startTime.getTime() - now.getTime();
+                    console.log(`Evento '${event.nombre}' programado para INICIAR en ${Math.round(delay/1000)}s.`);
+                    const timerId = setTimeout(() => {
+                        console.log(`%cINICIANDO EVENTO: ${event.nombre}`, 'color: green; font-weight: bold;');
+                        this.manageEventState(event, 'add');
+                    }, delay);
+                    this.timers.push(timerId);
                 }
 
-                if (delayUntilEnd > 0) {
-                    const timer = setTimeout(() => {
-                        console.log(`%cFIN EVENTO: ${event.event_details.nombre}`, 'color: red; font-weight: bold;');
-                        this.updateCurrentState(event.event_details, 'end');
-                    }, delayUntilEnd);
-                    this.timers.push(timer);
+                if (endTime > now) {
+                    const delay = endTime.getTime() - now.getTime();
+                    console.log(`Evento '${event.nombre}' programado para FINALIZAR en ${Math.round(delay/1000)}s.`);
+                    const timerId = setTimeout(() => {
+                        console.log(`%cFINALIZANDO EVENTO: ${event.nombre}`, 'color: red; font-weight: bold;');
+                        this.manageEventState(event, 'remove');
+                    }, delay);
+                    this.timers.push(timerId);
                 }
             });
         }
         
-        determineInitialState(serverNow, events_agenda) {
-            events_agenda.forEach(event => {
-                const startTime = new Date(event.start_iso).getTime();
-                const endTime = new Date(event.end_iso).getTime();
-                if (serverNow >= startTime && serverNow < endTime) {
-                    console.log(`El evento '${event.event_details.nombre}' ya estaba activo al cargar la página.`);
-                    this.activeEvents[event.event_details.nombre] = event.event_details;
-                }
-            });
-            this.updateView();
-        }
-
-        updateCurrentState(eventDetails, type) {
-            const eventName = eventDetails.nombre;
-            if (type === 'start') {
-                this.activeEvents[eventName] = eventDetails;
-            } else if (type === 'end') {
-                delete this.activeEvents[eventName];
+        manageEventState(event, action) {
+            if (action === 'add') {
+                this.activeEvents[event.id] = event;
+            } else if (action === 'remove') {
+                delete this.activeEvents[event.id];
             }
             this.updateView();
         }
@@ -115,29 +112,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.isInitialUpdate = false;
                 return;
             }
-
             this.isInitialUpdate = false;
 
-            console.log("Actualizando vista. Evento ganador:", winningEvent ? winningEvent.nombre : 'Ninguno');
+            console.log("Actualizando vista. Evento ganador:", winningEvent ? winningEvent.nombre : 'Ninguno (estado por defecto)');
 
-            const newSkin = winningEvent?.cambios?.skin || this.initialContext.default_skin;
-            
+            const newSkin = winningEvent?.cambios?.skin || this.initialContext.default_skin || 'default';
             const faviconPath = winningEvent?.cambios?.favicon || this.initialContext.default_favicon;
             const newSuffix = winningEvent?.cambios?.sufijo;
 
             if (newSuffix) {
                 document.title = this.initialContext.profile_title + newSuffix;
+            } else {
+                document.title = this.initialContext.profile_title;
             }
             
             if (this.favicon && faviconPath) {
+                let finalFaviconUrl = '';
                 if (faviconPath.startsWith('http')) {
-                    this.favicon.href = faviconPath;
+                    // URL absoluta
+                    finalFaviconUrl = faviconPath;
                 } else if (faviconPath.startsWith('/')) {
-                    this.favicon.href = `${this.publicUrl}${faviconPath}`;
+                    finalFaviconUrl = `${this.publicUrl}${faviconPath}`;
                 } else {
-                    const clientUrlWithSlash = this.url.endsWith('/') ? this.url : this.url + '/';
-                    this.favicon.href = `${clientUrlWithSlash}imagenes/${faviconPath}`;
+                    const clientUrlWithSlash = this.clientUrl.endsWith('/') ? this.clientUrl : this.clientUrl + '/';
+                    finalFaviconUrl = `${clientUrlWithSlash}imagenes/${faviconPath}`;
                 }
+                this.favicon.href = finalFaviconUrl;
             }
 
             if (this.currentSkin !== newSkin) {
@@ -146,7 +146,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     const currentHref = sheet.getAttribute('href');
                     if (currentHref) {
                         const newHref = currentHref.replace(`/${this.currentSkin}/`, `/${newSkin}/`);
-                        sheet.setAttribute('href', newHref);
+                        if (currentHref !== newHref) {
+                            sheet.setAttribute('href', newHref);
+                            console.log(`Stylesheet actualizado a: ${newHref}`);
+                        }
                     }
                 });
                 this.currentSkin = newSkin;
@@ -154,9 +157,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         destroy() {
-            console.log('Limpiando todos los timers programados.');
-            this.timers.forEach(timer => clearTimeout(timer));
-            this.timers = [];
+            if(this.timers.length > 0) {
+                console.log(`Limpiando ${this.timers.length} timers programados.`);
+                this.timers.forEach(timer => clearTimeout(timer));
+                this.timers = [];
+            }
         }
     }
 

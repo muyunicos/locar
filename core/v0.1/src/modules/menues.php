@@ -1,8 +1,5 @@
 <?php
-if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
-    header('Location: /');
-    exit;
-}
+use Core\Utils;
 
 function process_images_recursively(array &$item)
 {
@@ -38,7 +35,7 @@ function get_module_data(array $moduleConfig, array $context, bool $isAdmin = fa
     
     if (!$isAdmin) {
         process_images_recursively($data);
-    } else { 
+    } else {
         $data["imagen_url"] = Utils::buildImageUrl($data["imagen"]);
     }
     

@@ -1,70 +1,48 @@
 <?php
-ini_set("display_errors", 1);
-error_reporting(E_ALL);
-
-if (isset($_GET["client"]) && !defined("CLIENT_ID")) {
-    define("CLIENT_ID", $_GET["client"]);
-}
-
-if (isset($_GET["url"]) && !defined("CLIENT_URL")) {
-    define("CLIENT_URL", $_GET["url"]);
-}
-
-if (isset($_GET["dev"]) && !defined("DEV_BRANCH")) {
-    define("DEV_BRANCH", $_GET["dev"]);
-}
-
-require_once defined("DEV_BRANCH") && DEV_BRANCH ? dirname(__DIR__, 4) . "/core/" . DEV_BRANCH . "/src/Config.php" : dirname(__DIR__, 3) . "/core/src/config.php";
-
-header('Access-Control-Allow-Origin: ' . CLIENT_URL );
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-
-header("Content-Type: application/json");
-
-require_once PRIVATE_PATH . "/src/EventManager.php";
-require_once PRIVATE_PATH . "/src/Utils.php";
+require_once __DIR__ . '/api_bootstrap.php';
+use Core\EventManager;
+use Core\Utils;
 
 if (!preg_match('/^[a-zA-Z0-9_-]+$/', CLIENT_ID)) {
-    http_response_code(400);
-    echo json_encode(["error" => "ID de cliente inválido."]);
-    exit();
+    send_json_response(false, "ID de cliente inválido.", null, 400);
 }
 
 $manifestPath = CLIENT_PATH . "/datos/manifest.json";
+log_dev_message("Agenda API: Buscando manifiesto en: " . $manifestPath);
 
 if (!file_exists($manifestPath)) {
-    http_response_code(404);
-    echo json_encode(["error" => "Manifiesto no encontrado para el cliente."]);
-    exit();
+    send_json_response(false, "Manifiesto no encontrado para el cliente.", null, 404);
 }
 
-$manifest = json_decode(file_get_contents($manifestPath), true);
+$manifestContent = file_get_contents($manifestPath);
+if ($manifestContent === false) {
+    send_json_response(false, "Error al leer el contenido del manifiesto.", null, 500);
+}
+
+$manifest = json_decode($manifestContent, true);
 if (json_last_error() !== JSON_ERROR_NONE) {
-    http_response_code(500);
-    echo json_encode(["error" => "Error al leer el manifiesto."]);
-    exit();
+    send_json_response(false, "Error al decodificar el manifiesto: " . json_last_error_msg(), null, 500);
 }
 
 try {
     $eventManager = new EventManager($manifest["eventos"] ?? []);
-
     $timezone = new DateTimeZone("America/Argentina/Buenos_Aires");
     $now = new DateTime("now", $timezone);
     $until = (clone $now)->add(new DateInterval("PT6H"));
 
     $agenda = $eventManager->getEventsAgenda($until);
 
-    echo json_encode([
+    send_json_response(true, "Agenda de eventos obtenida exitosamente.", [
         "server_time_iso" => $now->format(DateTime::ISO8601),
         "events_agenda" => $agenda,
     ]);
 
 } catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        "error" => "Ocurrió un error en el servidor.",
-        "details" => $e->getMessage(),
-    ]);
+    error_log("Error en agenda.php: " . $e->getMessage());
+    send_json_response(
+        false,
+        "Ocurrió un error en el servidor.",
+        DEV ? ["details" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()] : null, // Muestra detalles solo en DEV
+        500
+    );
 }

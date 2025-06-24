@@ -1,9 +1,7 @@
 <?php
-
-require_once dirname(__DIR__) . '/DatabaseManager.php';
-
+namespace Admin;
+use Core\DatabaseManager;
 class AuthManager {
-
     private $db;
     private const MAX_LOGIN_ATTEMPTS = 5;
     private const LOCKOUT_TIME_MINUTES = 15;
@@ -79,11 +77,11 @@ class AuthManager {
         return null;
     }
 
-    public function hasAdmins($clientId)
+    public function hasAdmins()
     {
         try {
             $stmt = $this->db->prepare("SELECT COUNT(*) FROM users WHERE client_id = :client_id AND role = 'admin'");
-            $stmt->execute(['client_id' => $clientId]);
+            $stmt->execute(['client_id' => CLIENT_ID]);
             $count = $stmt->fetchColumn();
             return $count > 0;
         } catch (PDOException $e) {

@@ -1,17 +1,18 @@
 <?php
+namespace Core;
 
 class EventManager
 {
     private array $events;
-    private DateTimeZone $timezone;
+    private \DateTimeZone $timezone;
 
     public function __construct(array $events)
     {
         $this->events = $events;
-        $this->timezone = new DateTimeZone("America/Argentina/Buenos_Aires");
+        $this->timezone = new \DateTimeZone("America/Argentina/Buenos_Aires");
     }
 
-    private function isDateInRange(array $event, DateTime $now): bool
+    private function isDateInRange(array $event, \DateTime $now): bool
     {
         $dateRange = $event["cuando"]["date_range"] ?? [];
 
@@ -19,14 +20,14 @@ class EventManager
             return true;
         }
 
-        $startDate = DateTime::createFromFormat(
+        $startDate = \DateTime::createFromFormat(
             "Y-m-d",
             $dateRange["start"],
             $this->timezone
         );
         $startDate->setTime(0, 0, 0);
 
-        $endDate = DateTime::createFromFormat(
+        $endDate = \DateTime::createFromFormat(
             "Y-m-d",
             $dateRange["end"],
             $this->timezone
@@ -36,7 +37,7 @@ class EventManager
         return $now >= $startDate && $now <= $endDate;
     }
 
-    private function isDayActive(array $event, DateTime $now): bool
+    private function isDayActive(array $event, \DateTime $now): bool
     {
         if (empty($event["cuando"]["active_on_days"])) {
             return true;
@@ -45,7 +46,7 @@ class EventManager
         return in_array($currentDay, $event["cuando"]["active_on_days"]);
     }
 
-    private function isTimeActive(array $event, DateTime $now): bool
+    private function isTimeActive(array $event, \DateTime $now): bool 
     {
         $timeRange = $event["cuando"]["time_range"] ?? [];
 
@@ -53,17 +54,17 @@ class EventManager
             return true;
         }
 
-        $currentTime = DateTime::createFromFormat(
+        $currentTime = \DateTime::createFromFormat(
             "H:i:s",
             $now->format("H:i:s"),
             $this->timezone
         );
-        $startTime = DateTime::createFromFormat(
+        $startTime = \DateTime::createFromFormat(
             "H:i",
             $timeRange["start"],
             $this->timezone
         );
-        $endTime = DateTime::createFromFormat(
+        $endTime = \DateTime::createFromFormat(
             "H:i",
             $timeRange["end"],
             $this->timezone
@@ -82,7 +83,7 @@ class EventManager
         return false;
     }
 
-    private function isEventActive(array $event, DateTime $now): bool
+    private function isEventActive(array $event, \DateTime $now): bool
     {
         if (!isset($event["cuando"])) {
             return false;
@@ -94,7 +95,7 @@ class EventManager
 
     public function getContext(): array
     {
-        $now = new DateTime("now", $this->timezone);
+        $now = new \DateTime("now", $this->timezone);
         $activeEvents = [];
 
         foreach ($this->events as $event) {

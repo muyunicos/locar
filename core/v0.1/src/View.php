@@ -1,4 +1,5 @@
 <?php
+namespace Core;
 class View {
     public static function render(string $templateName, array $data = []): string
     {
