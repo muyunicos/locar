@@ -104,16 +104,17 @@ import DragDropManager from './menues/DragDropManager.js';
      */
     function handleContentEdit(e) {
         const target = e.target;
-        if (!target.isContentEditable) return;
+        if (!target.isContentEditable) { console.log('hola'); return; }
 
         setChangesMade(true);
 
         const menuProperty = target.dataset.editableMenuProperty;
         const itemProperty = target.dataset.editableProperty;
         const itemElement = target.closest('[data-id]');
-
+ console.log('hola1');
         // Si se está editando una propiedad general del menú (ej. el título principal)
         if (menuProperty) {
+             console.log('hola2');
             MenuState.updateMenuProperty(menuProperty, target.textContent.trim());
             return;
         }
@@ -127,6 +128,7 @@ import DragDropManager from './menues/DragDropManager.js';
             if (itemProperty === 'precio') {
                 value = parseFloat(String(value).replace(/[$.]/g, '').replace(',', '.')) || 0;
             }
+             console.log('hola3');
             MenuState.updateItemProperty(itemElement.dataset.id, itemProperty, value);
         }
     }
