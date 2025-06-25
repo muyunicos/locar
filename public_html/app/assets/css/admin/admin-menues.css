@@ -1,0 +1,190 @@
+/**
+ * Estilos para la interfaz de administración de menús.
+ */
+
+/* Resaltado para el ítem o categoría activa (seleccionada) */
+.item.is-active-admin-item,
+.c-container.is-active-admin-item > .category-header {
+    outline: 2px solid #3b82f6;
+    border-radius: 8px; /* Redondear el contorno de la selección */
+}
+
+/* Hace que los campos editables sean más obvios cuando su ítem está activo */
+.is-active-admin-item [contenteditable="true"] {
+    background-color: rgba(59, 130, 246, 0.08);
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: -2px -4px;
+}
+
+/* Estructura base para un ítem o cabecera de categoría en modo admin */
+.is-admin-item, 
+.category-header {
+    position: relative; /* Contexto para posicionar los controles */
+}
+
+/* Manejador para arrastrar y soltar (Drag & Drop) */
+.item-drag-handle {
+    position: absolute;
+    top: 50%;
+    left: -35px; 
+    transform: translateY(-50%);
+    cursor: grab;
+    color: #a1a1aa;
+    padding: 8px;
+    border-radius: 50%;
+    opacity: 0; /* Oculto por defecto */
+    transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+    z-index: 5;
+}
+
+/* El manejador aparece cuando el cursor está sobre el ítem */
+.is-admin-item:hover .item-drag-handle {
+    opacity: 1;
+}
+
+.item-drag-handle:hover {
+    color: #3b82f6;
+}
+
+.item-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Panel de acciones (contenedor del botón de opciones y el popup) */
+.item-actions-panel {
+    position: absolute;
+    top: 50%;
+    right: -30px;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+/* Botón para abrir el popup de opciones (...) */
+.options-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 50%;
+    display: flex;
+    color: #71717a;
+    transition: background-color 0.2s, color 0.2s;
+}
+.options-trigger:hover {
+    background-color: #f4f4f5;
+    color: #18181b;
+}
+
+.options-popup {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(10px) scale(0.95);
+    transition: all 0.15s ease-out;
+    position: absolute;
+    right: 35px;
+    top: calc(50% + -64px);
+    background-color: #fff;
+    border-radius: 8px;
+    z-index: 11;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: max-content;
+    border: 1px solid #e4e4e7;
+}
+
+/* El popup se hace visible cuando el panel tiene la clase 'is-open' */
+.item-actions-panel.is-open .options-popup {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Botones dentro del popup */
+.options-popup button {
+    background-color: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    text-align: left;
+    color: #3f3f46;
+}
+
+.options-popup button svg {
+    flex-shrink: 0;
+}
+
+.options-popup button:hover {
+    background-color: #f4f4f5;
+    color: #18181b;
+}
+
+.options-popup button.danger:hover {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+/* Estilo para los placeholders en campos editables vacíos */
+[contenteditable=true][data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: #a1a1aa;
+    font-style: italic;
+    pointer-events: none;
+}
+
+/* Estilo para los ítems marcados como ocultos */
+.is-admin-hidden { 
+    opacity: 0.6; 
+    background-image: repeating-linear-gradient(
+        -45deg, 
+        transparent, 
+        transparent 5px, 
+        rgba(228, 228, 231, 0.5) 5px, 
+        rgba(228, 228, 231, 0.5) 10px
+    );
+    border: 1px dashed #d4d4d8 !important;
+}
+
+/* Estilos para el proceso de arrastrar y soltar */
+.item.is-dragging,
+.c-container.is-dragging {
+    opacity: 0.4;
+    border-style: dashed !important;
+    background-color: #f8fafc;
+}
+
+/* Marcador de posición que indica dónde se soltará el ítem */
+.drop-placeholder {
+    display: block;
+    height: 16px;
+    width: 100%;
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px dashed rgba(59, 130, 246, 0.5);
+    border-radius: 8px;
+    margin: 8px 0;
+    pointer-events: none;
+}
+
+/* Animación para el spinner del botón de guardado */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.is-spinning {
+    animation: spin 1s linear infinite;
+}
+.spinner-path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4;
+    stroke-linecap: round;
+}

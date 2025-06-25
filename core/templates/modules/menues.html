@@ -1,0 +1,140 @@
+<?php
+
+if (!function_exists("render_public_image")) {
+    function render_public_image(string $url, string $alt = "", string $class = "", string $loading = "lazy"): void
+    {
+        // If the URL is empty, there's nothing to render.
+        if (empty($url)) {
+            return;
+        }
+
+        // Output the image tag with all attributes properly escaped.
+        echo '<img src="' . htmlspecialchars($url) . '" alt="' . htmlspecialchars($alt) . '"' .
+            (!empty($class) ? ' class="' . htmlspecialchars($class) . '"' : "") .
+            ' loading="' . htmlspecialchars($loading) . '" />';
+    }
+}
+
+if (!function_exists("render_public_item")) {
+    function render_public_item(array $items_array): void
+    {
+        if (!is_array($items_array) || empty($items_array)) {
+            return;
+        }
+
+        foreach ($items_array as $item) {
+            if (isset($item["ocultar"]) && $item["ocultar"]) {
+                continue;
+            }
+
+            $has_image = !empty($item["imagen_url"]);
+            $is_category = isset($item["es_cat"]) && $item["es_cat"];
+
+            if ($is_category) {
+                $categoryId = htmlspecialchars($item['id'] ?? '');
+                $categoryLayout = htmlspecialchars($item["layout"] ?? '');
+                $categoryTitle = htmlspecialchars($item["titulo"] ?? '');
+                $categoryDescription = htmlspecialchars($item["descripcion"] ?? '');
+                $categoryImageUrl = htmlspecialchars($item["imagen_url"] ?? '');
+
+                $nestedItems = (isset($item["items"]) && is_array($item["items"])) ? $item["items"] : [];
+                ?>
+                <div class="c-container <?= $categoryLayout ?>" data-id="<?= $categoryId ?>">
+                    <h3 class="c-titulo">
+                        <div class="c-titulo-content">
+                            <span><?= $categoryTitle ?></span>
+                            <?php if (!empty($categoryDescription)): ?>
+                                <small class="c-titulo-descripcion"><?= $categoryDescription ?></small>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($has_image) {
+                            render_public_image($categoryImageUrl, $categoryTitle);
+                        } ?>
+                    </h3>
+                    <div class="item-list"><?php render_public_item($nestedItems); ?></div>
+                </div>
+            <?php } else {
+                $itemId = htmlspecialchars($item['id'] ?? '');
+                $itemTitle = htmlspecialchars($item["titulo"] ?? '');
+                $itemDescription = htmlspecialchars($item["descripcion"] ?? '');
+                $itemImageUrl = htmlspecialchars($item["imagen_url"] ?? '');
+                $itemPrice = htmlspecialchars(number_format($item["precio"] ?? 0, 0, ",", "."));
+                $itemOriginalPrice = isset($item["original_price"]) ? htmlspecialchars(number_format($item["original_price"], 0, ",", ".")) : null;
+                ?>
+                <div class="item" data-id="<?= $itemId ?>">
+                    <?php if ($has_image): ?>
+                        <div class="item-imagen-wrapper">
+                            <?php render_public_image($itemImageUrl, $itemTitle); ?>
+                        </div>
+                    <?php endif; ?>
+                    <div class="item-details">
+                        <div class="item-info">
+                            <h3 class="item-titulo"><?= $itemTitle ?></h3>
+                            <?php if (!empty($itemDescription)): ?>
+                                <p class="item-descripcion"><?= $itemDescription ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <div class="item-precio">
+                            <?php if ($itemOriginalPrice !== null): ?>
+                                <span class="precio-original">
+                                    <span class="precio-simbolo">$</span>
+                                    <span class="precio-valor"><?= $itemOriginalPrice ?></span>
+                                    <span class="precio-decimales">,-</span>
+                                </span>
+                            <?php endif; ?>
+                            <span class="precio-final">
+                                <span class="precio-simbolo">$</span>
+                                <span class="precio-valor"><?= $itemPrice ?></span>
+                                <span class="precio-decimales">,-</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            <?php }
+        }
+    }
+}
+
+
+$isAdmin = $isAdmin ?? false;
+$isAdminUrl = $isAdminUrl ?? false;
+$dataSourceFile = $dataSourceFile ?? '';
+$json_for_admin = $json_for_admin ?? []; // Assuming it's an array for JSON encoding
+$imagen_url = $imagen_url ?? '';
+$menu_title = $menu_title ?? '';
+$error = $error ?? '';
+$items = $items ?? []; // Assuming 'items' is an array for rendering
+$footer_text = $footer_text ?? '';
+
+?>
+
+<div id="menu-container" data-module-id="menues"
+    <?php if ($isAdmin && $isAdminUrl): ?>
+        data-source-file="<?= htmlspecialchars($dataSourceFile) ?>"
+        data-initial-json='<?= htmlspecialchars(json_encode($json_for_admin), ENT_QUOTES, 'UTF-8') ?>'
+    <?php endif; ?>
+>
+    <?php if (!empty($imagen_url)): ?>
+        <div class="menu-header-image-container"><?php render_public_image($imagen_url, $menu_title); ?></div>
+    <?php else: ?>
+        <h2 class="menues-title"><?= htmlspecialchars($menu_title) ?></h2>
+    <?php endif; ?>
+
+    <?php if (!empty($error)): // Display error if present ?>
+        <p class="app-error"><?= htmlspecialchars($error) ?></p>
+    <?php else: ?>
+        <div id="item-list-container" class="item-list">
+            <?php
+            if (!$isAdmin || !$isAdminUrl) {
+                render_public_item($items);
+            }
+            ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($footer_text)): ?>
+        <footer class="menu-footer">
+            <p><?= htmlspecialchars($footer_text) ?></p>
+        </footer>
+    <?php endif; ?>
+</div>

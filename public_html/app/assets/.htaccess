@@ -1,0 +1,8 @@
+<IfModule mod_headers.c>
+    SetEnvIf Origin "^(https?:\/\/(?:.+\.)?loc\.ar)$" CORS_ALLOW_ORIGIN=$1
+    Header set Access-Control-Allow-Origin "%{CORS_ALLOW_ORIGIN}e" env=CORS_ALLOW_ORIGIN
+    Header always merge Vary Origin
+    Header set Access-Control-Allow-Credentials "true"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</IfModule>
