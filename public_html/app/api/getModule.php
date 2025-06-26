@@ -39,7 +39,7 @@ try {
 
     $mainCssUrl = null;
     if ($moduleResult['main_skin_override'] && !empty($moduleResult['skin'])) {
-        $mainCssUrl = PUBLIC_URL . "/assets/css/" . $moduleResult['skin'] . "/main.css";
+        $mainCssUrl = $moduleResult['main_skin_override'];
     }
 
     $responseData = [

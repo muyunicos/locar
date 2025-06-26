@@ -50,15 +50,9 @@
             <?php endforeach; ?>
 
             <?php if ($isAdmin ?? false): ?>
-                <?php if (!$isAdminUrl): ?>
                     <li>
-                        <a href="<?= htmlspecialchars(CLIENT_URL . '/admin') ?>" class="nav-link is-external">Administrar</a>
+                        <a href="#" class="nav-link is-admin"><?php if ($isAdminUrl): ?>Vista Previa<?php else: ?>Administrar<?php endif; ?></a>
                     </li>
-                <?php else: ?>
-                    <li>
-                        <a href="<?= htmlspecialchars(CLIENT_URL) ?>" class="nav-link is-external">Vista Previa</a>
-                    </li>
-                <?php endif; ?>
                 <li>
                     <a href="<?= htmlspecialchars(PUBLIC_URL . '/api/logout.php?client_id=' . CLIENT_ID . '&version=' . VERSION . '&url=' . urlencode(CLIENT_URL)) ?>" class="nav-link is-external">Cerrar Sesión</a>
                 </li>

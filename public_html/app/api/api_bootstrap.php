@@ -34,7 +34,7 @@ define("VERSION", $request_data['version'] ?? '');
 if (!defined('IS_ADMIN_URL')) {
     $final_is_admin_value = false;
     if (isset($request_data['is_admin_url']) && $request_data['is_admin_url'] !== null) {
-        $final_is_admin_value = $request_data['is_admin_url'];
+        $final_is_admin_value = filter_var($request_data['is_admin_url'], FILTER_VALIDATE_BOOLEAN);
     } else {
         $current_url = $_SERVER['REQUEST_URI'] ?? '/';
         $admin_url_patterns = ['/admin', '/dashboard', '/secure']; 

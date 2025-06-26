@@ -1,6 +1,7 @@
 <?php
 namespace Core;
-use Core\View;
+use Core\Utils;
+use Core\View; 
 
 class ModuleLoader {
     private array $manifest;
@@ -57,25 +58,31 @@ class ModuleLoader {
         $moduleSkin = $moduleData["skin"] ?? $globalSkin;
         $cssUrls = [];
         $jsUrls = [];
+        $mainCssUrlOverride = null;
+
+        if ($moduleData["main_skin"] ?? false) {
+            $mainCssUrlOverride = Utils::get_versioned_asset("/assets/css/" . $moduleSkin . "/main.css");
+        }
 
         $moduleCssPath = "/assets/css/{$moduleSkin}/{$moduleType}.css";
         if (file_exists(PUBLIC_PATH . $moduleCssPath)) {
-            $cssUrls[] = PUBLIC_URL . $moduleCssPath;
+            $cssUrls[] = Utils::get_versioned_asset($moduleCssPath);
         }
 
         $moduleJsPath = "/assets/js/modules/{$moduleType}.js";
         if (file_exists(PUBLIC_PATH . $moduleJsPath)) {
-            $jsUrls[] = PUBLIC_URL . $moduleJsPath;
+            $jsUrls[] = Utils::get_versioned_asset($moduleJsPath);
         }
 
         if ($isAdmin && $isAdminUrl) {
             $adminCssPath = "/assets/css/admin/admin-{$moduleType}.css";
             if (file_exists(PUBLIC_PATH . $adminCssPath)) {
-                $cssUrls[]  = PUBLIC_URL . $adminCssPath;
+                $cssUrls[]  = Utils::get_versioned_asset($adminCssPath);
             }
+            
             $adminJsPath = "/assets/js/admin/admin-{$moduleType}.js";
             if (file_exists(PUBLIC_PATH . $adminJsPath)) {
-                $jsUrls[]  = PUBLIC_URL . $adminJsPath;
+                $jsUrls[]  = Utils::get_versioned_asset($adminJsPath);
             }
         }
 
@@ -85,7 +92,7 @@ class ModuleLoader {
             "js" => $jsUrls,
             "skin" => $moduleSkin,
             "sufijo" => $moduleData["sufijo"] ?? null,
-            "main_skin_override" => $moduleData["main_skin"] ?? false,
+            "main_skin_override" => $mainCssUrlOverride,
             "type" => $moduleType,
             "error" => $moduleData['error'] ?? false
         ];

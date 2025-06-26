@@ -39,7 +39,7 @@ if (!function_exists("render_public_item")) {
 
                 $nestedItems = (isset($item["items"]) && is_array($item["items"])) ? $item["items"] : [];
                 ?>
-                <div class="c-container <?= $categoryLayout ?>" data-id="<?= $categoryId ?>">
+                <div class="c-container <?= $categoryLayout ?>" data-title="<?= str_replace(' ', '_', $categoryTitle) ?>" data-id="<?= $categoryId ?>">
                     <h3 class="c-titulo">
                         <div class="c-titulo-content">
                             <span><?= $categoryTitle ?></span>

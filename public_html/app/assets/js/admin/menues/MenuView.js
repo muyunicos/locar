@@ -105,7 +105,7 @@ const MenuView = (function() {
         categoryElement.dataset.id = itemData.id;
         categoryElement.dataset.type = 'category';
         categoryElement.setAttribute('draggable', 'true');
-
+        categoryElement.dataset.title = itemData.titulo.replace(/ /g, '_');
         const headerHtml = `
             <div class="category-header">
                 ${_createDragHandle()}
@@ -143,16 +143,13 @@ const MenuView = (function() {
             console.error("MenuView no inicializado correctamente. Falta el contenedor.");
             return;
         }
-
         const titleElement = menuContainer.querySelector('.menues-title');
         if (titleElement) {
             titleElement.textContent = menuData.titulo || 'Menú';
             titleElement.setAttribute('contenteditable', 'true');
             titleElement.dataset.editableMenuProperty = 'titulo';
         }
-        
         itemListContainer.innerHTML = '';
-        
         const items = menuData.items || [];
         items.forEach(itemData => {
             const isCategory = itemData.es_cat || itemData.type === 'category';

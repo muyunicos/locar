@@ -43,6 +43,7 @@ import DragDropManager from './menues/DragDropManager.js';
 
         setupEventListeners();
         renderMenu();
+        
     }
 
     function setupEventListeners() {

@@ -5,7 +5,7 @@
   "favicon": "favicon.ico",
   "logo": "logo.svg",
   "skin": "default",
-  "modulo": 1,
+  "modulo": "Cafe",
   "eventos": [
     {
       "id": 1,
@@ -28,13 +28,13 @@
         "time_range": { "start": "20:00", "end": "07:00" }
       },
       "cambios": {
-        "modulo": 2
+        "modulo": "Bar"
       }
     }
   ],
   "modulos": [
-    { "tipo": "menues", "titulo": "Menú Bar", "id": 2, "navegacion": true, "url": "menu_bar.json" },
-    { "tipo": "menues", "titulo": "Menú Café", "id": 1, "navegacion": true, "url": "menu_cafe.json" },
+    { "tipo": "menues", "titulo": "Menú Bar", "id": "Bar", "navegacion": true, "url": "menu_bar.json" },
+    { "tipo": "menues", "titulo": "Menú Café", "id": "Cafe", "navegacion": true, "url": "menu_cafe.json" },
     { "tipo": "link", "titulo": "Instagram", "id": 3, "navegacion": true, "url": "https://www.instagram.com/revel.mdq/" },
     { "tipo": "galeria", "titulo": "Fotos del Local", "id": 4, "navegacion": false }
   ]

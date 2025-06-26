@@ -125,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (this.isInitialUpdate && winningEvent && winningEvent.id == this.serverLoadedEventId) {
                 console.log(`El estado del evento '${winningEvent.nombre}' ya fue cargado por el servidor. Omitiendo actualización visual.`);
-                // Sincronizamos el estado del skin actual. ¡Esto es crucial!
                 this.currentSkin = winningEvent.cambios?.skin || this.currentSkin;
                 this.isInitialUpdate = false;
                 return;

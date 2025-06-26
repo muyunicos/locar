@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/api_bootstrap.php';
-
 use Core\DatabaseManager;
-use Core\Utils;
-use Core\EventManager;
 
 function send_generic_success_response() {
     send_json_response(

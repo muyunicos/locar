@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let sectionObserver = null;
     const navPanel = document.getElementById('nav-panel');
     const contentWrapper = document.getElementById('module-content-wrapper');
     const hamburgerBtn = document.getElementById('hamburger-button');
@@ -7,8 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error crítico: Faltan uno o más elementos esenciales del DOM (nav-panel, module-content-wrapper, hamburger-button, o loading-overlay).');
         return;
     }
-
-    const { clientId, clientUrl, version, publicUrl, isAdminUrl } = window.appConfig || {};
+    const {
+        clientId,
+        clientUrl,
+        version,
+        publicUrl,
+        isAdminUrl,
+        initialContext: {
+            profile_title: pageTitle
+        }
+    } = window.appConfig || {};
 
     window.addEventListener('load', () => {
         loadingOverlay.classList.remove('active');
@@ -27,8 +36,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     navPanel.addEventListener('click', (e) => {
         const link = e.target.closest('.nav-link');
+        if (link.classList.contains('is-admin')) {
+            e.preventDefault();
 
-        if (link && !link.classList.contains('is-external')) {
+            const currentQuery = window.location.search;
+            const currentHash = window.location.hash;
+            let targetUrl;
+            if (isAdminUrl) {
+                targetUrl = `${clientUrl}${currentQuery}${currentHash}`; 
+            } else {
+                targetUrl = `${clientUrl}/admin${currentQuery}${currentHash}`; 
+            }
+            window.location.href = targetUrl;
+            navPanel.classList.remove('open');
+        } else if (!link.classList.contains('is-external')) {
             e.preventDefault();
             const moduleId = link.dataset.moduleId;
             if (moduleId) {
@@ -40,11 +61,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+ window.observeSections = function() { 
+        if (sectionObserver) {
+            sectionObserver.disconnect();
+        }
+
+        const options = {
+            root: null,
+            rootMargin: '-40% 0px -60% 0px',
+            threshold: 0
+        };
+
+        const observerCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const targetTitle = entry.target.dataset.title;
+
+                    const newHash = '#' + encodeURIComponent(targetTitle);
+
+                    const baseUrl = window.location.pathname + window.location.search;
+
+                    history.replaceState(null, '', baseUrl + newHash);
+                }
+            });
+        };
+
+        sectionObserver = new IntersectionObserver(observerCallback, options);
+        const sections = document.querySelectorAll('[data-title]');
+        if (sections.length > 0) {
+            console.log(`Observando ${sections.length} secciones...`);
+            sections.forEach(section => {
+                sectionObserver.observe(section);
+            });
+        }
+    }
+
     async function loadModule(moduleId) {
         loadingOverlay.classList.add('active');
         try {
-            
-
             if (!clientId || !publicUrl) {
                 throw new Error('La configuración del cliente (clientId, publicUrl) no está disponible en window.appConfig.');
             }
@@ -73,6 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.success && data.data) {
                 updatePageAssets(data.data);
+                if (data.data.hasOwnProperty('sufijo') && pageTitle) {
+                    document.title = pageTitle + (data.data.sufijo || '');
+                }
+                const newUrl = `${window.location.pathname}?${moduleId}`;
+                history.pushState({
+                    moduleId: moduleId
+                }, '', newUrl);
+
+                handleScrollToHash();
+                observeSections();
             } else {
                 throw new Error(data.message || 'La respuesta de la API no fue exitosa o no contenía datos.');
             }
@@ -87,6 +151,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+   window.handleScrollToHash = function() {
+        const hash = window.location.hash;
+        if (!hash) {
+            return;
+        }
+        try {
+            const targetTitle = decodeURIComponent(hash.substring(1));
+            const selector = `[data-title="${targetTitle}"]`;
+            const targetElement = document.querySelector(selector);
+            if (targetElement) {
+                console.log(`Elemento encontrado con data-title="${targetTitle}". Desplazando instantáneamente con margen...`);
+                const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
+                const offsetPosition = elementPosition - 90;
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'instant'
+                });
+
+            } else {
+                console.warn(`No se encontró ningún elemento con el selector: ${selector}`);
+            }
+        } catch (e) {
+            console.error(`Error al procesar el hash "${hash}".`, e);
+        }
+    }
 
     function updatePageAssets(data) {
         contentWrapper.innerHTML = data.html || '';
@@ -103,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mainStylesheet && data.main_css_url && mainStylesheet.href !== data.main_css_url) {
             mainStylesheet.href = data.main_css_url;
         }
-        
+
         const scriptPromises = (data.js || []).map(scriptUrl => {
             return new Promise((resolve, reject) => {
                 const script = document.createElement('script');
@@ -111,12 +200,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 script.src = scriptUrl;
                 script.className = 'module-script';
                 script.onload = resolve;
-                script.onerror = () => reject(new Error(`No se pudo cargar el script: ${scriptUrl}`)); 
+                script.onerror = () => reject(new Error(`No se pudo cargar el script: ${scriptUrl}`));
                 document.body.appendChild(script);
             });
         });
-
-        
 
         Promise.all(scriptPromises)
             .then(() => {
@@ -136,4 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 contentWrapper.innerHTML += `<div class="app-error"><p><small>Error al inicializar el módulo: ${error.message}</small></p></div>`;
             });
     }
+    handleScrollToHash();
+    observeSections();
 });

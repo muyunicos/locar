@@ -44,8 +44,7 @@ function launchApp()
         "default_skin" => $manifest["skin"],
         "default_favicon" => $manifest["favicon"],
     ];
-    $navigableModules = []; 
-
+    $navigableModules = [];
     $authManager = new AuthManager();
 
     if (IS_ADMIN_URL) {
@@ -59,13 +58,13 @@ function launchApp()
                 "favicon" => Utils::buildImageUrl($manifest["favicon"]),
                 "logo_url" => Utils::buildImageUrl($manifest["logo"]),
                 "main_stylesheets" => [
-                    PUBLIC_URL . "/assets/css/{$manifest['skin']}/main.css",
-                    PUBLIC_URL . "/assets/css/admin/admin-core.css",
-                    PUBLIC_URL . "/assets/css/core.css"
+                    Utils::get_versioned_asset("/assets/css/{$manifest['skin']}/main.css"),
+                    Utils::get_versioned_asset("/assets/css/admin/admin-core.css"),
+                    Utils::get_versioned_asset("/assets/css/core.css")
                 ],
                 "module_stylesheets" => [],
                 "main_scripts" => [
-                    PUBLIC_URL . "/assets/js/admin/admin-core.js"
+                    Utils::get_versioned_asset("/assets/js/admin/admin-core.js")
                 ],
                 "module_scripts" => [],
                 "module_data " => [],
@@ -101,13 +100,13 @@ function launchApp()
                 "favicon" => Utils::buildImageUrl($manifest["favicon"]),
                 "logo_url" => Utils::buildImageUrl($manifest["logo"]),
                 "main_stylesheets" => [
-                    PUBLIC_URL . "/assets/css/{$manifest['skin']}/main.css",
-                    PUBLIC_URL . "/assets/css/admin/admin-core.css",
-                    PUBLIC_URL . "/assets/css/core.css"
+                    Utils::get_versioned_asset("/assets/css/{$manifest['skin']}/main.css"),
+                    Utils::get_versioned_asset("/assets/css/admin/admin-core.css"),
+                    Utils::get_versioned_asset("/assets/css/core.css")
                 ],
                 "module_stylesheets" => [],
                 "main_scripts" => [
-                    PUBLIC_URL . "/assets/js/admin/admin-core.js"
+                    Utils::get_versioned_asset("/assets/js/admin/admin-core.js")
                 ],
                 "module_scripts" => [],
                 "module_data " => [],
@@ -153,10 +152,20 @@ function launchApp()
         }
     }
 
-    $moduleLoader = new ModuleLoader($manifest, $activeEventContext);
-    $activeModuleId = $activeEvent["cambios"]["modulo"] ?? $manifest["modulo"];
-    $moduleResult = $moduleLoader->loadById($activeModuleId, $isAdmin, IS_ADMIN_URL);
+    $initial_module_id = null;
+    $requested_module = $_SERVER['QUERY_STRING'] ?? '';
+    foreach ($manifest["modulos"] as $moduleConfig) {
+            if (strtolower((string) $moduleConfig["id"]) == strtolower($requested_module)) {
+                $initial_module_id = $moduleConfig["id"];
+            break;
+        }
+    }
 
+    $moduleLoader = new ModuleLoader($manifest, $activeEventContext);
+
+    $activeModuleId = $initial_module_id ?? $activeEvent["cambios"]["modulo"] ?? $manifest["modulo"];
+
+    $moduleResult = $moduleLoader->loadById($activeModuleId, $isAdmin, IS_ADMIN_URL);
     
     if (isset($activeEvent["cambios"]["sufijo"])) {
         $pageTitle .= $activeEvent["cambios"]["sufijo"];
@@ -165,30 +174,42 @@ function launchApp()
     }
     $content = $moduleResult['html'];
 
-    if ($moduleResult['main_skin_override'] && empty($activeEvent["cambios"]["skin"])) {
-        $mainSkin = $moduleResult['skin'];
-    }
-
     $mainStylesheets = [];
-    $mainStylesheets[] = PUBLIC_URL . "/assets/css/{$mainSkin}/main.css";
-    if (IS_ADMIN_URL) {
-        $mainStylesheets[] = PUBLIC_URL . "/assets/css/admin/admin-core.css";
+    if ($moduleResult['main_skin_override'] && empty($activeEvent["cambios"]["skin"])) {
+        $mainStylesheets[] = $moduleResult['main_skin_override'];
+    } else {
+        $mainStylesheets[] = Utils::get_versioned_asset("/assets/css/{$mainSkin}/main.css");
     }
+    
+    
+
+    
     $cssFiles = Utils::getFilesInDirectory(PUBLIC_PATH . "/assets/css", 'css');
     foreach ($cssFiles as $cssFile) {
-        $mainStylesheets[] = PUBLIC_URL . "/assets/css/" . $cssFile;
+        if (strpos($cssFile, 'main.css') !== false || strpos($cssFile, 'admin-core.css') !== false) {
+            continue;
+        }
+        $mainStylesheets[] = Utils::get_versioned_asset("/assets/css/" . $cssFile);
     }
 
-    $mainScripts = [];
     if (IS_ADMIN_URL) {
-        $mainScripts[] = PUBLIC_URL . "/assets/js/admin/admin-core.js";
+        $mainStylesheets[] = Utils::get_versioned_asset("/assets/css/admin/admin-core.css");
     }
+
+
+    $mainScripts = [];
 
     $jsFiles = Utils::getFilesInDirectory(PUBLIC_PATH . "/assets/js", 'js');
     foreach ($jsFiles as $jsFile) {
-        $mainScripts[] = PUBLIC_URL . "/assets/js/" . $jsFile;
+        if (strpos($jsFile, 'admin-core.js') !== false) {
+            continue;
+        }
+        $mainScripts[] = Utils::get_versioned_asset("/assets/js/" . $jsFile);
     }
-
+    
+    if (IS_ADMIN_URL) {
+        $mainScripts[] = Utils::get_versioned_asset("/assets/js/admin/admin-core.js");
+    }
     $initialContextForJs = array_merge($initialContextForJs, [
         "active_event" => $activeEvent,
     ]);
