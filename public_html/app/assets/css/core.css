@@ -1,34 +1,147 @@
-/* =============================================== */
-/* Estilos para el Telón de Carga y Transiciones */
-/* =============================================== */
-
 .loading-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.9); /* Un fondo blanco semitransparente */
+    background-color: rgba(255, 255, 255, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    opacity: 0; /* Inicialmente invisible */
-    pointer-events: none; /* No interfiere con los clics cuando está oculto */
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Transición suave */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
 }
 
 .loading-overlay.active {
-    opacity: 1; /* Lo hace visible */
-    pointer-events: all; /* Permite interacción (aunque no hay nada con que interactuar) */
+    opacity: 1; 
+    pointer-events: all; 
 }
 
 .loading-overlay img {
-    width: 80px; /* Ajusta el tamaño de tu GIF o imagen */
+    width: 80px;
     height: 80px;
 }
 
-/* Transición para el contenido principal */
 #module-content-wrapper {
     transition: opacity 0.4s ease-in-out;
+}
+
+.modal-body {
+    padding-top: 15px;
+    min-height: 300px;
+}
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+    background-color: #f4f4f5;
+    border-radius: 8px;
+    max-height: 65vh;
+    overflow-y: auto;
+    border: 1px solid #e4e4e7;
+    justify-content: space-between;
+}
+
+.image-tile {
+    width: 85px;
+    height: 85px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    background-color: #e4e4e7;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #ddd;
+}
+
+.image-tile:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border-color: #3b82f6;
+}
+
+.upload-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    color: #71717a;
+    border: 2px dashed #a1a1aa;
+}
+
+.upload-tile:hover {
+    background-color: #eef2ff;
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.upload-tile svg {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 5px;
+}
+
+.upload-tile span {
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+}
+
+
+#image-editor {
+    display: none;
+    margin-top: 15px;
+}
+
+#image-editor p {
+    text-align: center;
+    color: #52525b;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+#crop-container {
+    max-width: 450px;
+    max-height: 450px;
+    margin: 10px auto;
+    overflow: hidden;
+    border: 1px solid #ddd;
+    background-color: #f0f0f0;
+}
+
+#image-preview {
+    display: block;
+    max-width: 100%;
+}
+
+#image-editor .action-buttons {
+    text-align: center;
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#upload-cropped-btn {
+}
+
+#cancel-crop-btn {
+    background-color: #71717a; /* Un color secundario para el botón de cancelar */
+}
+
+#cancel-crop-btn:hover {
+    background-color: #52525b;
+}
+
+
+#upload-feedback {
+    margin-top: 15px;
+    display: none;
 }

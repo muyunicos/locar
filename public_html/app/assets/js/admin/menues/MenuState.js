@@ -22,8 +22,8 @@ const MenuState = (function() {
     const item = this.findItemById(this.items, itemId);
     if (item) {
         item.imagen = imageName;
-        this.renderMenu(); // Re-renderiza para mostrar la nueva imagen
-        this.showSaveButton(); // Muestra el botón de guardar cambios
+        this.renderMenu();
+        this.showSaveButton();
     }
 }
     function findItemRecursive(id, currentItems = menu.items, parent = null) {
@@ -45,14 +45,17 @@ const MenuState = (function() {
         return null;
     }
 
-    function updateItemProperty(id, property, value) {
-        const found = findItemRecursive(id);
-        if (found) {
-            found.item[property] = value;
-            hasChanges = true;
-            _logState(`updateItemProperty: ${property}`);
+function updateItemProperty(id, property, value) {
+    const found = findItemRecursive(id);
+    if (found) {
+        if (property === 'imagen') {
+            value = value.replace(/\.(webp|jpg|jpeg|png|gif)$/i, '');
         }
+        found.item[property] = value;
+        hasChanges = true;
+        _logState(`updateItemProperty: ${property} para el ítem ${id}`);
     }
+}
     
     function updateMenuProperty(key, value) {
         if (menu && typeof menu === 'object') {

@@ -57,8 +57,6 @@
     cursor: grabbing;
 }
 
-
-/* Panel de acciones SÓLO aparece al pasar el cursor sobre su padre directo */
 .item:hover > .item-actions-panel,
 .category-header:hover > .item-actions-panel {
     opacity: 1;
@@ -67,7 +65,7 @@
 .item-actions-panel {
     position: absolute;
     top: 50%;
-    right: 35px; 
+    right: - 35px; 
     transform: translateY(-50%);
     z-index: 10;
     opacity: 0; 
@@ -217,4 +215,28 @@
     opacity: 0.6; 
     background-image: repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(228, 228, 231, 0.5) 5px, rgba(228, 228, 231, 0.5) 10px);
     border: 1px dashed #d4d4d8 !important;
+}
+
+/* --- Estilos para Drag & Drop con SortableJS --- */
+
+/* Estilo para el elemento "fantasma" que muestra dónde se soltará el ítem */
+.is-dragging-ghost {
+    opacity: 0.4;
+    background-color: #cce5ff; /* Un azul claro para indicar la zona de drop */
+    border: 1px dashed #3b82f6;
+}
+
+/* Estilo para el elemento que se está arrastrando activamente */
+.is-dragging {
+    opacity: 1 !important; /* Aseguramos que el original sea visible mientras se arrastra */
+    background: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Forzamos que el cursor sea de "agarrar" sobre el manejador */
+.item-drag-handle {
+    cursor: grab;
+}
+.item-drag-handle:active {
+    cursor: grabbing;
 }

@@ -17,7 +17,11 @@
             <link rel="stylesheet" class="module-stylesheet" href="<?= htmlspecialchars($stylesheet ?? '') ?>" >
         <?php endforeach; ?>
     <?php endif; ?>
-
+    <?php if (($isAdmin ?? false) && $isAdminUrl): ?>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js" defer></script>
+    <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Bona+Nova+SC:wght@400;700&display=swap" rel="stylesheet">
@@ -75,7 +79,10 @@
         </main>
     </div>
     <?php if ($isAdmin && $isAdminUrl): ?>
-        <?php include(PRIVATE_PATH . '/templates/admin/menues/fab.html'); ?>
+        <?php 
+            include(PRIVATE_PATH . '/templates/modal/image-manager-modal.html');
+            include(PRIVATE_PATH . '/templates/admin/menues/fab.html');
+        ?>
     <?php endif; ?>
     <script>
         window.appConfig = {

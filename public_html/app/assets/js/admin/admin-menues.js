@@ -2,7 +2,7 @@ import MenuState from './menues/MenuState.js';
 import MenuView from './menues/MenuView.js';
 import MenuApiService from './menues/MenuApiService.js';
 import DragDropManager from './menues/DragDropManager.js';
-import ImageManager from '../ImageManager.js';
+import ImageManager from '../ImageManager.js'; 
 
 (function() {
     let appConfig = {};
@@ -10,7 +10,7 @@ import ImageManager from '../ImageManager.js';
     let menuContainer, saveFab, itemListContainer;
     let isSaving = false;
 
-    function init(moduleElement) {
+    async function init(moduleElement) {
         menuContainer = moduleElement;
         if (!menuContainer) {
              console.error("Error crítico: La función init del editor de menús fue llamada sin un elemento de módulo.");
@@ -25,15 +25,16 @@ import ImageManager from '../ImageManager.js';
             return;
         }
 
-        const globalConfig = window.appConfig || {}; 
-        appConfig = {
-            ...globalConfig,
-            dataSource: menuContainer.dataset.sourceFile,
-            initialData: JSON.parse(menuContainer.dataset.initialJson || '{}'),
-        };
+        appConfig = window.appConfig || {}; 
+        
+        await ImageManager.init();
 
-        MenuState.load(appConfig.initialData);
-        MenuView.init(menuContainer); 
+        MenuState.load(JSON.parse(menuContainer.dataset.initialJson || '{}'));
+         MenuView.init(menuContainer, {
+            onImageClick: (itemId) => {
+                ImageManager.openModal(itemId);
+            }
+        }); 
         MenuApiService.init(appConfig); 
         DragDropManager.init({
             onDragEnd: () => {
@@ -44,7 +45,6 @@ import ImageManager from '../ImageManager.js';
 
         setupEventListeners();
         renderMenu();
-        
     }
 
     function setupEventListeners() {
@@ -52,6 +52,14 @@ import ImageManager from '../ImageManager.js';
         itemListContainer.addEventListener('click', handleItemClick);
         document.addEventListener('click', handleDocumentClick, true);
         saveFab.addEventListener('click', handleSaveMenu);
+        
+        document.addEventListener('imageSelected', (e) => {
+            const { itemId, imageName } = e.detail;
+            MenuState.updateItemProperty(itemId, 'imagen', imageName);
+            setChangesMade(true);
+
+            renderMenu(); 
+        });
     }
 
     function renderMenu() {
@@ -70,7 +78,6 @@ import ImageManager from '../ImageManager.js';
         MenuState.setChanges(state);
         saveFab.classList.toggle('is-hidden', !state);
     }
-
 
     function handleContentEdit(e) {
         const target = e.target;
@@ -96,11 +103,16 @@ import ImageManager from '../ImageManager.js';
         }
     }
 
-
     function handleItemClick(e) {
+        const imageWrapper = e.target.closest('.item-imagen-wrapper');
         const itemElement = e.target.closest('.is-admin-item');
         const optionsTrigger = e.target.closest('.options-trigger');
         const actionButton = e.target.closest('.options-popup button');
+        
+        if (imageWrapper && itemElement) {
+             setActiveItem(itemElement);
+             return; 
+        }
 
         if (optionsTrigger) {
             e.preventDefault();
@@ -148,7 +160,6 @@ import ImageManager from '../ImageManager.js';
         closeAllOptionMenus();
     }
 
-
     function toggleOptionsMenu(actionsPanel) {
         const wasOpen = actionsPanel.classList.contains('is-open');
         closeAllOptionMenus();
@@ -157,13 +168,11 @@ import ImageManager from '../ImageManager.js';
         }
     }
     
-
     function closeAllOptionMenus() {
         itemListContainer.querySelectorAll('.item-actions-panel.is-open').forEach(panel => {
             panel.classList.remove('is-open');
         });
     }
-
 
     function setActiveItem(itemElement) {
         if (itemElement === activeItemElement) return;
@@ -177,7 +186,6 @@ import ImageManager from '../ImageManager.js';
         closeAllOptionMenus();
     }
 
-
     function deactivateCurrentItem() {
         if (activeItemElement) {
             activeItemElement.classList.remove('is-active-admin-item');
@@ -187,7 +195,7 @@ import ImageManager from '../ImageManager.js';
     }
     
     function handleDocumentClick(e) {
-        const isClickInsideMenu = e.target.closest('#item-list-container, .admin-fab');
+        const isClickInsideMenu = e.target.closest('#item-list-container, .admin-fab, #image-manager-modal');
         const isClickOnActions = e.target.closest('.item-actions-panel');
 
         if (!isClickInsideMenu) {
@@ -199,7 +207,6 @@ import ImageManager from '../ImageManager.js';
         }
     }
     
-
     async function handleSaveMenu() {
         if (isSaving) return;
         isSaving = true;
@@ -234,16 +241,14 @@ import ImageManager from '../ImageManager.js';
         }
     }
 
-function handleSaveSuccess(response) {
-    MenuState.setChanges(false);
-
-    setFabState('is-success');
-    
-    setTimeout(() => {
-        setChangesMade(MenuState.getChanges());
-        setFabState('');
-    }, 2000);
-}
+    function handleSaveSuccess(response) {
+        MenuState.setChanges(false);
+        setFabState('is-success');
+        setTimeout(() => {
+            setChangesMade(MenuState.getChanges());
+            setFabState('');
+        }, 2000);
+    }
 
     function handleSaveError(error) {
         console.error('Error al guardar:', error);
@@ -256,8 +261,8 @@ function handleSaveSuccess(response) {
 
     if (!window.adminModuleInitializers) window.adminModuleInitializers = {};
     window.adminModuleInitializers.menues = init;
+
     const initialMenuContainer = document.querySelector('div[id^="menues-container-"][data-initial-json]');
-    console.log(initialMenuContainer);
     if (initialMenuContainer) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             init(initialMenuContainer);
