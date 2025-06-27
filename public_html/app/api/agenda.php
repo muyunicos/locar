@@ -42,7 +42,7 @@ try {
     send_json_response(
         false,
         "Ocurrió un error en el servidor.",
-        DEV ? ["details" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()] : null, // Muestra detalles solo en DEV
+        DEV ? ["details" => $e->getMessage(), "file" => $e->getFile(), "line" => $e->getLine()] : null,
         500
     );
 }

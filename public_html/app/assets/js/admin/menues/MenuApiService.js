@@ -10,11 +10,25 @@ const MenuApiService = (function() {
     }
 
     async function saveMenu(payload) {
+        const menuContainerElement = document.querySelector('div[id^="menues-container"]');
+        let dataSource = null;
+        if (menuContainerElement) {
+            const lastHyphenIndex = menuContainerElement.id.lastIndexOf('-');
+            if (lastHyphenIndex !== -1) {
+                dataSource = menuContainerElement.id.substring(lastHyphenIndex + 1) + '.json';
+            } else {
+                console.warn("El ID del elemento no contiene un guion para extraer 'yyy':", menuContainerElement.id);
+            }
+        } else {
+            console.warn("No se encontró ningún div con ID que comience con 'menues-container'.");
+        }
+        
         const params = new URLSearchParams({
             client_id: config.clientId,
-            url: config.clientUrl
+            url: config.clientUrl,
+            dataSource: dataSource
         });
-
+        
         if (config.version) {
             params.append('version', config.version);
         }

@@ -7,6 +7,7 @@ if (!$authManager->isLoggedIn()) {
 }
 
 $menuData = $input['menuData'] ?? null;
+
 $dataSource = $input['dataSource'] ?? null;
 
 if (!$menuData || !$dataSource) {

@@ -43,6 +43,7 @@ function get_module_data(array $moduleConfig, array $context, bool $isAdmin = fa
         "sufijo" => $processedData["sufijo"] ?? null,
         "items" => $processedData["items"] ?? [],
         "footer_text" => $processedData["footer"] ?? "",
+        "json_id" => str_replace(".json", "", $moduleConfig["url"]),
         "error" => $processedData["error"] ?? null
     ];
     

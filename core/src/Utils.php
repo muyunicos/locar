@@ -42,16 +42,20 @@ class Utils
         }
         return $files;
     }
-    
+
     public static function get_versioned_asset(string $path): string
     {
-        $full_server_path = PUBLIC_PATH . $path; 
+        if (DEV) {
+            $full_server_path = PUBLIC_PATH . $path; 
 
-        if (!file_exists($full_server_path)) {
-            return PUBLIC_URL . $path;
+            if (!file_exists($full_server_path)) {
+                return PUBLIC_URL . $path;
+            }
+
+            $mtime = filemtime($full_server_path);
+            return PUBLIC_URL . $path . '?v=' . $mtime;
+        } else {
+            return PUBLIC_URL . $path . '?v=' . VERSION;
         }
-
-        $mtime = filemtime($full_server_path);
-        return PUBLIC_URL . $path . '?v=' . $mtime;
     }
 }   

@@ -17,7 +17,7 @@ class ModuleLoader {
     {
         $moduleConfig = null;
         foreach ($this->manifest["modulos"] as $module) {
-            if ((string) $module["id"] === $moduleId) {
+            if ( (string) $module["id"] === $moduleId || $module["url"] === $moduleId . '.json' ) {
                 $moduleConfig = $module;
                 break;
             }

@@ -108,12 +108,9 @@ $footer_text = $footer_text ?? '';
 
 ?>
 
-<div id="menu-container" data-module-id="menues"
-    <?php if ($isAdmin && $isAdminUrl): ?>
-        data-source-file="<?= htmlspecialchars($dataSourceFile) ?>"
+<div id="menues-container-<?= htmlspecialchars($json_id); ?>" <?php if ($isAdmin && $isAdminUrl): ?>
         data-initial-json='<?= htmlspecialchars(json_encode($json_for_admin), ENT_QUOTES, 'UTF-8') ?>'
-    <?php endif; ?>
->
+    <?php endif; ?>>
     <?php if (!empty($imagen_url)): ?>
         <div class="menu-header-image-container"><?php render_public_image($imagen_url, $menu_title); ?></div>
     <?php else: ?>

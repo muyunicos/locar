@@ -255,8 +255,8 @@ function handleSaveSuccess(response) {
 
     if (!window.adminModuleInitializers) window.adminModuleInitializers = {};
     window.adminModuleInitializers.menues = init;
-    
-    const initialMenuContainer = document.querySelector('[data-module-id="menues"][data-initial-json]');
+    const initialMenuContainer = document.querySelector('div[id^="menues-container-"][data-initial-json]');
+    console.log(initialMenuContainer);
     if (initialMenuContainer) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             init(initialMenuContainer);
