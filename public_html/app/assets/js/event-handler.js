@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const modulesToWatch = uniqueModuleIds.length > 0 ? encodeURIComponent(JSON.stringify([...new Set(uniqueModuleIds)])) : '';
 
             const eventSource = new EventSource(
-                    `${this.publicUrl}/api/events.php?client_id=${this.clientId}&url=${encodeURIComponent(this.clientUrl)}&watch_modules=${modulesToWatch}`
+                    `${this.publicUrl}/api/events.php?client_id=${this.clientId}&url=${encodeURIComponent(this.clientUrl)}&version=${encodeURIComponent(this.version)}&watch_modules=${modulesToWatch}`
                 );
             eventSource.addEventListener('watching_files', (event) => {
                 try {
