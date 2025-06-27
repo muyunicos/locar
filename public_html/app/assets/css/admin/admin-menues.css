@@ -1,29 +1,42 @@
 /**
  * Estilos para la interfaz de administración de menús.
+ * Versión pulida para corregir problemas de especificidad.
  */
 
-/* Resaltado para el ítem o categoría activa (seleccionada) */
+/* =============================================== */
+/* == Estilos de Interacción y Selección Activa == */
+/* =============================================== */
+
+/* Resaltado para el ítem o categoría que tiene la clase activa DIRECTAMENTE */
 .item.is-active-admin-item,
 .c-container.is-active-admin-item > .category-header {
     outline: 2px solid #3b82f6;
-    border-radius: 8px; /* Redondear el contorno de la selección */
+    border-radius: 8px;
 }
 
-/* Hace que los campos editables sean más obvios cuando su ítem está activo */
-.is-active-admin-item [contenteditable="true"] {
+/* Los campos editables se resaltan SÓLO si su contenedor directo es el activo */
+.item.is-active-admin-item > .item-details [contenteditable="true"],
+.c-container.is-active-admin-item > .category-header [contenteditable="true"] {
     background-color: rgba(59, 130, 246, 0.08);
     border-radius: 4px;
     padding: 2px 4px;
     margin: -2px -4px;
 }
 
-/* Estructura base para un ítem o cabecera de categoría en modo admin */
+/* =============================================== */
+/* == Controles Flotantes (Arrastrar y Opciones) == */
+/* =============================================== */
+
 .is-admin-item, 
 .category-header {
-    position: relative; /* Contexto para posicionar los controles */
+    position: relative;
 }
 
-/* Manejador para arrastrar y soltar (Drag & Drop) */
+/* El manejador de arrastre SÓLO aparece al pasar el cursor sobre su padre directo */
+.item:hover > .item-drag-handle,
+.category-header:hover > .item-drag-handle {
+    opacity: 1;
+}
 .item-drag-handle {
     position: absolute;
     top: 50%;
@@ -37,30 +50,31 @@
     transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease;
     z-index: 5;
 }
-
-/* El manejador aparece cuando el cursor está sobre el ítem */
-.is-admin-item:hover .item-drag-handle {
-    opacity: 1;
-}
-
 .item-drag-handle:hover {
     color: #3b82f6;
 }
-
 .item-drag-handle:active {
     cursor: grabbing;
 }
 
-/* Panel de acciones (contenedor del botón de opciones y el popup) */
+
+/* Panel de acciones SÓLO aparece al pasar el cursor sobre su padre directo */
+.item:hover > .item-actions-panel,
+.category-header:hover > .item-actions-panel {
+    opacity: 1;
+    pointer-events: all;
+}
 .item-actions-panel {
     position: absolute;
     top: 50%;
-    right: -30px;
+    right: 35px; 
     transform: translateY(-50%);
     z-index: 10;
+    opacity: 0; 
+    pointer-events: none;
+    transition: opacity 0.2s ease;
 }
 
-/* Botón para abrir el popup de opciones (...) */
 .options-trigger {
     background: none;
     border: none;
@@ -79,11 +93,12 @@
 .options-popup {
     visibility: hidden;
     opacity: 0;
-    transform: translateX(10px) scale(0.95);
+    transform: translateY(-10px) scale(0.95);
     transition: all 0.15s ease-out;
     position: absolute;
-    right: 35px;
-    top: calc(50% + -64px);
+    right: 100%; 
+    top: 50%;
+    transform: translateY(-50%);
     background-color: #fff;
     border-radius: 8px;
     z-index: 11;
@@ -93,16 +108,15 @@
     gap: 4px;
     width: max-content;
     border: 1px solid #e4e4e7;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* El popup se hace visible cuando el panel tiene la clase 'is-open' */
 .item-actions-panel.is-open .options-popup {
     visibility: visible;
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(-50%) scale(1);
 }
 
-/* Botones dentro del popup */
 .options-popup button {
     background-color: transparent;
     border: none;
@@ -118,22 +132,80 @@
     text-align: left;
     color: #3f3f46;
 }
-
-.options-popup button svg {
-    flex-shrink: 0;
-}
-
 .options-popup button:hover {
     background-color: #f4f4f5;
     color: #18181b;
 }
-
 .options-popup button.danger:hover {
     background-color: #fee2e2;
     color: #ef4444;
 }
 
-/* Estilo para los placeholders en campos editables vacíos */
+/* =============================================== */
+/* == Placeholder de Imagen (Lógica Corregida)  == */
+/* =============================================== */
+
+/* El wrapper de imagen en sí no necesita muchos estilos base aquí */
+.is-admin-item .item-imagen-wrapper {
+    transition: all 0.2s ease-in-out;
+    border-radius: 8px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Si un ítem NO está activo Y NO tiene imagen, lo colapsamos */
+.item:not(.is-active-admin-item) > .item-imagen-wrapper:not(:has(img)) {
+    width: 0;
+    height: 0;
+    border: none;
+    margin-left: -1.2rem;
+    overflow: hidden;
+}
+
+.item-image-placeholder {
+    display: none;
+}
+
+/* Cuando el ítem específico es ACTIVO, su wrapper de imagen se transforma */
+.item.is-active-admin-item > .item-imagen-wrapper {
+    border: 1px dashed #d4d4d8;
+    background-color: #f4f4f5;
+    cursor: pointer;
+}
+
+/* Mostramos el placeholder SÓLO si su padre ítem está activo y no tiene imagen */
+.item.is-active-admin-item > .item-imagen-wrapper:not(:has(img)) .item-image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #a1a1aa;
+    font-size: 12px;
+}
+
+/* Opacamos la imagen SÓLO si su padre ítem está activo */
+.item.is-active-admin-item > .item-imagen-wrapper img {
+    opacity: 0.5;
+}
+
+/* Efectos hover SÓLO para el wrapper del ítem activo */
+.item.is-active-admin-item > .item-imagen-wrapper:hover {
+    border-color: #3b82f6;
+    background-color: #eef2ff;
+}
+.item.is-active-admin-item > .item-imagen-wrapper:hover img {
+    opacity: 0.7;
+}
+.item.is-active-admin-item > .item-imagen-wrapper:hover .item-image-placeholder {
+    color: #3b82f6;
+}
+
+/* =============================================== */
+/* == Estilos Generales y de Estado Adicionales == */
+/* =============================================== */
+
 [contenteditable=true][data-placeholder]:empty:before {
     content: attr(data-placeholder);
     color: #a1a1aa;
@@ -141,50 +213,8 @@
     pointer-events: none;
 }
 
-/* Estilo para los ítems marcados como ocultos */
 .is-admin-hidden { 
     opacity: 0.6; 
-    background-image: repeating-linear-gradient(
-        -45deg, 
-        transparent, 
-        transparent 5px, 
-        rgba(228, 228, 231, 0.5) 5px, 
-        rgba(228, 228, 231, 0.5) 10px
-    );
+    background-image: repeating-linear-gradient(-45deg, transparent, transparent 5px, rgba(228, 228, 231, 0.5) 5px, rgba(228, 228, 231, 0.5) 10px);
     border: 1px dashed #d4d4d8 !important;
-}
-
-/* Estilos para el proceso de arrastrar y soltar */
-.item.is-dragging,
-.c-container.is-dragging {
-    opacity: 0.4;
-    border-style: dashed !important;
-    background-color: #f8fafc;
-}
-
-/* Marcador de posición que indica dónde se soltará el ítem */
-.drop-placeholder {
-    display: block;
-    height: 16px;
-    width: 100%;
-    background-color: rgba(59, 130, 246, 0.15);
-    border: 1px dashed rgba(59, 130, 246, 0.5);
-    border-radius: 8px;
-    margin: 8px 0;
-    pointer-events: none;
-}
-
-/* Animación para el spinner del botón de guardado */
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-.is-spinning {
-    animation: spin 1s linear infinite;
-}
-.spinner-path {
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 4;
-    stroke-linecap: round;
 }

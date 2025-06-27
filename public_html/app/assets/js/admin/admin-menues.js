@@ -2,6 +2,7 @@ import MenuState from './menues/MenuState.js';
 import MenuView from './menues/MenuView.js';
 import MenuApiService from './menues/MenuApiService.js';
 import DragDropManager from './menues/DragDropManager.js';
+import ImageManager from '../ImageManager.js';
 
 (function() {
     let appConfig = {};

@@ -18,6 +18,14 @@ const MenuState = (function() {
         return menu;
     }
 
+    function updateItemImage(itemId, imageName) {
+    const item = this.findItemById(this.items, itemId);
+    if (item) {
+        item.imagen = imageName;
+        this.renderMenu(); // Re-renderiza para mostrar la nueva imagen
+        this.showSaveButton(); // Muestra el botón de guardar cambios
+    }
+}
     function findItemRecursive(id, currentItems = menu.items, parent = null) {
         if (!currentItems) return null;
         for (let i = 0; i < currentItems.length; i++) {

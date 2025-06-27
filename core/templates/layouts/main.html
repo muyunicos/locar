@@ -23,7 +23,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600&family=Bona+Nova+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
 
-<body class="<?= (($isAdmin ?? false) && !$isAdminView) ? 'isAdmin-view' : '' ?>">
+<body class="<?= (($isAdmin ?? false) && $isAdminUrl) ? 'isAdmin-view' : '' ?>">
 
     <div id="loading-overlay" class="loading-overlay">
         <img src="<?= htmlspecialchars($spinner) ?>" alt="Cargando...">

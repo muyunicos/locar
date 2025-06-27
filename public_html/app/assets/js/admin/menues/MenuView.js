@@ -43,17 +43,38 @@ const MenuView = (function() {
         `;
     }
 
-    function _createImageElement(itemData) {
-        if (!itemData.imagen) return '';
-        const imageUrl = itemData.imagen.startsWith('http') 
-            ? itemData.imagen 
-            : `${config.clientUrl}/imagenes/${itemData.imagen}.webp`;
+    function _createImageElement(item) {
+        const imageWrapper = document.createElement('div');
+        imageWrapper.className = 'item-imagen-wrapper';
+        imageWrapper.addEventListener('click', () => {
+            ImageManager.openModal(item.id); 
+        });
 
-        return `
-            <div class="item-imagen-wrapper">
-                <img src="${imageUrl}" alt="${itemData.titulo || ''}" loading="lazy" />
-            </div>
+        if (item.imagen && item.imagen.trim() !== '') {
+            const img = document.createElement('img');
+            const timestamp = new Date().getTime();
+            img.src = `${config.clientUrl}/imagenes/${item.imagen}.webp?t=${timestamp}`;
+            img.alt = item.titulo;
+            img.onerror = function() {
+                imageWrapper.innerHTML = '';
+                imageWrapper.appendChild(_createImagePlaceholder());
+            }.bind(this);
+            imageWrapper.appendChild(img);
+        } else {
+            imageWrapper.appendChild(_createImagePlaceholder());
+        }
+
+        return imageWrapper;
+    }
+
+    function _createImagePlaceholder() {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'item-image-placeholder';
+        placeholder.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            <span>Añadir imagen</span>
         `;
+        return placeholder;
     }
 
     function _createPriceElement(itemData) {
@@ -76,67 +97,95 @@ const MenuView = (function() {
         `;
     }
 
-    function _createItemElement(itemData) {
-        const itemElement = document.createElement('div');
-        itemElement.className = `item is-admin-item ${itemData.ocultar ? 'is-admin-hidden' : ''}`;
-        itemElement.dataset.id = itemData.id;
-        itemElement.dataset.type = 'item';
-        itemElement.setAttribute('draggable', 'true');
+   // Reemplaza esta función en /public_html/app/assets/js/admin/menues/MenuView.js
 
-        itemElement.innerHTML = `
-            ${_createDragHandle()}
-            ${_createImageElement(itemData)}
-            <div class="item-details">
-                <div class="item-info">
-                    <h3 class="item-titulo" contenteditable="true" data-editable-property="titulo" data-placeholder="Título del ítem">${itemData.titulo || ''}</h3>
-                    <p class="item-descripcion" contenteditable="true" data-editable-property="descripcion" data-placeholder="Descripción (opcional)">${itemData.descripcion || ''}</p>
-                </div>
-                ${_createPriceElement(itemData)}
+function _createItemElement(itemData) {
+    const itemElement = document.createElement('div');
+    itemElement.className = `item is-admin-item ${itemData.ocultar ? 'is-admin-hidden' : ''}`;
+    itemElement.dataset.id = itemData.id;
+    itemElement.dataset.type = 'item';
+    itemElement.setAttribute('draggable', 'true');
+
+    // 1. Creamos el manejador de arrastre (drag handle)
+    const dragHandle = _createDragHandle();
+    itemElement.insertAdjacentHTML('beforeend', dragHandle);
+
+    // 2. Creamos el elemento de la imagen y lo AÑADIMOS como un nodo
+    const imageElement = _createImageElement(itemData);
+    itemElement.appendChild(imageElement);
+
+    // 3. Creamos el resto del HTML (detalles, precio, etc.)
+    const otherDetailsHtml = `
+        <div class="item-details">
+            <div class="item-info">
+                <h3 class="item-titulo" contenteditable="true" data-editable-property="titulo" data-placeholder="Título del ítem">${itemData.titulo || ''}</h3>
+                <p class="item-descripcion" contenteditable="true" data-editable-property="descripcion" data-placeholder="Descripción (opcional)">${itemData.descripcion || ''}</p>
             </div>
-            ${_createActionsPanel(itemData)}
-        `;
-        return itemElement;
+            ${_createPriceElement(itemData)}
+        </div>
+        ${_createActionsPanel(itemData)}
+    `;
+    itemElement.insertAdjacentHTML('beforeend', otherDetailsHtml);
+
+    return itemElement;
+}
+
+// Ahora, reemplaza también la función para crear categorías
+
+function _createCategoryElement(itemData) {
+    const categoryElement = document.createElement('div');
+    const layoutClass = itemData.layout ? ` ${itemData.layout}` : '';
+    categoryElement.className = `c-container is-admin-item${layoutClass} ${itemData.ocultar ? 'is-admin-hidden' : ''}`;
+    categoryElement.dataset.id = itemData.id;
+    categoryElement.dataset.type = 'category';
+    categoryElement.setAttribute('draggable', 'true');
+    if (itemData.titulo) {
+         categoryElement.dataset.title = itemData.titulo.replace(/ /g, '_');
     }
 
-    function _createCategoryElement(itemData) {
-        const categoryElement = document.createElement('div');
-        const layoutClass = itemData.layout ? ` ${itemData.layout}` : '';
-        categoryElement.className = `c-container is-admin-item${layoutClass} ${itemData.ocultar ? 'is-admin-hidden' : ''}`;
-        categoryElement.dataset.id = itemData.id;
-        categoryElement.dataset.type = 'category';
-        categoryElement.setAttribute('draggable', 'true');
-        categoryElement.dataset.title = itemData.titulo.replace(/ /g, '_');
-        const headerHtml = `
-            <div class="category-header">
-                ${_createDragHandle()}
-                <h3 class="c-titulo">
-                    <div class="c-titulo-content">
-                        <span contenteditable="true" data-editable-property="titulo" data-placeholder="Título de categoría">${itemData.titulo || ''}</span>
-                        <small class="c-titulo-descripcion" contenteditable="true" data-editable-property="descripcion" data-placeholder="Descripción (opcional)">${itemData.descripcion || ''}</small>
-                    </div>
-                    ${itemData.imagen ? _createImageElement(itemData) : ''}
-                </h3>
-                ${_createActionsPanel(itemData)}
+    // --- Construcción del Header de la Categoría ---
+    const categoryHeader = document.createElement('div');
+    categoryHeader.className = 'category-header';
+    
+    // Añadimos el drag handle y el contenido del título
+    const headerContent = `
+        ${_createDragHandle()}
+        <h3 class="c-titulo">
+            <div class="c-titulo-content">
+                <span contenteditable="true" data-editable-property="titulo" data-placeholder="Título de categoría">${itemData.titulo || ''}</span>
+                <small class="c-titulo-descripcion" contenteditable="true" data-editable-property="descripcion" data-placeholder="Descripción (opcional)">${itemData.descripcion || ''}</small>
             </div>
-        `;
-        
-        const sublist = document.createElement('div');
-        sublist.className = 'item-list';
+        </h3>
+        ${_createActionsPanel(itemData)}
+    `;
+    categoryHeader.innerHTML = headerContent;
 
-        if (itemData.items) {
-            itemData.items.forEach(subItemData => {
-                const subElement = (subItemData.es_cat || subItemData.type === 'category') 
-                    ? _createCategoryElement(subItemData) 
-                    : _createItemElement(subItemData);
-                if (subElement) sublist.appendChild(subElement);
-            });
-        }
-        
-        categoryElement.innerHTML = headerHtml;
-        categoryElement.appendChild(sublist);
-        
-        return categoryElement;
+    // Si la categoría tiene imagen, la creamos y la insertamos en el lugar correcto
+    if (itemData.imagen) {
+        const imageElement = _createImageElement(itemData);
+        const titleElement = categoryHeader.querySelector('.c-titulo');
+        titleElement.appendChild(imageElement);
     }
+    
+    categoryElement.appendChild(categoryHeader);
+    
+    // --- Construcción de la lista de sub-ítems (sin cambios aquí) ---
+    const sublist = document.createElement('div');
+    sublist.className = 'item-list';
+
+    if (itemData.items) {
+        itemData.items.forEach(subItemData => {
+            const subElement = (subItemData.es_cat || subItemData.type === 'category') 
+                ? _createCategoryElement(subItemData) 
+                : _createItemElement(subItemData);
+            if (subElement) sublist.appendChild(subElement);
+        });
+    }
+    
+    categoryElement.appendChild(sublist);
+    
+    return categoryElement;
+}
 
     function render(menuData) {
         if (!itemListContainer || !menuContainer) {
