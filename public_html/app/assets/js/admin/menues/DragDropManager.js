@@ -1,75 +1,83 @@
 import MenuState from './MenuState.js';
 
 const DragDropManager = (function() {
-    // Guardaremos las instancias de Sortable para poder destruirlas si es necesario.
     let sortableInstances = [];
     let _onDragEndCallback = null;
+    let mainContainer = null;
 
     /**
-     * Inicializa el sistema de Drag & Drop en el contenedor principal y en todas las sub-listas.
+     * Inicializa el sistema de Drag & Drop en todas las listas.
      */
-    function init({ onDragEnd }) {
+    function init({ container, onDragEnd }) {
         _onDragEndCallback = onDragEnd;
-        // Limpiamos instancias viejas si se re-inicializa
+        mainContainer = container; 
+        
+        if (!mainContainer) {
+            console.error("DragDropManager no recibió un contenedor para inicializar.");
+            return;
+        }
+
         destroy(); 
         
-        const mainList = document.getElementById('item-list-container');
-        if (mainList) {
-            // Hacemos "ordenable" la lista principal
-            createSortable(mainList);
-
-            // Buscamos todas las sub-listas (dentro de las categorías) y también las hacemos "ordenables"
-            const subLists = mainList.querySelectorAll('.item-list');
-            subLists.forEach(createSortable);
-        }
+        // La clave: aplicamos Sortable a TODAS las listas (.item-list)
+        const allLists = mainContainer.querySelectorAll('.item-list');
+        allLists.forEach(createSortable);
     }
 
     /**
      * Crea una instancia de Sortable en un elemento de lista.
-     * @param {HTMLElement} listElement - El elemento (ul, div) que contiene los ítems a ordenar.
      */
     function createSortable(listElement) {
         const sortable = new Sortable(listElement, {
-            group: 'nested', // Permite mover ítems entre listas del mismo grupo
-            animation: 150,  // Animación suave al soltar
-            handle: '.item-drag-handle', // Solo se puede arrastrar desde el manejador
-            ghostClass: 'is-dragging-ghost', // Clase CSS para el elemento "fantasma"
-            dragClass: 'is-dragging', // Clase CSS para el elemento que se está arrastrando
+            // --- CONFIGURACIÓN CLAVE PARA ANIDAMIENTO ---
+            group: 'nested-menu', // Un nombre de grupo único. Todos los que lo compartan pueden intercambiar ítems.
+            animation: 150,
+            fallbackOnBody: true,
+            swapThreshold: 0.65,
+            handle: '.item-drag-handle', // El arrastre SÓLO puede empezar en este elemento.
+            draggable: '.is-admin-item', // Define qué elementos dentro de la lista son arrastrables.
+            ghostClass: 'is-dragging-ghost',
             
-            // Se llama cuando un ítem se suelta en una nueva posición
+            // --- Lógica de Eventos ---
+            onStart: function (evt) {
+                // Vista simplificada al arrastrar categorías
+                if (evt.item.classList.contains('c-container')) {
+                    mainContainer.classList.add('is-category-drag-view');
+                }
+            },
+            
             onEnd: function (evt) {
+                // Siempre limpiamos la vista simplificada al soltar
+                mainContainer.classList.remove('is-category-drag-view');
+
                 const draggedItemId = evt.item.dataset.id;
                 const newIndex = evt.newIndex;
                 
-                // Determinamos el nuevo contenedor padre
-                const newParentList = evt.to;
-                const parentCategoryElement = newParentList.closest('.c-container');
+                // evt.to nos da el elemento de la lista de destino. Con esto encontramos al padre.
+                const parentCategoryElement = evt.to.closest('.c-container');
                 const newParentId = parentCategoryElement ? parentCategoryElement.dataset.id : null;
                 
-                // Actualizamos el estado con la nueva información
+                // Actualizamos el estado
                 MenuState.reorderItem(draggedItemId, newParentId, newIndex);
 
-                // Llamamos al callback para que la vista principal se re-renderice
+                // Notificamos al controlador principal que re-renderice todo
                 if (_onDragEndCallback) {
                     _onDragEndCallback();
                 }
             },
         });
 
-        // Guardamos la instancia para poder limpiarla después
         sortableInstances.push(sortable);
     }
 
     /**
-     * Destruye todas las instancias de Sortable.
-     * Útil si necesitas recargar la interfaz sin recargar la página.
+     * Destruye todas las instancias activas de Sortable.
      */
     function destroy() {
         sortableInstances.forEach(instance => instance.destroy());
         sortableInstances = [];
     }
 
-    // Exponemos públicamente solo los métodos necesarios
     return {
         init,
         destroy

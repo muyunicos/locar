@@ -110,7 +110,6 @@
 }
 
 .item:hover {
-    transform: translateY(-5px);
     background-color: rgba(0, 0, 0, 0.4);
     box-shadow: 0 0 15px rgba(0, 229, 255, 0.2), inset 0 0 8px rgba(0, 229, 255, 0.1);
 }

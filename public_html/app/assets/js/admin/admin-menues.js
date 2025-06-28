@@ -10,7 +10,12 @@ import ImageManager from '../ImageManager.js';
     let menuContainer, saveFab, itemListContainer;
     let isSaving = false;
 
+    /**
+     * Función principal que inicializa todo el editor de menús.
+     * @param {HTMLElement} moduleElement - El elemento contenedor principal del módulo.
+     */
     async function init(moduleElement) {
+        // Guardamos referencias a los elementos principales del DOM
         menuContainer = moduleElement;
         if (!menuContainer) {
              console.error("Error crítico: La función init del editor de menús fue llamada sin un elemento de módulo.");
@@ -27,16 +32,22 @@ import ImageManager from '../ImageManager.js';
 
         appConfig = window.appConfig || {}; 
         
+        // Inicializamos los módulos de soporte
         await ImageManager.init();
-
         MenuState.load(JSON.parse(menuContainer.dataset.initialJson || '{}'));
-         MenuView.init(menuContainer, {
+        MenuApiService.init(appConfig); 
+        
+        // Inicializamos los módulos de la vista y de interacción
+        MenuView.init(menuContainer, {
             onImageClick: (itemId) => {
                 ImageManager.openModal(itemId);
             }
         }); 
-        MenuApiService.init(appConfig); 
+
+        // ¡CORRECCIÓN APLICADA AQUÍ!
+        // Pasamos el contenedor del módulo a DragDropManager.
         DragDropManager.init({
+            container: moduleElement,
             onDragEnd: () => {
                 setChangesMade(true);
                 renderMenu();
@@ -47,24 +58,40 @@ import ImageManager from '../ImageManager.js';
         renderMenu();
     }
 
+    /**
+     * Configura todos los listeners de eventos para la interfaz.
+     */
     function setupEventListeners() {
         itemListContainer.addEventListener('input', handleContentEdit, true);
         itemListContainer.addEventListener('click', handleItemClick);
         document.addEventListener('click', handleDocumentClick, true);
         saveFab.addEventListener('click', handleSaveMenu);
         
+        // Escuchamos el evento personalizado del ImageManager para actualizar el estado
         document.addEventListener('imageSelected', (e) => {
             const { itemId, imageName } = e.detail;
             MenuState.updateItemProperty(itemId, 'imagen', imageName);
             setChangesMade(true);
-
             renderMenu(); 
         });
     }
 
+    /**
+     * Renderiza el menú completo basándose en el estado actual.
+     */
     function renderMenu() {
         const activeId = activeItemElement ? activeItemElement.dataset.id : null;
         MenuView.render(MenuState.getMenu());
+        
+        // Re-inicializamos DragDropManager después de cada renderizado
+        // para que reconozca la nueva estructura del DOM.
+        DragDropManager.init({
+            container: menuContainer,
+            onDragEnd: () => {
+                setChangesMade(true);
+                renderMenu();
+            }
+        });
         
         if (activeId) {
             const newActiveElement = itemListContainer.querySelector(`[data-id="${activeId}"]`);
@@ -259,6 +286,7 @@ import ImageManager from '../ImageManager.js';
         }, 2500);
     }
 
+    // --- Punto de Entrada de la Aplicación ---
     if (!window.adminModuleInitializers) window.adminModuleInitializers = {};
     window.adminModuleInitializers.menues = init;
 

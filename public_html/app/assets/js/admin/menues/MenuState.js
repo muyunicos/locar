@@ -108,7 +108,83 @@ function updateItemProperty(id, property, value) {
             _logState("toggleVisibility");
         }
     }
+// --- Añade esta función dentro de MenuState ---
+    /**
+     * Crea un nuevo ítem con valores por defecto.
+     * @param {string|null} parentId - El ID de la categoría padre, o null para añadirlo a la raíz.
+     */
+    function createItem(parentId = null) {
+        const newItem = {
+            id: generateId(), // Reutilizamos tu función para generar IDs
+            titulo: "Nuevo Ítem",
+            descripcion: "",
+            precio: 0,
+            imagen: "",
+            ocultar: false,
+            es_cat: false // Importante para distinguirlo de una categoría
+        };
 
+        let destinationList;
+
+        if (parentId) {
+            // Si se especifica un padre, buscamos su lista de ítems
+            const parentInfo = findItemRecursive(parentId);
+            if (parentInfo && parentInfo.item) {
+                if (!parentInfo.item.items) {
+                    parentInfo.item.items = []; // Si no tiene una lista de hijos, la creamos
+                }
+                destinationList = parentInfo.item.items;
+            } else {
+                console.error(`No se encontró la categoría padre con ID: ${parentId}`);
+                return; // Salimos si no encontramos al padre
+            }
+        } else {
+            // Si no hay padre, lo añadimos a la lista principal del menú
+            destinationList = menu.items;
+        }
+
+        destinationList.push(newItem); // Añadimos el nuevo ítem a la lista de destino
+        hasChanges = true;
+        _logState(`createItem en padre: ${parentId || 'raíz'}`);
+    }
+
+    // --- Añade también esta función ---
+    /**
+     * Crea una nueva categoría con valores por defecto.
+     * @param {string|null} parentId - El ID de la categoría padre, o null para añadirla a la raíz.
+     */
+    function createCategory(parentId = null) {
+        const newCategory = {
+            id: generateId(),
+            titulo: "Nueva Categoría",
+            descripcion: "",
+            imagen: "",
+            ocultar: false,
+            es_cat: true, // La clave para identificarla como categoría
+            items: [] // Las categorías siempre empiezan con una lista de ítems vacía
+        };
+
+        let destinationList;
+
+        if (parentId) {
+            const parentInfo = findItemRecursive(parentId);
+            if (parentInfo && parentInfo.item) {
+                if (!parentInfo.item.items) {
+                    parentInfo.item.items = [];
+                }
+                destinationList = parentInfo.item.items;
+            } else {
+                console.error(`No se encontró la categoría padre con ID: ${parentId}`);
+                return;
+            }
+        } else {
+            destinationList = menu.items;
+        }
+
+        destinationList.push(newCategory);
+        hasChanges = true;
+        _logState(`createCategory en padre: ${parentId || 'raíz'}`);
+    }
     function reorderItem(draggedId, newParentId, newIndex) {
         const found = findItemRecursive(draggedId);
         if (!found) return;
@@ -145,8 +221,9 @@ function updateItemProperty(id, property, value) {
         reorderItem,
         toggleVisibility,
         setChanges: (state) => { hasChanges = state; },
-        getChanges: () => hasChanges
+        getChanges: () => hasChanges,
+
+        createItem,
+        createCategory
     };
 })();
-
-export default MenuState;
