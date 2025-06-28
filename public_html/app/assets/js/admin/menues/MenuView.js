@@ -1,18 +1,13 @@
-// public_html/app/assets/js/admin/menues/MenuView.js (Versión Corregida)
-
 const MenuView = (function() {
     let menuContainer = null;
     let itemListContainer = null;
     let config = {};
-    // AQUÍ ESTÁ LA CLAVE: Una variable privada para guardar la función callback.
     let onImageClickCallback = null;
 
-    // La función init ahora guarda el callback en nuestra variable privada.
     function init(mainContainer, options = {}) {
         menuContainer = mainContainer;
         itemListContainer = menuContainer.querySelector('#item-list-container');
         config = window.appConfig || {};
-        onImageClickCallback = options.onImageClick; // Guardamos la función que nos pasan.
     }
 
     function _getIcon(iconName) {
@@ -26,27 +21,47 @@ const MenuView = (function() {
         return icons[iconName] || '';
     }
 
+    function _createDragHandle() {
+        return `<div class="item-drag-handle" title="Reordenar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg></div>`;
+    }
+
     function _createActionsPanel(itemData) {
+        const panel = document.createElement('div');
+        panel.className = 'item-actions-panel';
+
         const visibilityText = itemData.ocultar ? 'Mostrar' : 'Ocultar';
         const visibilityIcon = itemData.ocultar ? _getIcon('visibility-off') : _getIcon('visibility-on');
-        return `<div class="item-actions-panel"><button class="options-trigger" title="Más opciones">${_getIcon('options')}</button><div class="options-popup"><button data-action="toggle-visibility" title="${visibilityText} ítem">${visibilityIcon} ${visibilityText}</button><button data-action="duplicate" title="Duplicar ítem">${_getIcon('duplicate')} Duplicar</button><button data-action="delete" class="danger" title="Eliminar ítem">${_getIcon('delete')} Eliminar</button></div></div>`;
+
+        let popupButtonsHTML = `
+            <button data-action="toggle-visibility" title="${visibilityText} ítem">${visibilityIcon} ${visibilityText}</button>
+            <button data-action="duplicate" title="Duplicar ítem">${_getIcon('duplicate')} Duplicar</button>
+            <button data-action="delete" class="danger" title="Eliminar ítem">${_getIcon('delete')} Eliminar</button>
+        `;
+
+        // Si el elemento es una categoría, añadimos los botones de creación.
+        if (itemData.es_cat) {
+            popupButtonsHTML += `
+                <div class="popup-divider"></div>
+                <button data-action="create-item" data-parent-id="${itemData.id}">+ Añadir Ítem</button>
+                <button data-action="create-category" data-parent-id="${itemData.id}">+ Añadir Categoría</button>
+            `;
+        }
+
+        panel.innerHTML = `
+            <button class="options-trigger" title="Más opciones">${_getIcon('options')}</button>
+            <div class="options-popup">${popupButtonsHTML}</div>
+        `;
+        return panel;
     }
 
     function _createImageElement(item) {
         const imageWrapper = document.createElement('div');
         imageWrapper.className = 'item-imagen-wrapper';
-        imageWrapper.addEventListener('click', () => {
-            if (typeof onImageClickCallback === 'function') {
-                onImageClickCallback(item.id);
-            }
-        });
-
+       
         if (item.imagen && item.imagen.trim() !== '') {
             const img = document.createElement('img');
-            //const timestamp = new Date().getTime();
-            //?t=${timestamp}`;
             img.src = `${config.clientUrl}/imagenes/${item.imagen}.webp`;
-            img.alt = item.titulo;
+            img.alt = item.titulo || 'Imagen de ítem';
             img.onerror = function() {
                 imageWrapper.innerHTML = '';
                 imageWrapper.appendChild(_createImagePlaceholder());
@@ -55,97 +70,108 @@ const MenuView = (function() {
         } else {
             imageWrapper.appendChild(_createImagePlaceholder());
         }
-
         return imageWrapper;
     }
-
+    
     function _createImagePlaceholder() {
         const placeholder = document.createElement('div');
         placeholder.className = 'item-image-placeholder';
-        placeholder.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span>Añadir imagen</span>`;
+        placeholder.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><span>Añadir</span>`;
         return placeholder;
     }
 
     function _createPriceElement(itemData) {
-        const formatConfig = { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 };
-        const formattedPrice = itemData.precio ? new Intl.NumberFormat('es-AR', formatConfig).format(itemData.precio) : '0,00';
-        return `<div class="item-precio"><span class="precio-final">$<span contenteditable="true" data-editable-property="precio">${formattedPrice}</span></span></div>`;
-    }
+    const formattedPrice = Math.round(itemData.precio || 0);
+    return `
+        <div class="item-precio">
+            <span class="precio-final">
+                $
+                <span 
+                    contenteditable="true" 
+                    data-editable-property="precio" 
+                    inputmode="numeric" 
+                    pattern="[0-9]*"
+                >
+                    ${formattedPrice}
+                </span>
+            </span>
+        </div>
+    `;
+}
 
-    function _createDragHandle() {
-        return `<div class="item-drag-handle" title="Reordenar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99h-3zM9 3L5 6.99h3V14h2V6.99h3L9 3z"/></svg></div>`;
-    }
-
+    // --- FUNCIONES DE CONSTRUCCIÓN DE ESTRUCTURA ---
+    
     function _createItemElement(itemData) {
         const itemElement = document.createElement('div');
         itemElement.className = `item is-admin-item ${itemData.ocultar ? 'is-admin-hidden' : ''}`;
         itemElement.dataset.id = itemData.id;
         itemElement.dataset.type = 'item';
-        itemElement.setAttribute('draggable', 'true');
-        itemElement.insertAdjacentHTML('beforeend', _createDragHandle());
-        itemElement.appendChild(_createImageElement(itemData));
-        const otherDetailsHtml = `<div class="item-details"><div class="item-info"><h3 class="item-titulo" contenteditable="true" data-editable-property="titulo" data-placeholder="Título del ítem">${itemData.titulo || ''}</h3><p class="item-descripcion" contenteditable="true" data-editable-property="descripcion" data-placeholder="Descripción (opcional)">${itemData.descripcion || ''}</p></div>${_createPriceElement(itemData)}</div>${_createActionsPanel(itemData)}`;
-        itemElement.insertAdjacentHTML('beforeend', otherDetailsHtml);
+        
+        const contentWrapper = `
+            ${_createDragHandle()}
+            ${_createImageElement(itemData).outerHTML}
+            <div class="item-details">
+                <div class="item-info">
+                    <h3 class="item-titulo" contenteditable="true" data-editable-property="titulo">${itemData.titulo || ''}</h3>
+                    <p class="item-descripcion" contenteditable="true" data-editable-property="descripcion">${itemData.descripcion || ''}</p>
+                </div>
+                ${_createPriceElement(itemData)}
+            </div>
+            ${_createActionsPanel(itemData).outerHTML}
+        `;
+        itemElement.innerHTML = contentWrapper;
         return itemElement;
     }
 
     function _createCategoryElement(itemData) {
         const categoryElement = document.createElement('div');
-        const layoutClass = itemData.layout ? ` ${itemData.layout}` : '';
-        categoryElement.className = `c-container is-admin-item${layoutClass} ${itemData.ocultar ? 'is-admin-hidden' : ''}`;
+        categoryElement.className = `c-container is-admin-item ${itemData.layout || ''} ${itemData.ocultar ? 'is-admin-hidden' : ''}`;
         categoryElement.dataset.id = itemData.id;
         categoryElement.dataset.type = 'category';
-        categoryElement.setAttribute('draggable', 'true');
-        if (itemData.titulo) {
-            categoryElement.dataset.title = itemData.titulo.replace(/ /g, '_');
-        }
+
         const categoryHeader = document.createElement('div');
         categoryHeader.className = 'category-header';
-        const headerContent = `${_createDragHandle()}<h3 class="c-titulo"><div class="c-titulo-content"><span contenteditable="true" data-editable-property="titulo" data-placeholder="Título de categoría">${itemData.titulo || ''}</span><small class="c-titulo-descripcion" contenteditable="true" data-editable-property="descripcion" data-placeholder="Descripción (opcional)">${itemData.descripcion || ''}</small></div></h3>${_createActionsPanel(itemData)}`;
-        categoryHeader.innerHTML = headerContent;
-        if (itemData.imagen) {
-            const imageElement = _createImageElement(itemData);
-            const titleElement = categoryHeader.querySelector('.c-titulo');
-            titleElement.appendChild(imageElement);
-        }
-        categoryElement.appendChild(categoryHeader);
+        
+        const h3 = document.createElement('h3');
+        h3.className = 'c-titulo';
+        const titleContent = `<div class="c-titulo-content"><span contenteditable="true" data-editable-property="titulo">${itemData.titulo || ''}</span><small contenteditable="true" data-editable-property="descripcion">${itemData.descripcion || ''}</small></div>`;
+        h3.innerHTML = titleContent;
+        if (itemData.imagen) h3.appendChild(_createImageElement(itemData));
+
+        categoryHeader.innerHTML = _createDragHandle();
+        categoryHeader.appendChild(h3);
+        categoryHeader.appendChild(_createActionsPanel(itemData));
+
         const sublist = document.createElement('div');
         sublist.className = 'item-list';
-        if (itemData.items) {
-            itemData.items.forEach(subItemData => {
-                const subElement = (subItemData.es_cat || subItemData.type === 'category') ? _createCategoryElement(subItemData) : _createItemElement(subItemData);
-                if (subElement) sublist.appendChild(subElement);
+        if (itemData.items && itemData.items.length > 0) {
+            itemData.items.forEach(subItem => {
+                const subElement = (subItem.es_cat) ? _createCategoryElement(subItem) : _createItemElement(subItem);
+                sublist.appendChild(subElement);
             });
         }
+        
+        categoryElement.appendChild(categoryHeader);
         categoryElement.appendChild(sublist);
+
         return categoryElement;
     }
 
     function render(menuData) {
-        if (!itemListContainer || !menuContainer) {
-            console.error("MenuView no inicializado correctamente. Falta el contenedor.");
-            return;
-        }
+        if (!itemListContainer || !menuContainer) return;
+
         const titleElement = menuContainer.querySelector('.menues-title');
-        if (titleElement) {
-            titleElement.textContent = menuData.titulo || 'Menú';
-            titleElement.setAttribute('contenteditable', 'true');
-            titleElement.dataset.editableMenuProperty = 'titulo';
-        }
+        if (titleElement) titleElement.textContent = menuData.titulo || 'Menú';
+
         itemListContainer.innerHTML = '';
         const items = menuData.items || [];
         items.forEach(itemData => {
-            const isCategory = itemData.es_cat || itemData.type === 'category';
-            const element = isCategory ? _createCategoryElement(itemData) : _createItemElement(itemData);
-            if(element) itemListContainer.appendChild(element);
+            const element = (itemData.es_cat) ? _createCategoryElement(itemData) : _createItemElement(itemData);
+            itemListContainer.appendChild(element);
         });
     }
 
-    // El objeto que se devuelve es simple, no necesita exponer el callback.
-    return {
-        init,
-        render
-    };
+    return { init, render };
 })();
 
 export default MenuView;

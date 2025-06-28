@@ -24,7 +24,7 @@
     right: -38px; /* Misma distancia que el drag-handle */
     transform: translateY(-50%);
     z-index: 10;
-    opacity: 0;
+    display: none;
 }
 
 .is-active-admin-item > .item-drag-handle,
@@ -32,6 +32,7 @@
 .is-active-admin-item > .item-actions-panel,
 .is-active-admin-item > .category-header > .item-actions-panel {
     opacity: 1;
+    display: block !important;
     pointer-events: all;
 }
 
@@ -182,11 +183,16 @@
 
 .is-dragging-ghost { background: #dbeafe; border: 1px dashed #3b82f6; }
 
-.is-category-drag-view .item { display: none !important; }
+.is-category-drag-view .item, .is-category-drag-view small, .is-category-drag-view .item-imagen-wrapper { display: none !important; }
 .is-category-drag-view .c-container > .item-list {
-    min-height: 40px;
+    min-height: 50px;
     background-color: rgba(219, 234, 254, 0.5);
-    border: 2px dashed #93c5fd;
     border-radius: 8px;
-    margin-top: 4px;
+}
+.is-category-drag-view .c-titulo {
+padding-bottom: 0;
+margin-top:  0;
+margin-bottom: 0;}
+.is-actively-dragging {
+    opacity: 0 !important; /* Lo hacemos completamente invisible */
 }

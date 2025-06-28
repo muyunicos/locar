@@ -2,50 +2,31 @@ import MenuState from './menues/MenuState.js';
 import MenuView from './menues/MenuView.js';
 import MenuApiService from './menues/MenuApiService.js';
 import DragDropManager from './menues/DragDropManager.js';
-import ImageManager from '../ImageManager.js'; 
-
+import ImageManager from '../ImageManager.js';
 (function() {
     let appConfig = {};
     let activeItemElement = null;
     let menuContainer, saveFab, itemListContainer;
     let isSaving = false;
-
-    /**
-     * Función principal que inicializa todo el editor de menús.
-     * @param {HTMLElement} moduleElement - El elemento contenedor principal del módulo.
-     */
     async function init(moduleElement) {
-        // Guardamos referencias a los elementos principales del DOM
         menuContainer = moduleElement;
         if (!menuContainer) {
-             console.error("Error crítico: La función init del editor de menús fue llamada sin un elemento de módulo.");
-             return;
-        }
-
-        saveFab = document.querySelector('.admin-fab');
-        itemListContainer = menuContainer.querySelector('#item-list-container');
-
-        if (!saveFab || !itemListContainer) {
-            console.error("Faltan elementos esenciales del DOM para el editor de menús.");
+            console.error("Error crítico: El editor de menús no encontró su contenedor principal.");
             return;
         }
-
-        appConfig = window.appConfig || {}; 
-        
-        // Inicializamos los módulos de soporte
+        saveFab = document.querySelector('.admin-fab');
+        itemListContainer = menuContainer.querySelector('#item-list-container');
+        if (!saveFab || !itemListContainer) {
+            console.error("Faltan elementos esenciales del DOM (FAB o lista de ítems).");
+            return;
+        }
+        appConfig = window.appConfig || {};
         await ImageManager.init();
         MenuState.load(JSON.parse(menuContainer.dataset.initialJson || '{}'));
-        MenuApiService.init(appConfig); 
-        
-        // Inicializamos los módulos de la vista y de interacción
+        MenuApiService.init(appConfig);
         MenuView.init(menuContainer, {
-            onImageClick: (itemId) => {
-                ImageManager.openModal(itemId);
-            }
-        }); 
-
-        // ¡CORRECCIÓN APLICADA AQUÍ!
-        // Pasamos el contenedor del módulo a DragDropManager.
+            onImageClick: (itemId) => ImageManager.openModal(itemId)
+        });
         DragDropManager.init({
             container: moduleElement,
             onDragEnd: () => {
@@ -53,38 +34,30 @@ import ImageManager from '../ImageManager.js';
                 renderMenu();
             }
         });
-
         setupEventListeners();
         renderMenu();
+        console.log("Editor de Menús inicializado correctamente.");
     }
 
-    /**
-     * Configura todos los listeners de eventos para la interfaz.
-     */
     function setupEventListeners() {
-        itemListContainer.addEventListener('input', handleContentEdit, true);
-        itemListContainer.addEventListener('click', handleItemClick);
+        menuContainer.addEventListener('input', handleContentEdit);
+        menuContainer.addEventListener('click', handleItemClick);
         document.addEventListener('click', handleDocumentClick, true);
         saveFab.addEventListener('click', handleSaveMenu);
-        
-        // Escuchamos el evento personalizado del ImageManager para actualizar el estado
         document.addEventListener('imageSelected', (e) => {
-            const { itemId, imageName } = e.detail;
+            const {
+                itemId,
+                imageName
+            } = e.detail;
             MenuState.updateItemProperty(itemId, 'imagen', imageName);
             setChangesMade(true);
-            renderMenu(); 
+            renderMenu();
         });
     }
 
-    /**
-     * Renderiza el menú completo basándose en el estado actual.
-     */
     function renderMenu() {
         const activeId = activeItemElement ? activeItemElement.dataset.id : null;
         MenuView.render(MenuState.getMenu());
-        
-        // Re-inicializamos DragDropManager después de cada renderizado
-        // para que reconozca la nueva estructura del DOM.
         DragDropManager.init({
             container: menuContainer,
             onDragEnd: () => {
@@ -92,7 +65,6 @@ import ImageManager from '../ImageManager.js';
                 renderMenu();
             }
         });
-        
         if (activeId) {
             const newActiveElement = itemListContainer.querySelector(`[data-id="${activeId}"]`);
             if (newActiveElement) {
@@ -108,67 +80,57 @@ import ImageManager from '../ImageManager.js';
 
     function handleContentEdit(e) {
         const target = e.target;
-        if (!target.isContentEditable) { return; }
-
+        if (!target.isContentEditable) return;
         setChangesMade(true);
-
-        const menuProperty = target.dataset.editableMenuProperty;
-        const itemProperty = target.dataset.editableProperty;
         const itemElement = target.closest('[data-id]');
-
-        if (menuProperty) {
-            MenuState.updateMenuProperty(menuProperty, target.textContent.trim());
-            return;
-        }
-        
-        if (itemProperty && itemElement) {
+        const property = target.dataset.editableProperty;
+        if (property && itemElement) {
             let value = target.textContent.trim();
-            if (itemProperty === 'precio') {
-                value = parseFloat(String(value).replace(/[$.]/g, '').replace(',', '.')) || 0;
+            if (property === 'precio') {
+                value = value.replace(/\D/g, '');
+                value = parseFloat(value) || 0;
             }
-            MenuState.updateItemProperty(itemElement.dataset.id, itemProperty, value);
+            MenuState.updateItemProperty(itemElement.dataset.id, property, value);
+        } else if (target.dataset.editableMenuProperty) {
+            MenuState.updateMenuProperty(target.dataset.editableMenuProperty, target.textContent.trim());
         }
     }
 
     function handleItemClick(e) {
-        const imageWrapper = e.target.closest('.item-imagen-wrapper');
         const itemElement = e.target.closest('.is-admin-item');
-        const optionsTrigger = e.target.closest('.options-trigger');
-        const actionButton = e.target.closest('.options-popup button');
-        
-        if (imageWrapper && itemElement) {
-             setActiveItem(itemElement);
-             return; 
+        if (!itemElement) return;
+        const imageWrapper = e.target.closest('.item-imagen-wrapper');
+        if (imageWrapper) {
+            setActiveItem(itemElement);
+            ImageManager.openModal(itemElement.dataset.id);
         }
-
+        const optionsTrigger = e.target.closest('.options-trigger');
         if (optionsTrigger) {
             e.preventDefault();
             toggleOptionsMenu(optionsTrigger.closest('.item-actions-panel'));
             return;
         }
-
+        const actionButton = e.target.closest('.options-popup button');
         if (actionButton) {
             e.preventDefault();
             handleAction(actionButton, itemElement.dataset.id);
             return;
         }
-
-        if (itemElement) {
-            setActiveItem(itemElement);
-        }
+        setActiveItem(itemElement);
     }
 
     function handleAction(button, itemId) {
+        const actionsPanel = button.closest('.item-actions-panel');
+        if (!actionsPanel || !actionsPanel.classList.contains('is-open')) return;
         const action = button.dataset.action;
-        if (!itemId) return;
-
-        let confirmAction = true;
-        if (action === 'delete') {
-            confirmAction = confirm('¿Estás seguro de que quieres eliminar este ítem? Esta acción no se puede deshacer.');
-        }
-
-        if (confirmAction) {
-            switch(action) {
+        const parentId = button.dataset.parentId;
+        if (action.startsWith('create-')) {
+            if (action === 'create-item') MenuState.createItem(parentId || null);
+            else if (action === 'create-category') MenuState.createCategory(parentId || null);
+        } else {
+            if (!itemId) return;
+            if (action === 'delete' && !confirm('¿Estás seguro? Esta acción no se puede deshacer.')) return;
+            switch (action) {
                 case 'delete':
                     MenuState.deleteItem(itemId);
                     activeItemElement = null;
@@ -180,36 +142,51 @@ import ImageManager from '../ImageManager.js';
                     MenuState.toggleVisibility(itemId);
                     break;
             }
-            setChangesMade(true);
-            renderMenu();
         }
-        
+        setChangesMade(true);
+        renderMenu();
         closeAllOptionMenus();
     }
 
-    function toggleOptionsMenu(actionsPanel) {
-        const wasOpen = actionsPanel.classList.contains('is-open');
-        closeAllOptionMenus();
-        if (!wasOpen) {
-            actionsPanel.classList.add('is-open');
+    function handleDocumentClick(e) {
+        if (!e.target.closest('#item-list-container, .admin-fab, #image-manager-modal')) {
+            deactivateCurrentItem();
+        }
+        if (!e.target.closest('.item-actions-panel')) {
+            closeAllOptionMenus();
         }
     }
-    
+    async function handleSaveMenu() {
+        if (isSaving) return;
+        isSaving = true;
+        setFabState('is-saving');
+        try {
+            await MenuApiService.saveMenu({
+                menuData: MenuState.getMenu()
+            });
+            handleSaveSuccess();
+        } catch (error) {
+            handleSaveError(error.message);
+        } finally {
+            isSaving = false;
+        }
+    }
+
+    function toggleOptionsMenu(panel) {
+        const wasOpen = panel.classList.contains('is-open');
+        closeAllOptionMenus();
+        if (!wasOpen) panel.classList.add('is-open');
+    }
+
     function closeAllOptionMenus() {
-        itemListContainer.querySelectorAll('.item-actions-panel.is-open').forEach(panel => {
-            panel.classList.remove('is-open');
-        });
+        itemListContainer.querySelectorAll('.item-actions-panel.is-open').forEach(p => p.classList.remove('is-open'));
     }
 
-    function setActiveItem(itemElement) {
-        if (itemElement === activeItemElement) return;
-
-        if (activeItemElement) {
-            activeItemElement.classList.remove('is-active-admin-item');
-        }
-
-        activeItemElement = itemElement;
-        activeItemElement.classList.add('is-active-admin-item');
+    function setActiveItem(element) {
+        if (activeItemElement === element) return;
+        if (activeItemElement) activeItemElement.classList.remove('is-active-admin-item');
+        activeItemElement = element;
+        if (activeItemElement) activeItemElement.classList.add('is-active-admin-item');
         closeAllOptionMenus();
     }
 
@@ -220,61 +197,17 @@ import ImageManager from '../ImageManager.js';
         }
         closeAllOptionMenus();
     }
-    
-    function handleDocumentClick(e) {
-        const isClickInsideMenu = e.target.closest('#item-list-container, .admin-fab, #image-manager-modal');
-        const isClickOnActions = e.target.closest('.item-actions-panel');
 
-        if (!isClickInsideMenu) {
-            deactivateCurrentItem();
-        }
-        
-        if (!isClickOnActions) {
-            closeAllOptionMenus();
-        }
-    }
-    
-    async function handleSaveMenu() {
-        if (isSaving) return;
-        isSaving = true;
-        setFabState('is-saving');
-
-        const payload = {
-            menuData: MenuState.getMenu(),
-            dataSource: appConfig.dataSource,
-        };
-
-        try {
-            const response = await MenuApiService.saveMenu(payload);
-            handleSaveSuccess(response);
-        } catch (error) {
-            handleSaveError(error.message || 'Error desconocido.');
-        } finally {
-            isSaving = false;
-        }
-    }
-    
-    function setFabState(state = '') {
-        const button = saveFab.querySelector('button');
-        if (!button) return;
-        saveFab.classList.remove('is-saving', 'is-success', 'is-error');
-        button.disabled = false;
-
-        if (state) {
-            saveFab.classList.add(state);
-            if (state === 'is-saving') {
-                button.disabled = true;
-            }
-        }
+    function setFabState(state) {
+        saveFab.className = 'admin-fab';
+        if (state) saveFab.classList.add(state);
+        saveFab.querySelector('button').disabled = (state === 'is-saving');
     }
 
-    function handleSaveSuccess(response) {
+    function handleSaveSuccess() {
         MenuState.setChanges(false);
         setFabState('is-success');
-        setTimeout(() => {
-            setChangesMade(MenuState.getChanges());
-            setFabState('');
-        }, 2000);
+        setTimeout(() => setFabState(''), 2000);
     }
 
     function handleSaveError(error) {
@@ -285,11 +218,8 @@ import ImageManager from '../ImageManager.js';
             setChangesMade(true);
         }, 2500);
     }
-
-    // --- Punto de Entrada de la Aplicación ---
     if (!window.adminModuleInitializers) window.adminModuleInitializers = {};
     window.adminModuleInitializers.menues = init;
-
     const initialMenuContainer = document.querySelector('div[id^="menues-container-"][data-initial-json]');
     if (initialMenuContainer) {
         if (document.readyState === 'complete' || document.readyState === 'interactive') {

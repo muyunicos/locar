@@ -227,3 +227,4 @@ function updateItemProperty(id, property, value) {
         createCategory
     };
 })();
+export default MenuState;
