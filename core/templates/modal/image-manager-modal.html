@@ -1,23 +1,29 @@
 <div id="image-manager-modal" class="modal-backdrop">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h2 id="modal-title">Seleccionar Imagen</h2>
-            <button id="modal-close-btn" class="close-button">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div id="image-gallery" class="image-gallery">
-                </div>
-            <div id="image-editor">                
-                <div id="crop-container">
-                    <img id="image-preview" src="#" alt="Previsualización de recorte">
-                </div>
-
-                <div>
-                    <button id="upload-cropped-btn" class="auth-button">Confirmar y Subir</button>
-                    <button id="cancel-crop-btn" class="auth-button">Cancelar</button>
-                </div>
-            </div>
-            <div id="upload-feedback" class="form-message"></div>
-        </div>
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="modal-title">Seleccionar Imagen</h2>
+      <button id="modal-close-btn" class="close-button">&times;</button>
     </div>
+    <div class="modal-body">
+      <div id="image-gallery" class="image-gallery"></div>
+      <div id="image-editor" style="display: none; margin-top: 15px;">
+        <div id="crop-container" style="position: relative; max-width: 400px; /* ... etc. */">
+          <img id="image-preview" src="#" alt="Previsualización de recorte">
+          <img id="watermark-preview-overlay" src="#" alt="Previsualización de marca de agua" style="display: none; pointer-events: none; position: absolute; top: 0; left: 0;">
+        </div>
+        <div id="watermark-options" style="max-width: 400px; margin: 15px auto; text-align: left;">
+        <label for="watermark-select" style="display: block; margin-bottom: 5px; font-weight: 500; color: #3f3f46;">Marca de Agua:</label>
+        <select id="watermark-select" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #e4e4e7;"></select>
+        <div style="text-align: center; margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
+        <button id="upload-cropped-btn" class="auth-button">Confirmar y Subir</button>
+        <button id="cancel-crop-btn" class="auth-button" style="background-color: #71717a;">Cancelar</button>
+      </div>
+    </div>
+    <div id="upload-feedback" class="form-message" style="display: none;"></div>
+      </div>
+      </div>
+      </div>
+      
+      
+  </div>
 </div>
